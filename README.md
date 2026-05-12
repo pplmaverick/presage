@@ -4,6 +4,22 @@ Independent crypto trader building on Circle's Arc Network (Chain ID: 5042002).
 
 ## Deployed Contracts
 
+### WeatherMarket (Core Project)
+The main contract — a decentralized weather prediction market settled in USDC.
+
+| Field | Value |
+|-------|-------|
+| Contract Address | `0x072a3a0c04cf8cdcaf5b4a73a4ea4ff5a841531f` |
+| Transaction Hash | `0xcbadd466e96480deed94505468bbbccd016c687b8cc164930ae121207a3583d7` |
+| Network | Arc Network Testnet (Chain ID: 5042002) |
+| Explorer | [View on ArcScan](https://testnet.arcscan.app/tx/0xcbadd466e96480deed94505468bbbccd016c687b8cc164930ae121207a3583d7) |
+
+**Features:**
+- Create weather prediction markets (temperature, rainfall, etc.)
+- Users place USDC bets on outcomes (Above / Below threshold)
+- Owner settles market based on real weather data from n8n Oracle
+- Winners claim proportional rewards automatically
+
 ### BuyMeACoffee
 A tipping contract deployed to Arc Testnet as proof of deployment and first step toward a Weather Prediction Market.
 
@@ -18,7 +34,7 @@ A tipping contract deployed to Arc Testnet as proof of deployment and first step
 ## Roadmap
 
 - [x] P1 — Arc Testnet setup, first contract deployed
-- [ ] P2 — Hardhat environment + USDC integration
+- [x] P2 — Hardhat environment + USDC integration
 - [ ] P3 — Weather Prediction Market core contracts + n8n Oracle
 - [ ] P4 — Circle Developer Grant application
 
