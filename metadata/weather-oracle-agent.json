@@ -1,0 +1,13 @@
+{
+  "name": "WeatherOracle",
+  "description": "AI agent that submits real-world weather data on-chain for prediction markets on Arc Network",
+  "version": "1.0.0",
+  "services": [
+    {
+      "name": "web",
+      "endpoint": "https://github.com/pplmaverick/arc-projects"
+    }
+  ],
+  "tags": ["weather", "oracle", "prediction-market", "arc-network"],
+  "owner": "0xed2B5717c9b936ecC76d75401026A99143e278F5"
+}

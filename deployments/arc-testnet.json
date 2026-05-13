@@ -1,0 +1,20 @@
+{
+  "network": "Arc Testnet",
+  "chainId": 5042002,
+  "deployedAt": "2026-05-13T04:45:22.435Z",
+  "deployer": "0xed2B5717c9b936ecC76d75401026A99143e278F5",
+  "contracts": {
+    "WeatherMarket": "0xcac5b9d2817325e78090e3ce4b9c299c819cf953",
+    "AdminOracle": "0xbdc53e50b1167ce1199bfad54a034f7ab1741051",
+    "MarketFactory": "0x914c40a644493b47336de847b0404e729e06c68d",
+    "USDC": "0x3600000000000000000000000000000000000000"
+  },
+  "agent": {
+    "agentId": "6762",
+    "txHash": "0x6ea8835782b5fc553e2b8834be7b711ebe1a05e61687f73e293dd6592aee8981",
+    "name": "WeatherOracle",
+    "ownerAddress": "0xed2B5717c9b936ecC76d75401026A99143e278F5",
+    "validatorAddress": "0xAcCC48919cA90Bd3643031517CD1eFDF9E2C9Dd0",
+    "registeredAt": "2026-05-13T06:21:04.845Z"
+  }
+}
