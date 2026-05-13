@@ -21,11 +21,11 @@ export const STATUS_COLOR = [
   'bg-purple-500/20 text-purple-400 border border-purple-500/30',
 ] as const
 
-export function getBucketLabel(thresholds: bigint[], index: number): string {
+export function getBucketLabel(thresholds: readonly bigint[], index: number): string {
   if (thresholds.length === 0) return `Bucket ${index}`
-  if (index === 0) return `≤ ${thresholds[0]}°C`
+  if (index === 0) return `< ${thresholds[0]}°C`
   if (index >= thresholds.length) return `> ${thresholds[thresholds.length - 1]}°C`
-  return `${thresholds[index - 1]}-${thresholds[index]}°C`
+  return `${thresholds[index - 1]}–${thresholds[index]}°C`
 }
 
 export function formatUsdc(amount: bigint): string {

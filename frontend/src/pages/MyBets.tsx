@@ -13,6 +13,8 @@ import {
 } from '../config'
 import { useState } from 'react'
 
+type MarketTuple = readonly [string, bigint, bigint, number, bigint, bigint, number, readonly bigint[], boolean]
+
 export default function MyBets() {
   const { address, isConnected } = useAccount()
   const { connect } = useConnect()
@@ -29,17 +31,10 @@ export default function MyBets() {
     query: { refetchInterval: 30_000 },
   })
 
-  const market = marketRaw as {
-    city: string
-    targetDate: bigint
-    lockTime: bigint
-    status: number
-    totalPool: bigint
-    finalTemp: bigint
-    winningBucket: number
-    buckets: bigint[]
-    noWinner: boolean
-  } | undefined
+  // 解構 tuple
+  const marketTuple = marketRaw as MarketTuple | undefined
+  const [city, , , status, , finalTemp, winningBucket, thresholds, noWinner] =
+    marketTuple ?? ([] as unknown as MarketTuple)
 
   // ── 讀取用戶各 bucket 下注 ──────────────────────────────────────────────────
   const { data: userBetsRaw } = useReadContracts({
@@ -75,15 +70,14 @@ export default function MyBets() {
     return r?.status === 'success' ? (r.result as bigint) : 0n
   })
 
-  const thresholds = market?.buckets ?? []
-  const status = market?.status ?? 0
-  const isSettled = status === 2
-  const hasBets = (userTotal as bigint | undefined) ?? 0n > 0n
-  const canClaim = isSettled && hasBets && !hasClaimed && !claimSuccess
+  const isSettled = (status ?? 0) === 2
+  const totalBets = (userTotal as bigint | undefined) ?? 0n
+  const hasBets = totalBets > 0n
+  const hasBetsAnywhere = userBets.some(b => b > 0n)
 
-  const winningBucket = market?.winningBucket ?? 0
-  const userWon = isSettled && !market?.noWinner && userBets[winningBucket] > 0n
-  const userCanRefund = isSettled && market?.noWinner && hasBets
+  const userWon = isSettled && !noWinner && winningBucket !== undefined && userBets[winningBucket] > 0n
+  const userCanRefund = isSettled && noWinner && hasBets
+  const canClaim = (userWon || userCanRefund) && !hasClaimed && !claimSuccess
 
   // ── 領獎 ─────────────────────────────────────────────────────────────────────
   async function handleClaim() {
@@ -121,44 +115,56 @@ export default function MyBets() {
     )
   }
 
-  const hasBetsAnywhere = userBets.some(b => b > 0n)
-
   return (
     <div className="space-y-6 mt-4">
       {/* 市場狀態摘要 */}
       <div className="flex items-center gap-3">
-        <span className={`text-xs font-semibold px-3 py-1 rounded-full ${STATUS_COLOR[status] ?? STATUS_COLOR[0]}`}>
-          {STATUS_LABEL[status] ?? '—'}
+        <span
+          className={`text-xs font-semibold px-3 py-1 rounded-full ${
+            STATUS_COLOR[status ?? 0] ?? STATUS_COLOR[0]
+          }`}
+        >
+          {STATUS_LABEL[status ?? 0] ?? '—'}
         </span>
         <span className="text-slate-400 text-sm">
-          市場 #{MARKET_ID.toString()} · {market?.city ?? '—'}
+          市場 #{MARKET_ID.toString()} · {city ?? '—'}
         </span>
       </div>
 
       {/* 結算結果（已結算） */}
-      {isSettled && market && (
-        <div className={`rounded-2xl p-5 border ${
-          market.noWinner
-            ? 'bg-slate-800/50 border-slate-700'
-            : 'bg-yellow-500/5 border-yellow-500/30'
-        }`}>
-          {market.noWinner ? (
+      {isSettled && marketTuple && (
+        <div
+          className={`rounded-2xl p-5 border ${
+            noWinner
+              ? 'bg-slate-800/50 border-slate-700'
+              : 'bg-yellow-500/5 border-yellow-500/30'
+          }`}
+        >
+          {noWinner ? (
             <div>
               <p className="text-amber-400 font-semibold">⚠ 無人猜中</p>
               <p className="text-slate-400 text-sm mt-1">
-                最終氣溫：{Number(market.finalTemp)}°C · 所有押注全額退回
+                最終氣溫：{finalTemp !== undefined ? Number(finalTemp) : '—'}°C · 所有押注全額退回
               </p>
             </div>
           ) : (
             <div>
               <p className="text-yellow-400 font-semibold">🏆 市場已結算</p>
               <p className="text-slate-300 text-sm mt-1">
-                最終氣溫：<span className="text-white font-bold">{Number(market.finalTemp)}°C</span>
-                &nbsp;· 得獎區間：<span className="text-yellow-400 font-bold">
-                  {getBucketLabel(thresholds, winningBucket)}
+                最終氣溫：
+                <span className="text-white font-bold">
+                  {finalTemp !== undefined ? Number(finalTemp) : '—'}°C
+                </span>
+                &nbsp;· 得獎區間：
+                <span className="text-yellow-400 font-bold">
+                  {winningBucket !== undefined
+                    ? getBucketLabel(thresholds ?? [], winningBucket)
+                    : '—'}
                 </span>
               </p>
-              {userWon && <p className="text-emerald-400 text-sm mt-2 font-medium">🎉 恭喜！你猜中了！</p>}
+              {userWon && (
+                <p className="text-emerald-400 text-sm mt-2 font-medium">🎉 恭喜！你猜中了！</p>
+              )}
             </div>
           )}
         </div>
@@ -168,23 +174,21 @@ export default function MyBets() {
       <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-800">
           <h3 className="font-semibold text-white">我的下注</h3>
-          {userTotal !== undefined && (
+          {hasBets && (
             <p className="text-slate-400 text-sm mt-0.5">
-              合計：{formatUsdc(userTotal as bigint)} USDC
+              合計：{formatUsdc(totalBets)} USDC
             </p>
           )}
         </div>
 
         {!hasBetsAnywhere ? (
-          <div className="px-5 py-8 text-center text-slate-500">
-            尚未在此市場下注
-          </div>
+          <div className="px-5 py-8 text-center text-slate-500">尚未在此市場下注</div>
         ) : (
           <div className="divide-y divide-slate-800">
             {userBets.map((amount, i) => {
               if (amount === 0n) return null
-              const label = getBucketLabel(thresholds, i)
-              const isWinning = isSettled && !market?.noWinner && i === winningBucket
+              const label = getBucketLabel(thresholds ?? [], i)
+              const isWinning = isSettled && !noWinner && i === winningBucket
 
               return (
                 <div
@@ -217,7 +221,7 @@ export default function MyBets() {
               <span>✓</span>
               <span className="font-medium">已領取</span>
             </div>
-          ) : canClaim || userCanRefund ? (
+          ) : canClaim ? (
             <div className="space-y-3">
               <p className="text-slate-300 text-sm">
                 {userCanRefund
@@ -233,15 +237,11 @@ export default function MyBets() {
               >
                 {isPending ? '處理中...' : userCanRefund ? '領回押金' : '領取獎金'}
               </button>
-              {claimMsg && (
-                <p className="text-sm text-slate-400">{claimMsg}</p>
-              )}
+              {claimMsg && <p className="text-sm text-slate-400">{claimMsg}</p>}
             </div>
           ) : (
             <p className="text-slate-500 text-sm">
-              {isSettled && !userWon && !market?.noWinner
-                ? '此次未猜中，沒有獎金可領。'
-                : ''}
+              {isSettled && !userWon && !noWinner ? '此次未猜中，沒有獎金可領。' : ''}
             </p>
           )}
         </div>

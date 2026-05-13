@@ -12,6 +12,8 @@ import {
   shortenAddress,
 } from '../config'
 
+type MarketTuple = readonly [string, bigint, bigint, number, bigint, bigint, number, readonly bigint[], boolean]
+
 export default function MarketStatus() {
   const [now, setNow] = useState(Math.floor(Date.now() / 1000))
 
@@ -28,23 +30,13 @@ export default function MarketStatus() {
     query: { refetchInterval: 30_000 },
   })
 
-  const market = marketRaw as {
-    city: string
-    targetDate: bigint
-    lockTime: bigint
-    status: number
-    totalPool: bigint
-    finalTemp: bigint
-    winningBucket: number
-    buckets: bigint[]
-    noWinner: boolean
-  } | undefined
+  // 解構 tuple
+  const marketTuple = marketRaw as MarketTuple | undefined
+  const [city, targetDate, lockTime, status, totalPool, finalTemp, winningBucket, thresholds, noWinner] =
+    marketTuple ?? ([] as unknown as MarketTuple)
 
-  const status = market?.status ?? 0
-  const thresholds = market?.buckets ?? []
-
-  function formatCountdown(targetSec: bigint): string {
-    const diff = Number(targetSec) - now
+  function formatCountdown(sec: bigint): string {
+    const diff = Number(sec) - now
     if (diff <= 0) return '已過'
     const d = Math.floor(diff / 86400)
     const h = Math.floor((diff % 86400) / 3600)
@@ -66,55 +58,73 @@ export default function MarketStatus() {
     )
   }
 
+  const statusIdx = status ?? 0
+
   return (
     <div className="space-y-4 mt-4">
       {/* 狀態標題 */}
       <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-bold text-white">市場狀態</h2>
-          <span className={`text-sm font-semibold px-3 py-1.5 rounded-full ${STATUS_COLOR[status] ?? STATUS_COLOR[0]}`}>
-            {STATUS_LABEL[status] ?? '—'}
+          <span
+            className={`text-sm font-semibold px-3 py-1.5 rounded-full ${
+              STATUS_COLOR[statusIdx] ?? STATUS_COLOR[0]
+            }`}
+          >
+            {STATUS_LABEL[statusIdx] ?? '—'}
           </span>
         </div>
 
         <div className="space-y-3">
           <Row label="Market ID" value={`#${MARKET_ID.toString()}`} />
-          <Row label="城市" value={market?.city ?? '—'} />
+          <Row label="城市" value={city ?? '—'} />
           <Row
             label="預測日期"
-            value={market ? new Date(Number(market.targetDate) * 1000).toLocaleDateString('zh-TW', { timeZone: 'Asia/Taipei' }) : '—'}
+            value={
+              targetDate
+                ? new Date(Number(targetDate) * 1000).toLocaleDateString('zh-TW', {
+                    timeZone: 'Asia/Taipei',
+                  })
+                : '—'
+            }
           />
           <Row
             label="鎖盤時間"
-            value={market ? new Date(Number(market.lockTime) * 1000).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' }) : '—'}
+            value={
+              lockTime
+                ? new Date(Number(lockTime) * 1000).toLocaleString('zh-TW', {
+                    timeZone: 'Asia/Taipei',
+                  })
+                : '—'
+            }
           />
-          {status === 0 && market && (
-            <Row
-              label="距離鎖盤"
-              value={formatCountdown(market.lockTime)}
-              highlight
-            />
+          {statusIdx === 0 && lockTime !== undefined && lockTime > 0n && (
+            <Row label="距離鎖盤" value={formatCountdown(lockTime)} highlight />
           )}
-          <Row label="總獎池" value={`${formatUsdc(market?.totalPool ?? 0n)} USDC`} />
+          <Row label="總獎池" value={`${formatUsdc(totalPool ?? 0n)} USDC`} />
         </div>
       </div>
 
       {/* 結算資訊 */}
-      {status === 2 && market && (
+      {statusIdx === 2 && marketTuple && (
         <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800">
           <h3 className="font-semibold text-white mb-4">結算結果</h3>
           <div className="space-y-3">
             <Row
               label="最終氣溫"
-              value={`${Number(market.finalTemp)}°C`}
+              value={finalTemp !== undefined ? `${Number(finalTemp)}°C` : '—'}
               highlight
             />
-            {market.noWinner ? (
+            {noWinner ? (
               <Row label="得獎區間" value="無人猜中（全額退回）" />
             ) : (
               <Row
                 label="得獎區間"
-                value={getBucketLabel(thresholds, market.winningBucket)}
+                value={
+                  winningBucket !== undefined
+                    ? getBucketLabel(thresholds ?? [], winningBucket)
+                    : '—'
+                }
                 highlight
               />
             )}
@@ -130,15 +140,15 @@ export default function MarketStatus() {
             <div
               key={i}
               className={`flex items-center justify-between px-3 py-2 rounded-lg ${
-                status === 2 && market && !market.noWinner && market.winningBucket === i
+                statusIdx === 2 && !noWinner && winningBucket === i
                   ? 'bg-yellow-500/10 border border-yellow-500/30'
                   : 'bg-slate-800'
               }`}
             >
               <span className="text-slate-300 text-sm">
-                Bucket {i} — {getBucketLabel(thresholds, i)}
+                Bucket {i} — {getBucketLabel(thresholds ?? [], i)}
               </span>
-              {status === 2 && market && !market.noWinner && market.winningBucket === i && (
+              {statusIdx === 2 && !noWinner && winningBucket === i && (
                 <span className="text-yellow-400 text-xs">🏆</span>
               )}
             </div>
@@ -180,11 +190,21 @@ export default function MarketStatus() {
   )
 }
 
-function Row({ label, value, highlight = false }: { label: string; value: string; highlight?: boolean }) {
+function Row({
+  label,
+  value,
+  highlight = false,
+}: {
+  label: string
+  value: string
+  highlight?: boolean
+}) {
   return (
     <div className="flex items-center justify-between">
       <span className="text-slate-400 text-sm">{label}</span>
-      <span className={`text-sm font-medium ${highlight ? 'text-white' : 'text-slate-300'}`}>{value}</span>
+      <span className={`text-sm font-medium ${highlight ? 'text-white' : 'text-slate-300'}`}>
+        {value}
+      </span>
     </div>
   )
 }
