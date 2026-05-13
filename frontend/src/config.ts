@@ -1,4 +1,4 @@
-import { defineChain } from 'viem'
+import { defineChain, parseGwei } from 'viem'
 
 export const arcTestnet = defineChain({
   id: 5042002,
@@ -7,6 +7,12 @@ export const arcTestnet = defineChain({
   rpcUrls: { default: { http: ['https://rpc.testnet.arc.network'] } },
   blockExplorers: { default: { name: 'ArcScan', url: 'https://testnet.arcscan.app' } },
 })
+
+export const GAS_OPTS = {
+  gas: 300_000n,
+  maxPriorityFeePerGas: parseGwei('10'),
+  maxFeePerGas: parseGwei('100'),
+} as const
 
 export const WEATHER_MARKET_ADDRESS = '0xcac5b9d2817325e78090e3ce4b9c299c819cf953' as const
 export const ADMIN_ORACLE_ADDRESS = '0xbdc53e50b1167ce1199bfad54a034f7ab1741051' as const

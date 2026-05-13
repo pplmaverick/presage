@@ -5,6 +5,7 @@ import {
   WEATHER_MARKET_ADDRESS,
   MARKET_ID,
   BUCKET_COUNT,
+  GAS_OPTS,
   WEATHER_MARKET_ABI,
   STATUS_LABEL,
   STATUS_COLOR,
@@ -91,6 +92,7 @@ export default function MyBets() {
         abi: WEATHER_MARKET_ABI,
         functionName: 'claimWinnings',
         args: [MARKET_ID],
+        ...GAS_OPTS,
       })
       setClaimSuccess(true)
       setClaimMsg(`✅ 領獎成功！TX: ${hash.slice(0, 12)}...`)

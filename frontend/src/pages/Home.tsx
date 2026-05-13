@@ -7,6 +7,7 @@ import {
   USDC_ADDRESS,
   MARKET_ID,
   BUCKET_COUNT,
+  GAS_OPTS,
   WEATHER_MARKET_ABI,
   ERC20_ABI,
   STATUS_LABEL,
@@ -98,6 +99,7 @@ export default function Home() {
         abi: ERC20_ABI,
         functionName: 'approve',
         args: [WEATHER_MARKET_ADDRESS, amountUnits],
+        ...GAS_OPTS,
       })
       setTxMsg('授權成功！請點「下注」')
       await refetchAllowance()
@@ -118,6 +120,7 @@ export default function Home() {
         abi: WEATHER_MARKET_ABI,
         functionName: 'placeBet',
         args: [MARKET_ID, selectedBucket, amountUnits],
+        ...GAS_OPTS,
       })
       setIsSuccess(true)
       setTxMsg(`✅ 下注成功！TX: ${hash.slice(0, 12)}...`)
