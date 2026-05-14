@@ -34,7 +34,7 @@ export default function MyBets() {
 
   // 解構 tuple
   const marketTuple = marketRaw as MarketTuple | undefined
-  const [city, , , status, , finalTemp, winningBucket, thresholds, noWinner] =
+  const [city, , , status, totalPool, finalTemp, winningBucket, thresholds, noWinner] =
     marketTuple ?? ([] as unknown as MarketTuple)
 
   // ── 讀取用戶各 bucket 下注 ──────────────────────────────────────────────────
@@ -46,6 +46,17 @@ export default function MyBets() {
       args: [MARKET_ID, i, address!] as [bigint, number, `0x${string}`],
     })),
     query: { enabled: isConnected && !!address, refetchInterval: 15_000 },
+  })
+
+  // ── 讀取各 bucket 總額（計算獎金用）──────────────────────────────────────────
+  const { data: bucketTotalsRaw } = useReadContracts({
+    contracts: Array.from({ length: BUCKET_COUNT }, (_, i) => ({
+      address: WEATHER_MARKET_ADDRESS,
+      abi: WEATHER_MARKET_ABI,
+      functionName: 'bucketTotals' as const,
+      args: [MARKET_ID, i] as [bigint, number],
+    })),
+    query: { enabled: isConnected && !!address },
   })
 
   // ── 讀取總下注 / 已領取 ─────────────────────────────────────────────────────
@@ -79,6 +90,22 @@ export default function MyBets() {
   const userWon = isSettled && !noWinner && winningBucket !== undefined && userBets[winningBucket] > 0n
   const userCanRefund = isSettled && noWinner && hasBets
   const canClaim = (userWon || userCanRefund) && !hasClaimed && !claimSuccess
+
+  // ── 計算預期領獎金額 ─────────────────────────────────────────────────────────
+  const bucketTotals: bigint[] = Array.from({ length: BUCKET_COUNT }, (_, i) => {
+    const r = bucketTotalsRaw?.[i]
+    return r?.status === 'success' ? (r.result as bigint) : 0n
+  })
+
+  const expectedWinnings = (() => {
+    if (!isSettled || !hasBets) return 0n
+    if (noWinner) return totalBets
+    if (!userWon || winningBucket === undefined) return 0n
+    const bucketTotal = bucketTotals[winningBucket]
+    if (!bucketTotal || bucketTotal === 0n) return 0n
+    const pool = totalPool ?? 0n
+    return (pool * 98n / 100n) * userBets[winningBucket] / bucketTotal
+  })()
 
   // ── 領獎 ─────────────────────────────────────────────────────────────────────
   async function handleClaim() {
@@ -219,19 +246,29 @@ export default function MyBets() {
       {isSettled && hasBetsAnywhere && (
         <div className="bg-slate-900 rounded-2xl p-5 border border-slate-800">
           {hasClaimed || claimSuccess ? (
-            <div className="flex items-center gap-2 text-emerald-400">
-              <span>✓</span>
-              <span className="font-medium">已領取</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-emerald-400">
+                <span>✓</span>
+                <span className="font-medium">已領取</span>
+              </div>
+              {expectedWinnings > 0n && (
+                <span className="text-emerald-400 font-mono font-bold">
+                  +{formatUsdc(expectedWinnings)} USDC
+                </span>
+              )}
             </div>
           ) : canClaim ? (
             <div className="space-y-3">
-              <p className="text-slate-300 text-sm">
-                {userCanRefund
-                  ? '無人猜中，可領回全額押金'
-                  : userWon
-                  ? '你猜中了！請領取獎金'
-                  : ''}
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-slate-300 text-sm">
+                  {userCanRefund ? '無人猜中，可領回全額押金' : '你猜中了！請領取獎金'}
+                </p>
+                {expectedWinnings > 0n && (
+                  <span className="text-yellow-400 font-mono font-bold">
+                    +{formatUsdc(expectedWinnings)} USDC
+                  </span>
+                )}
+              </div>
               <button
                 onClick={handleClaim}
                 disabled={isPending}
