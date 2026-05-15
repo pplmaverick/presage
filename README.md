@@ -89,7 +89,7 @@ ERC-8004 AI Agent (agentId: 6762)
 | marketId | `0` |
 | City | Taipei |
 | Target date | 2026-05-14 |
-| `createMarket` tx | `0x3a09da...6a295` |
+| `createMarket` tx | `0x3a09da1976fe5a1ce5fb73ae5e39056d77e04b43815ce998803834728bc6a295` |
 
 ### WeatherMarket v1 (deprecated)
 
