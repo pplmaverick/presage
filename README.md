@@ -80,7 +80,7 @@ ERC-8004 AI Agent (agentId: 6762)
 |-------|-------|
 | Agent ID | `6762` |
 | Name | `WeatherOracle` |
-| Registration tx | `0x6ea883...e8981` |
+| Registration tx | `0x6ea8835782b5fc553e2b8834be7b711ebe1a05e61687f73e293dd6592aee8981` |
 
 ### First Market
 
@@ -104,6 +104,11 @@ ERC-8004 AI Agent (agentId: 6762)
 | Address | `0x9F57ec09303Fd94Fa1ea4AC07932abE844808617` |
 | Tx | `0x659316db5a7e817f060db4c0e3f4d415c19aec180959f145504abd391c318cf2` |
 | Verified | [Sourcify](https://repo.sourcify.dev/5042002/0x9F57ec09303Fd94Fa1ea4AC07932abE844808617/) |
+
+## Live Demo
+
+Frontend: https://arc-projects.vercel.app  
+Network: Arc Testnet (Chain ID: 5042002)
 
 ## Quick Start
 
@@ -258,8 +263,11 @@ Bucket boundaries are enforced to be strictly increasing at market creation. The
 - ✅ P1 — Arc Testnet setup, first contract deployed (BuyMeACoffee proof)
 - ✅ P2 — Hardhat environment + USDC integration
 - ✅ P3 — Weather Prediction Market core contracts + n8n Oracle + ERC-8004 agent registration
-- ✅ P4 — Circle Developer Grant application
-- ⬜ P5 — Arc Mainnet deployment with multi-city market support and frontend on permanent hosting
+- ✅ P4 — Circle Developer Grant application submitted
+- ⬜ P5 — Arc Mainnet (targeting Summer 2026)
+  - M1: Deploy to Mainnet, first live USDC market, custom domain frontend
+  - M2: Multi-city expansion (Taipei / Tokyo / Bangkok), 50+ unique wallets
+  - M3: ERC-8004 Agent autonomously creates markets + submits oracle data on-chain; decentralized oracle integration (Chainlink / UMA)
 
 ## Developer
 
