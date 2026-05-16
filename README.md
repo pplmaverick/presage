@@ -105,6 +105,23 @@ ERC-8004 AI Agent (agentId: 6762)
 | Tx | `0x659316db5a7e817f060db4c0e3f4d415c19aec180959f145504abd391c318cf2` |
 | Verified | [Sourcify](https://repo.sourcify.dev/5042002/0x9F57ec09303Fd94Fa1ea4AC07932abE844808617/) |
 
+## Oracle & Temperature Rounding
+
+Temperature data is sourced from OpenWeather API (city: Taipei).
+Raw float values are rounded down (floor) to the nearest integer
+before on-chain submission.
+
+Example: 24.76°C → submitted as 24°C
+
+Bucket boundary rule: temperature exactly equal to a bucket
+threshold is assigned to the lower bucket.
+Example: 25°C → bucket 0 (< 25°C), not bucket 1 (25–28°C)
+
+Current oracle: self-hosted n8n on VPS (testnet MVP).
+Mainnet transition plan: migrate to Chainlink Functions or
+multi-sig oracle upon Arc mainnet availability. Abstract
+OracleInterface pre-designed to minimize migration cost.
+
 ## Live Demo
 
 Frontend: https://arc-projects.vercel.app  
