@@ -9,16 +9,25 @@ export const arcTestnet = defineChain({
 })
 
 export const GAS_OPTS = {
-  gas: 300_000n,
-  maxPriorityFeePerGas: parseGwei('10'),
-  maxFeePerGas: parseGwei('100'),
+  gas: 600_000n,
+  maxPriorityFeePerGas: parseGwei('20'),
+  maxFeePerGas: parseGwei('200'),
 } as const
 
 export const WEATHER_MARKET_ADDRESS = '0xcac5b9d2817325e78090e3ce4b9c299c819cf953' as const
 export const ADMIN_ORACLE_ADDRESS = '0xbdc53e50b1167ce1199bfad54a034f7ab1741051' as const
 export const USDC_ADDRESS = '0x3600000000000000000000000000000000000000' as const
-export const MARKET_ID = 0n
 export const BUCKET_COUNT = 5
+
+export const CITY_MARKETS = {
+  Taipei:  1n,
+  Tokyo:   3n,
+  Bangkok: 4n,
+  Seoul:   5n,
+} as const
+
+export type CityName = keyof typeof CITY_MARKETS
+export const CITY_NAMES = Object.keys(CITY_MARKETS) as CityName[]
 
 export const STATUS_LABEL = ['OPEN', 'LOCKED', 'SETTLED'] as const
 export const STATUS_COLOR = [

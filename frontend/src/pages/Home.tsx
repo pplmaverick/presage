@@ -5,7 +5,6 @@ import { useConnect } from 'wagmi'
 import {
   WEATHER_MARKET_ADDRESS,
   USDC_ADDRESS,
-  MARKET_ID,
   BUCKET_COUNT,
   GAS_OPTS,
   WEATHER_MARKET_ABI,
@@ -19,7 +18,11 @@ import {
 // getMarket 回傳 tuple：[city, targetDate, lockTime, status, totalPool, finalTemp, winningBucket, buckets, noWinner]
 type MarketTuple = readonly [string, bigint, bigint, number, bigint, bigint, number, readonly bigint[], boolean]
 
-export default function Home() {
+interface Props {
+  marketId: bigint
+}
+
+export default function Home({ marketId }: Props) {
   const { address, isConnected } = useAccount()
   const { connect } = useConnect()
   const { writeContractAsync, isPending } = useWriteContract()
@@ -34,7 +37,7 @@ export default function Home() {
     address: WEATHER_MARKET_ADDRESS,
     abi: WEATHER_MARKET_ABI,
     functionName: 'getMarket',
-    args: [MARKET_ID],
+    args: [marketId],
     query: { refetchInterval: 30_000 },
   })
 
@@ -44,7 +47,7 @@ export default function Home() {
       address: WEATHER_MARKET_ADDRESS,
       abi: WEATHER_MARKET_ABI,
       functionName: 'bucketTotals' as const,
-      args: [MARKET_ID, i] as [bigint, number],
+      args: [marketId, i] as [bigint, number],
     })),
     query: { refetchInterval: 30_000 },
   })
@@ -119,7 +122,7 @@ export default function Home() {
         address: WEATHER_MARKET_ADDRESS,
         abi: WEATHER_MARKET_ABI,
         functionName: 'placeBet',
-        args: [MARKET_ID, selectedBucket, amountUnits],
+        args: [marketId, selectedBucket, amountUnits],
         ...GAS_OPTS,
       })
       setIsSuccess(true)

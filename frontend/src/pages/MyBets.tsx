@@ -3,7 +3,6 @@ import { injected } from 'wagmi/connectors'
 import { useConnect } from 'wagmi'
 import {
   WEATHER_MARKET_ADDRESS,
-  MARKET_ID,
   BUCKET_COUNT,
   GAS_OPTS,
   WEATHER_MARKET_ABI,
@@ -16,7 +15,11 @@ import { useState } from 'react'
 
 type MarketTuple = readonly [string, bigint, bigint, number, bigint, bigint, number, readonly bigint[], boolean]
 
-export default function MyBets() {
+interface Props {
+  marketId: bigint
+}
+
+export default function MyBets({ marketId }: Props) {
   const { address, isConnected } = useAccount()
   const { connect } = useConnect()
   const { writeContractAsync, isPending } = useWriteContract()
@@ -28,7 +31,7 @@ export default function MyBets() {
     address: WEATHER_MARKET_ADDRESS,
     abi: WEATHER_MARKET_ABI,
     functionName: 'getMarket',
-    args: [MARKET_ID],
+    args: [marketId],
     query: { refetchInterval: 30_000 },
   })
 
@@ -43,7 +46,7 @@ export default function MyBets() {
       address: WEATHER_MARKET_ADDRESS,
       abi: WEATHER_MARKET_ABI,
       functionName: 'bets' as const,
-      args: [MARKET_ID, i, address!] as [bigint, number, `0x${string}`],
+      args: [marketId, i, address!] as [bigint, number, `0x${string}`],
     })),
     query: { enabled: isConnected && !!address, refetchInterval: 15_000 },
   })
@@ -54,7 +57,7 @@ export default function MyBets() {
       address: WEATHER_MARKET_ADDRESS,
       abi: WEATHER_MARKET_ABI,
       functionName: 'bucketTotals' as const,
-      args: [MARKET_ID, i] as [bigint, number],
+      args: [marketId, i] as [bigint, number],
     })),
     query: { enabled: isConnected && !!address },
   })
@@ -64,7 +67,7 @@ export default function MyBets() {
     address: WEATHER_MARKET_ADDRESS,
     abi: WEATHER_MARKET_ABI,
     functionName: 'userTotalBets',
-    args: [MARKET_ID, address!],
+    args: [marketId, address!],
     query: { enabled: isConnected && !!address, refetchInterval: 15_000 },
   })
 
@@ -72,7 +75,7 @@ export default function MyBets() {
     address: WEATHER_MARKET_ADDRESS,
     abi: WEATHER_MARKET_ABI,
     functionName: 'claimed',
-    args: [MARKET_ID, address!],
+    args: [marketId, address!],
     query: { enabled: isConnected && !!address },
   })
 
@@ -118,7 +121,7 @@ export default function MyBets() {
         address: WEATHER_MARKET_ADDRESS,
         abi: WEATHER_MARKET_ABI,
         functionName: 'claimWinnings',
-        args: [MARKET_ID],
+        args: [marketId],
         ...GAS_OPTS,
       })
       setClaimSuccess(true)
@@ -156,7 +159,7 @@ export default function MyBets() {
           {STATUS_LABEL[status ?? 0] ?? '—'}
         </span>
         <span className="text-slate-400 text-sm">
-          市場 #{MARKET_ID.toString()} · {city ?? '—'}
+          市場 #{marketId.toString()} · {city ?? '—'}
         </span>
       </div>
 

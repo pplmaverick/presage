@@ -3,7 +3,6 @@ import { useReadContract } from 'wagmi'
 import {
   WEATHER_MARKET_ADDRESS,
   ADMIN_ORACLE_ADDRESS,
-  MARKET_ID,
   WEATHER_MARKET_ABI,
   STATUS_LABEL,
   STATUS_COLOR,
@@ -14,7 +13,11 @@ import {
 
 type MarketTuple = readonly [string, bigint, bigint, number, bigint, bigint, number, readonly bigint[], boolean]
 
-export default function MarketStatus() {
+interface Props {
+  marketId: bigint
+}
+
+export default function MarketStatus({ marketId }: Props) {
   const [now, setNow] = useState(Math.floor(Date.now() / 1000))
 
   useEffect(() => {
@@ -26,7 +29,7 @@ export default function MarketStatus() {
     address: WEATHER_MARKET_ADDRESS,
     abi: WEATHER_MARKET_ABI,
     functionName: 'getMarket',
-    args: [MARKET_ID],
+    args: [marketId],
     query: { refetchInterval: 30_000 },
   })
 
@@ -76,7 +79,7 @@ export default function MarketStatus() {
         </div>
 
         <div className="space-y-3">
-          <Row label="Market ID" value={`#${MARKET_ID.toString()}`} />
+          <Row label="Market ID" value={`#${marketId.toString()}`} />
           <Row label="城市" value={city ?? '—'} />
           <Row
             label="預測日期"
