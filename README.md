@@ -172,12 +172,12 @@ Temperatures are passed as plain integers (whole degrees Celsius). Given `bucket
 | Bucket | Range |
 |---|---|
 | 0 | ≤ 25°C |
-| 1 | 26°C – 28°C |
-| 2 | 29°C – 31°C |
-| 3 | 32°C – 34°C |
+| 1 | > 25°C 且 ≤ 28°C |
+| 2 | > 28°C 且 ≤ 31°C |
+| 3 | > 31°C 且 ≤ 34°C |
 | 4 | > 34°C |
 
-Oracle rounding: raw float values are floored before submission (e.g. 24.76°C → 24°C). Temperature exactly equal to a boundary is assigned to the lower bucket (25°C → bucket 0).
+Oracle rounding: raw float values are floored before submission (e.g. 24.76°C → 24°C).
 
 ## Fees & Security
 
