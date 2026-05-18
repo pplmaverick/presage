@@ -194,14 +194,26 @@ Oracle rounding: raw float values are floored before submission (e.g. 24.76°C �
 
 ## Roadmap
 
-- ✅ P1 — Arc Testnet setup, first contract deployed (BuyMeACoffee proof-of-deployment)
-- ✅ P2 — Hardhat environment + USDC integration
-- ✅ P3 — Weather Prediction Market core contracts + n8n Oracle + ERC-8004 agent registration
-- ✅ P4 — Circle Developer Grant application submitted (under review)
-- ⬜ P5 — Arc Mainnet (targeting Summer 2026)
-  - M1: Deploy to mainnet, first live USDC market, custom domain frontend
-  - M2: Multi-city expansion (Taipei / Tokyo / Bangkok), 50+ unique wallets
-  - M3: ERC-8004 Agent autonomously creates markets + submits oracle data; decentralized oracle integration (Chainlink / UMA)
+**✅ M1 — Testnet MVP (completed)**
+- 4 smart contracts deployed on Arc Testnet
+- n8n Oracle automation live on VPS
+- ERC-8004 Agent registered (agentId: 6762)
+- React frontend deployed to Vercel
+- First market fully settled (Taipei, 54 USDC)
+- Circle Developer Grant application submitted (under review)
+
+**⬜ M2 — Mainnet Launch (targeting Summer 2026)**
+- Deploy to Arc Mainnet
+- Multi-city support: Tokyo, Bangkok, Seoul
+- Custom domain frontend
+- Multi-source weather oracle (OpenWeather + WeatherAPI median)
+- TypeScript SDK (`createMarket`, `placeBet` wrappers)
+- 50+ unique wallets
+
+**⬜ M3 — Autonomous Agent (post-mainnet)**
+- ERC-8004 Agent autonomously creates markets (no manual `createMarket`)
+- ERC-8004 Agent autonomously submits oracle results
+- Chainlink Oracle integration (pending Arc mainnet availability)
 
 ## Stack
 
@@ -222,3 +234,4 @@ Wallet: `0x529...d35b9` — 800+ mainnet transactions across multiple chains
 ## License
 
 MIT
+
