@@ -1,114 +1,112 @@
-# Pharos Weather Market
+# Arc Weather Market
 
-![Network](https://img.shields.io/badge/Pharos_Atlantic-688689-blue)
+![Arc Testnet](https://img.shields.io/badge/Arc_Testnet-5042002-blue)
 ![Solidity](https://img.shields.io/badge/Solidity-0.8.28-purple)
 ![License](https://img.shields.io/badge/license-MIT-green)
+![Status](https://img.shields.io/badge/grant-under_review-orange)
 
-A decentralized temperature prediction market built natively on Pharos, settled entirely in Circle-native USDC. Users onboard from Arc via Arc Bridge Kit + CCTP and bet on real-world temperature outcomes — no wrapped assets, no bridging risk.
-
-**Deployed on Pharos (Pacific Ocean)**
-
-| Network | Contract | Address |
-|---|---|---|
-| Pharos Mainnet (1672) | WeatherMarket | TBD |
-| Pharos Mainnet (1672) | AdminOracle | TBD |
-| Pharos Atlantic Testnet (688689) | WeatherMarket | `0x072a3a0c04cf8cdcaf5b4a73a4ed4ff5a841531f` |
-| Pharos Atlantic Testnet (688689) | AdminOracle | `0xcac5b9d2817325e78090e3ce4b9c299c819cf953` |
+**Live Demo → [arc-projects.vercel.app](https://arc-projects.vercel.app)** · Network: Arc Testnet (Chain ID 5042002)
 
 ---
 
-## Why Pharos-Native
+A decentralized weather prediction market built on Arc Network (Circle's EVM chain), settled entirely in USDC. Users bet on real-world temperature outcomes; an n8n-powered oracle fetches verified weather data and settles the contract on-chain — no custodian, no manual intervention.
 
-This project is not ported from another chain. Every design decision maps to a Pharos-specific capability.
+## Overview
 
-| Problem | Generic EVM approach | Pharos-native approach |
+Each market defines a city, a target date, and a set of temperature buckets (e.g. ≤25 / 26–28 / 29–31 / 32–34 / >34°C). Users deposit USDC into a bucket before the lock time. After the oracle submits the final temperature, winners split the net pool proportionally to their stake.
+
+The system consists of three contracts deployed on Arc Testnet (Chain ID: 5042002):
+
+- **WeatherMarket** — holds bets, manages market lifecycle, distributes USDC payouts
+- **AdminOracle** — the permissioned entry point for submitting on-chain results
+- **MarketFactory** — deploys matched WeatherMarket + AdminOracle pairs in a single transaction
+
+## Why Arc-Native
+
+The contract stack is built around Arc's specific properties rather than being a generic EVM port.
+
+| Design concern | Typical EVM approach | Arc-native approach |
 |---|---|---|
-| Cross-chain USDC onboarding | Wrapped tokens / third-party bridges | Arc Bridge Kit + CCTP: native burn-and-mint, no wrapped assets |
-| Oracle dependency | External oracle required | Owner-submitted results; Phase 2 upgrades to Chainlink CCIP |
-| Settlement finality | 10–60s confirmation | Sub-second finality, 30,000 TPS parallel execution |
-| RWA-grade stablecoin | Any ERC-20 | Circle-native USDC, part of Pharos RealFi ecosystem |
-
----
+| Settlement currency | Wrap or bridge an external stablecoin | Circle's USDC deployed natively on Arc — no bridge risk, no synthetic wrapper |
+| Deploying new markets | Manually deploy contracts and wire them together | `MarketFactory.deployMarketWithOracle()` atomically deploys a WeatherMarket + AdminOracle pair and hands ownership to the caller in one tx |
+| Off-chain data feed | Chainlink node subscription or centralized relayer | Self-hosted n8n workflow on VPS — pulls OpenWeather data, verifies, and calls `submitResult()` directly; no external oracle dependency |
+| Agent composability | Custom integration per application | ERC-8004 AI Agent (agentId: 6762) registered on-chain — any agent runtime that speaks the standard can read market state and place bets programmatically |
 
 ## Architecture
 
 ```
-Arc Testnet (USDC)
-      │
-      │  Arc Bridge Kit + CCTP
-      │  burn → attest → mint
-      ▼
-Pharos Mainnet (USDC)
-      │
-      ├── WeatherMarket.sol
-      │     ├── createMarket(city, buckets, lockTime)
-      │     ├── placeBet(marketId, bucket, amount)
-      │     ├── lockMarket(marketId)
-      │     ├── submitResult(marketId, temp)  ← AdminOracle
-      │     └── claimWinnings(marketId)
-      │
-      └── AdminOracle.sol
-            └── onlyOwner submitResult → WeatherMarket
+n8n (self-hosted VPS)
+    │
+    ├── HTTP Request → OpenWeather API    ← fetch daily high/low temp
+    ├── (optional) ECMWF / GFS cross-check
+    └── Write Contract → AdminOracle.submitResult(city, temp, marketId)
+                              │
+                              └── WeatherMarket.submitResult(marketId, finalTemp)
+                                        │
+                                        ├── determine winning bucket
+                                        ├── record finalTemp on-chain
+                                        └── unlock claimWinnings()
+
+ERC-8004 AI Agent (agentId: 6762)
+    └── reads market state, can call placeBet() programmatically
 ```
-
----
-
-## Core Features
-
-### Arc Bridge Kit + CCTP Cross-chain Onboarding
-
-Users hold USDC on Arc and onboard to Pharos via Arc Bridge Kit, which uses Circle's Cross-Chain Transfer Protocol (CCTP) for native burn-and-mint. The asset that arrives in the user's Pharos wallet is Circle-native USDC — not a synthetic wrapper — which is the same asset accepted by WeatherMarket.
-
-### Multi-Bucket Temperature Prediction
-
-Markets define temperature ranges as an ascending array of upper bounds. Given `buckets = [20, 25, 30, 35]`, five prediction ranges are created:
-
-| Bucket | Range |
-|---|---|
-| 0 | ≤ 20°C |
-| 1 | > 20°C and ≤ 25°C |
-| 2 | > 25°C and ≤ 30°C |
-| 3 | > 30°C and ≤ 35°C |
-| 4 | > 35°C |
-
-Up to 253 buckets per market. The bucket structure scales to any granularity without changing the contract interface.
-
-### No-Winner Full Refund
-
-When no bets land on the winning bucket, the 2% protocol fee is waived and all USDC is refunded at face value. The market's `noWinner` flag triggers this path on-chain automatically.
-
-### 2% Protocol Fee
-
-The fee (`FEE_BPS = 200`) is collected only when at least one winning bet exists. It is deducted from the total pool before proportional payout calculation. Fee accumulates in `collectedFees` and is withdrawable by the owner via `withdrawFees()`.
-
----
 
 ## Deployed Contracts
 
-**Pharos Atlantic Testnet (Chain ID: 688689)**
+**Arc Testnet (Chain ID: 5042002)**
 
 | Contract | Address |
 |---|---|
-| WeatherMarket | `0x072a3a0c04cf8cdcaf5b4a73a4ed4ff5a841531f` |
-| AdminOracle | `0xcac5b9d2817325e78090e3ce4b9c299c819cf953` |
-| USDC (testnet) | `0xcfc8330f4bcab529c625d12781b1c19466a9fc8b` |
+| WeatherMarket (v2) | `0xcac5b9d2817325e78090e3ce4b9c299c819cf953` |
+| AdminOracle | `0xbdc53e50b1167ce1199bfad54a034f7ab1741051` |
+| MarketFactory | `0x914c40a644493b47336de847b0404e729e06c68d` |
+| USDC (Arc native) | `0x3600000000000000000000000000000000000000` |
 
-**Pharos Pacific Ocean Mainnet (Chain ID: 1672)**
+**ERC-8004 AI Agent**
 
-| Contract | Address |
+| Field | Value |
 |---|---|
-| WeatherMarket | TBD |
-| AdminOracle | TBD |
-| USDC | `0xC879C018dB60520F4355C26eD1a6D572cdAC1815` |
+| Agent ID | 6762 |
+| Name | WeatherOracle |
+| Registration tx | `0x6ea8835782b5fc553e2b8834be7b711ebe1a05e61687f73e293dd6592aee8981` |
 
----
+**First Market**
+
+| Field | Value |
+|---|---|
+| marketId | 0 |
+| City | Taipei |
+| Target date | 2026-05-14 |
+| createMarket tx | `0x3a09da1976fe5a1ce5fb73ae5e39056d77e04b43815ce998803834728bc6a295` |
+
+## Core Features
+
+### Multi-Bucket Temperature Prediction
+
+Markets define temperature ranges as an ascending array of upper bounds. Given `buckets = [25, 28, 31, 34]`, five prediction ranges are created. This structure scales to any granularity without changing the contract interface.
+
+### USDC-Native Settlement
+
+All bets and payouts use Circle's USDC precompile on Arc (`0x360...`). No wrapping, no swaps — the asset users approve is the same asset they receive.
+
+### MarketFactory
+
+`deployMarketWithOracle()` deploys a WeatherMarket and AdminOracle atomically: the factory sets the oracle address on the market, then transfers ownership of both contracts to the caller. This makes spinning up isolated market instances safe and reproducible.
+
+### n8n Oracle Integration
+
+The oracle layer is a self-hosted n8n workflow rather than an on-chain subscription service. The workflow polls OpenWeather (and optionally ECMWF/GFS for verification), constructs the `submitResult` call, and fires it through the AdminOracle contract. Running on a VPS means the oracle has no dependency on a third-party node operator or subscription fee.
+
+### ERC-8004 AI Agent
+
+Agent ID 6762 (`WeatherOracle`) is registered on-chain. Any agent runtime that implements the ERC-8004 standard can read market state and place bets programmatically — no custom integration required.
 
 ## Quick Start
 
 **Prerequisites**
 - Node.js 18+
-- A funded Pharos wallet (PROS for gas, USDC for betting)
-- Arc Bridge Kit or direct USDC on Pharos Atlantic for testnet
+- An Arc Testnet wallet with ETH (for gas) and USDC
+- An OpenWeather API key (for the oracle)
 
 ```bash
 # 1. Install dependencies
@@ -120,8 +118,8 @@ cp .env.example .env
 
 | Variable | Description |
 |---|---|
-| `PRIVATE_KEY` | Deployer wallet private key (no `0x` prefix) |
-| `PHAROS_USDC_ADDRESS` | USDC contract address on Pharos |
+| `PRIVATE_KEY` | Deployer wallet private key (no 0x prefix) |
+| `USDC_ADDRESS` | USDC contract address — testnet: `0x3600000000000000000000000000000000000000` |
 
 ```bash
 # 3. Compile contracts
@@ -130,17 +128,22 @@ npx hardhat compile
 # 4. Run tests
 npx hardhat test
 
-# 5. Deploy to Pharos Atlantic Testnet
-npx hardhat run scripts/deploy-pharos.ts --network pharos
+# 5. Deploy (saves addresses to deployments/arc-testnet.json)
+npx hardhat run scripts/deploy.ts --network arc
 
-# 6. End-to-end test (creates market → bets → settles → claims)
-npx hardhat run scripts/e2e-pharos.ts --network pharos
+# 6. Create a market (Taipei, 5 buckets: ≤25 / 26–28 / 29–31 / 32–34 / >34°C)
+npx hardhat run scripts/createMarket.ts --network arc
 
-# 7. Deploy to Pharos Mainnet
-npx hardhat run scripts/deploy-pharos.ts --network pharosMainnet
+# 7. Submit oracle result
+npx hardhat run scripts/submitResult.ts --network arc
 ```
 
----
+**n8n Oracle Setup**
+
+In your self-hosted n8n instance, create a workflow that:
+1. Triggers after each market's `lockTime`
+2. Calls the OpenWeather API for the target city and date
+3. Executes a Write Contract node calling `AdminOracle.submitResult(city, temp, marketId)`
 
 ## Contract Interface
 
@@ -148,62 +151,69 @@ npx hardhat run scripts/deploy-pharos.ts --network pharosMainnet
 // WeatherMarket
 createMarket(string city, uint256 targetDate, int256[] buckets, uint256 lockTime) returns (uint256 marketId)
 placeBet(uint256 marketId, uint8 bucket, uint256 amount)
-lockMarket(uint256 marketId)          // callable by anyone after lockTime
+lockMarket(uint256 marketId)
 claimWinnings(uint256 marketId)
-withdrawFees()                        // onlyOwner
-getMarket(uint256 marketId) returns (city, targetDate, lockTime, status, totalPool, finalTemp, winningBucket, buckets, noWinner)
+withdrawFees()
+getMarket(uint256 marketId)
 
 // AdminOracle
-submitResult(string city, int256 temp, uint256 marketId)   // onlyOwner
-setWeatherMarket(address _weatherMarket)                   // onlyOwner
-```
+submitResult(string city, int256 temp, uint256 marketId)
 
----
+// MarketFactory
+deployMarketWithOracle() returns (address market, address oracle)
+getDeployedMarkets() returns (address[])
+getDeployedOracles() returns (address[])
+```
 
 ## Temperature Encoding & Bucket System
 
-Temperatures are passed as plain `int256` whole-degree Celsius values. No decimal encoding required.
+Temperatures are passed as plain integers (whole degrees Celsius). Given `buckets = [25, 28, 31, 34]`:
 
-```
-submitResult("Taipei", 28, 0)
-// 28°C → evaluated against buckets [20, 25, 30, 35]
-// 28 ≤ 30 → winning bucket = 2
-```
+| Bucket | Range |
+|---|---|
+| 0 | ≤ 25°C |
+| 1 | > 25°C 且 ≤ 28°C |
+| 2 | > 28°C 且 ≤ 31°C |
+| 3 | > 31°C 且 ≤ 34°C |
+| 4 | > 34°C |
 
-Oracle rounding: raw float values from weather APIs should be floored before submission (e.g. 28.9°C → 28).
-
----
+Oracle rounding: raw float values are floored before submission (e.g. 24.76°C → 24°C).
 
 ## Fees & Security
 
 **Fees**
-- Protocol fee: 2% of total pool (`FEE_BPS = 200`), deducted only when there is at least one winner
+- Platform fee: 2% of total pool (`FEE_BPS = 200`), deducted only when there is at least one winner
 - No-winner case: fee waived, all USDC refunded at face value
-- Oracle cost: oracle wallet pays only PROS gas for `submitResult`; no on-chain oracle subscription fee
+- Oracle cost: zero on-chain fee — oracle wallet pays only gas for `submitResult`
 
 **Security**
-- `onlyOracle` modifier gates `WeatherMarket.submitResult`
-- `onlyOwner` modifier gates `createMarket`, `setOracle`, `withdrawFees`, and all `AdminOracle` functions
+- `onlyOracle` modifier gates `submitResult`
+- `onlyOwner` gates `createMarket`, `setOracle`, `withdrawFees`, and all MarketFactory functions
 - `ReentrancyGuard` on `claimWinnings`
 - Market state machine enforces strict progression: `OPEN → LOCKED → SETTLED`
 
----
+## Roadmap
 
-## Implementation Notes
+**✅ M1 — Testnet MVP (completed)**
+- 4 smart contracts deployed on Arc Testnet
+- n8n Oracle automation live on VPS
+- ERC-8004 Agent registered (agentId: 6762)
+- React frontend deployed to Vercel
+- First market fully settled (Taipei, 54 USDC)
+- Circle Developer Grant application submitted (under review)
 
-**Gas limit must be set explicitly**
+**⬜ M2 — Mainnet Launch (targeting Summer 2026)**
+- Deploy to Arc Mainnet
+- Multi-city support: Tokyo, Bangkok, Seoul
+- Custom domain frontend
+- Multi-source weather oracle (OpenWeather + WeatherAPI median)
+- TypeScript SDK (`createMarket`, `placeBet` wrappers)
+- 50+ unique wallets
 
-Pharos testnet does not auto-estimate gas correctly for all transaction types. The stable combination is `gas: 1_000_000n` with `gasPrice: parseGwei("10")`. This ensures a reservation of 0.01 PROS per transaction, well within a typical funded testnet wallet.
-
-**Silent revert on insufficient balance**
-
-When an account's PROS balance is below the gas reservation (`gasLimit × gasPrice`), Pharos does not throw a mempool error. The transaction is submitted, gets a receipt, and returns `status: "reverted"` — with no error message or revert reason. Always check `receipt.status === "reverted"` explicitly. The original gas configuration (`gas: 5_000_000n × maxFeePerGas: 50 gwei = 0.25 PROS reservation`) triggered this silently on a wallet holding only 0.042 PROS.
-
-**USDC uses 6 decimals**
-
-All USDC amounts must be expressed in 6-decimal units. 100 USDC = `100_000_000n`. A common mistake when adapting code from ETH-native chains is passing 18-decimal values.
-
----
+**⬜ M3 — Autonomous Agent (post-mainnet)**
+- ERC-8004 Agent autonomously creates markets (no manual `createMarket`)
+- ERC-8004 Agent autonomously submits oracle results
+- Chainlink Oracle integration (pending Arc mainnet availability)
 
 ## Stack
 
@@ -211,37 +221,17 @@ All USDC amounts must be expressed in 6-decimal units. 100 USDC = `100_000_000n`
 |---|---|
 | Smart contracts | Solidity ^0.8.28, OpenZeppelin 5.x |
 | Development | Hardhat 3 + Viem |
-| Oracle | AdminOracle (owner-submitted); Phase 2: Chainlink CCIP |
-| Cross-chain | Arc Bridge Kit + Circle CCTP |
-| Testnet token | USDC `0xcfc8330f4bcab529c625d12781b1c19466a9fc8b` |
-| Mainnet token | USDC `0xC879C018dB60520F4355C26eD1a6D572cdAC1815` |
-
----
-
-## Roadmap
-
-**✅ M1 — Testnet Deployment (completed)**
-- WeatherMarket + AdminOracle deployed on Pharos Atlantic (Chain ID 688689)
-- Full e2e flow tested: `createMarket → placeBet → lockMarket → submitResult → claimWinnings`
-- 2% fee logic and no-winner refund path verified on-chain
-- Silent revert behavior diagnosed and gas configuration stabilized
-
-**⬜ M2 — Mainnet + CCTP Bridge**
-- Deploy to Pharos Pacific Ocean Mainnet (Chain ID 1672)
-- Arc Bridge Kit frontend integration for USDC onboarding from Arc
-- Multi-city market support: Taipei, Tokyo, Bangkok, Seoul
-
-**⬜ M3 — Decentralized Oracle**
-- Chainlink CCIP integration for trustless, permissionless settlement
-- Remove `onlyOwner` requirement from oracle submission
-
----
+| Frontend | React + Vite + Tailwind CSS (Vercel) |
+| Oracle automation | n8n (self-hosted VPS) |
+| Weather data | OpenWeather API, ECMWF, GFS |
+| Settlement token | Circle USDC on Arc Network |
 
 ## Developer
 
 GitHub: [pplmaverick](https://github.com/pplmaverick)
-Wallet: `0xed2B5717c9b936ecC76d75401026A99143e278F5`
+Wallet: `0x529...d35b9` — 800+ mainnet transactions across multiple chains
 
 ## License
 
 MIT
+
