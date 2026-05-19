@@ -3,6 +3,7 @@ import Header from './components/Header'
 import Home from './pages/Home'
 import MyBets from './pages/MyBets'
 import MarketStatus from './pages/MarketStatus'
+import WeatherBar from './components/WeatherBar'
 import { CITY_MARKETS, CITY_NAMES, type CityName } from './config'
 
 export type Tab = 'home' | 'myBets' | 'status'
@@ -33,6 +34,8 @@ export default function App() {
             </button>
           ))}
         </div>
+
+        <WeatherBar city={selectedCity} />
 
         {tab === 'home' && <Home marketId={marketId} />}
         {tab === 'myBets' && <MyBets marketId={marketId} />}
