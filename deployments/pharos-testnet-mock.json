@@ -1,0 +1,12 @@
+{
+  "network": "Pharos Atlantic Testnet (MockUSDC)",
+  "chainId": 688689,
+  "deployedAt": "2026-05-19T08:06:32.114Z",
+  "deployer": "0xed2B5717c9b936ecC76d75401026A99143e278F5",
+  "contracts": {
+    "MockUSDC": "0x15636ce4c0ede55335f84e6386f8f49c897c077d",
+    "WeatherMarket": "0x914c40a644493b47336de847b0404e729e06c68d",
+    "AdminOracle": "0x7ebc98c14920c9a9b060b81047ec96a8906b06c1"
+  },
+  "setupFixedAt": "2026-05-19T08:23:50.449Z"
+}

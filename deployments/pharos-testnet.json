@@ -1,0 +1,11 @@
+{
+  "network": "Pharos Atlantic Testnet",
+  "chainId": 688689,
+  "deployedAt": "2026-05-19T07:59:15.852Z",
+  "deployer": "0xed2B5717c9b936ecC76d75401026A99143e278F5",
+  "contracts": {
+    "WeatherMarket": "0x072a3a0c04cf8cdcaf5b4a73a4ed4ff5a841531f",
+    "AdminOracle": "0xcac5b9d2817325e78090e3ce4b9c299c819cf953",
+    "USDC": "0xcfc8330f4bcab529c625d12781b1c19466a9fc8b"
+  }
+}
