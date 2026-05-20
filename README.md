@@ -9,7 +9,7 @@
 
 ---
 
-A decentralized weather prediction market built on Arc Network (Circle's EVM chain), settled entirely in USDC. Users bet on real-world temperature outcomes; an n8n-powered oracle fetches verified weather data and settles the contract on-chain — no custodian, no manual intervention.
+A USDC-native prediction market infrastructure built on Arc Network (Circle's EVM chain). Weather is the first use case — MarketFactory supports any quantifiable real-world event. An n8n-powered oracle fetches verified data and settles on-chain automatically via ERC-8004 AI Agent — no custodian, no manual intervention.
 
 ## Overview
 
