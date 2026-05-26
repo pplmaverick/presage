@@ -10,6 +10,7 @@ import {
   STATUS_COLOR,
   getBucketLabel,
   formatUsdc,
+  arcscanTx,
 } from '../config'
 import { useState } from 'react'
 
@@ -24,6 +25,7 @@ export default function MyBets({ marketId }: Props) {
   const { connect } = useConnect()
   const { writeContractAsync, isPending } = useWriteContract()
   const [claimMsg, setClaimMsg] = useState('')
+  const [claimHash, setClaimHash] = useState('')
   const [claimSuccess, setClaimSuccess] = useState(false)
 
   // ── 讀取市場 ────────────────────────────────────────────────────────────────
@@ -114,6 +116,7 @@ export default function MyBets({ marketId }: Props) {
   async function handleClaim() {
     if (!isConnected) return
     setClaimMsg('')
+    setClaimHash('')
     setClaimSuccess(false)
     try {
       setClaimMsg('領獎中...')
@@ -125,7 +128,8 @@ export default function MyBets({ marketId }: Props) {
         ...GAS_OPTS,
       })
       setClaimSuccess(true)
-      setClaimMsg(`✅ 領獎成功！TX: ${hash.slice(0, 12)}...`)
+      setClaimHash(hash)
+      setClaimMsg('✅ 領獎成功！')
       await refetchClaimed()
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e)
@@ -279,7 +283,21 @@ export default function MyBets({ marketId }: Props) {
               >
                 {isPending ? '處理中...' : userCanRefund ? '領回押金' : '領取獎金'}
               </button>
-              {claimMsg && <p className="text-sm text-slate-400">{claimMsg}</p>}
+              {claimMsg && (
+                <p className="text-sm text-slate-400">
+                  {claimMsg}
+                  {claimHash && (
+                    <a
+                      href={arcscanTx(claimHash)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-1 font-mono text-blue-400 underline hover:text-blue-300 transition-colors"
+                    >
+                      TX: {claimHash.slice(0, 12)}...
+                    </a>
+                  )}
+                </p>
+              )}
             </div>
           ) : (
             <p className="text-slate-500 text-sm">

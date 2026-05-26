@@ -51,6 +51,9 @@ export function shortenAddress(addr: string): string {
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`
 }
 
+export const arcscanTx      = (hash: string) => `https://testnet.arcscan.app/tx/${hash}`
+export const arcscanAddress = (addr: string) => `https://testnet.arcscan.app/address/${addr}`
+
 export const WEATHER_MARKET_ABI = [
   {
     inputs: [{ name: 'marketId', type: 'uint256' }],

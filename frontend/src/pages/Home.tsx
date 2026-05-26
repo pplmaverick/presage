@@ -13,6 +13,7 @@ import {
   STATUS_COLOR,
   getBucketLabel,
   formatUsdc,
+  arcscanTx,
 } from '../config'
 
 // getMarket 回傳 tuple：[city, targetDate, lockTime, status, totalPool, finalTemp, winningBucket, buckets, noWinner]
@@ -30,6 +31,7 @@ export default function Home({ marketId }: Props) {
   const [selectedBucket, setSelectedBucket] = useState<number | null>(null)
   const [betAmount, setBetAmount] = useState('')
   const [txMsg, setTxMsg] = useState('')
+  const [txHash, setTxHash] = useState('')
   const [isSuccess, setIsSuccess] = useState(false)
 
   // ── 讀取市場資料 ────────────────────────────────────────────────────────────
@@ -94,6 +96,7 @@ export default function Home({ marketId }: Props) {
   async function handleApprove() {
     if (!isConnected || amountUnits === 0n) return
     setTxMsg('')
+    setTxHash('')
     setIsSuccess(false)
     try {
       setTxMsg('授權中...')
@@ -115,6 +118,7 @@ export default function Home({ marketId }: Props) {
   async function handlePlaceBet() {
     if (!isConnected || selectedBucket === null || amountUnits === 0n) return
     setTxMsg('')
+    setTxHash('')
     setIsSuccess(false)
     try {
       setTxMsg('下注中...')
@@ -126,7 +130,8 @@ export default function Home({ marketId }: Props) {
         ...GAS_OPTS,
       })
       setIsSuccess(true)
-      setTxMsg(`✅ 下注成功！TX: ${hash.slice(0, 12)}...`)
+      setTxHash(hash)
+      setTxMsg('✅ 下注成功！')
       setBetAmount('')
       setSelectedBucket(null)
       await refetchBalance()
@@ -321,6 +326,16 @@ export default function Home({ marketId }: Props) {
                   }`}
                 >
                   {txMsg}
+                  {txHash && (
+                    <a
+                      href={arcscanTx(txHash)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-1 font-mono underline hover:opacity-80 transition-opacity"
+                    >
+                      TX: {txHash.slice(0, 12)}...
+                    </a>
+                  )}
                 </p>
               )}
             </div>

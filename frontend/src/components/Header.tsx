@@ -1,7 +1,7 @@
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import { injected } from 'wagmi/connectors'
 import type { Tab } from '../App'
-import { shortenAddress } from '../config'
+import { shortenAddress, arcscanAddress } from '../config'
 
 interface Props {
   tab: Tab
@@ -33,7 +33,14 @@ export default function Header({ tab, setTab }: Props) {
 
           {isConnected && address ? (
             <div className="flex items-center gap-3">
-              <span className="text-slate-400 text-sm font-mono">{shortenAddress(address)}</span>
+              <a
+                href={arcscanAddress(address)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-400 hover:text-slate-200 text-sm font-mono transition-colors"
+              >
+                {shortenAddress(address)}
+              </a>
               <button
                 onClick={() => disconnect()}
                 className="text-sm text-slate-400 hover:text-white border border-slate-700 px-3 py-1.5 rounded-lg transition-colors"
