@@ -17,9 +17,9 @@ export default function App() {
     <div className="min-h-screen bg-slate-950">
       <Header tab={tab} setTab={setTab} />
       <main className="max-w-3xl mx-auto px-4 pb-16">
-        {/* 城市選擇器 */}
+        {/* City Selector */}
         <div className="flex items-center gap-2 mb-5 flex-wrap">
-          <span className="text-slate-500 text-xs mr-1">城市</span>
+          <span className="text-slate-500 text-xs mr-1">City</span>
           {CITY_NAMES.map(city => (
             <button
               key={city}

@@ -33,14 +33,14 @@ export default function MarketStatus({ marketId }: Props) {
     query: { refetchInterval: 30_000 },
   })
 
-  // 解構 tuple
+  // Destructure tuple
   const marketTuple = marketRaw as MarketTuple | undefined
   const [city, targetDate, lockTime, status, totalPool, finalTemp, winningBucket, thresholds, noWinner] =
     marketTuple ?? ([] as unknown as MarketTuple)
 
   function formatCountdown(sec: bigint): string {
     const diff = Number(sec) - now
-    if (diff <= 0) return '已過'
+    if (diff <= 0) return 'Expired'
     const d = Math.floor(diff / 86400)
     const h = Math.floor((diff % 86400) / 3600)
     const m = Math.floor((diff % 3600) / 60)
@@ -55,7 +55,7 @@ export default function MarketStatus({ marketId }: Props) {
       <div className="flex items-center justify-center py-24 text-slate-400">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          載入中...
+          Loading...
         </div>
       </div>
     )
@@ -65,10 +65,10 @@ export default function MarketStatus({ marketId }: Props) {
 
   return (
     <div className="space-y-4 mt-4">
-      {/* 狀態標題 */}
+      {/* Status Header */}
       <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold text-white">市場狀態</h2>
+          <h2 className="text-lg font-bold text-white">Market Status</h2>
           <span
             className={`text-sm font-semibold px-3 py-1.5 rounded-full ${
               STATUS_COLOR[statusIdx] ?? STATUS_COLOR[0]
@@ -80,49 +80,49 @@ export default function MarketStatus({ marketId }: Props) {
 
         <div className="space-y-3">
           <Row label="Market ID" value={`#${marketId.toString()}`} />
-          <Row label="城市" value={city ?? '—'} />
+          <Row label="City" value={city ?? '—'} />
           <Row
-            label="預測日期"
+            label="Target Date"
             value={
               targetDate
-                ? new Date(Number(targetDate) * 1000).toLocaleDateString('zh-TW', {
+                ? new Date(Number(targetDate) * 1000).toLocaleDateString('en-US', {
                     timeZone: 'Asia/Taipei',
                   })
                 : '—'
             }
           />
           <Row
-            label="鎖盤時間"
+            label="Lock Time"
             value={
               lockTime
-                ? new Date(Number(lockTime) * 1000).toLocaleString('zh-TW', {
+                ? new Date(Number(lockTime) * 1000).toLocaleString('en-US', {
                     timeZone: 'Asia/Taipei',
                   })
                 : '—'
             }
           />
           {statusIdx === 0 && lockTime !== undefined && lockTime > 0n && (
-            <Row label="距離鎖盤" value={formatCountdown(lockTime)} highlight />
+            <Row label="Time to Lock" value={formatCountdown(lockTime)} highlight />
           )}
-          <Row label="總獎池" value={`${formatUsdc(totalPool ?? 0n)} USDC`} />
+          <Row label="Total Pool" value={`${formatUsdc(totalPool ?? 0n)} USDC`} />
         </div>
       </div>
 
-      {/* 結算資訊 */}
+      {/* Settlement Info */}
       {statusIdx === 2 && marketTuple && (
         <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800">
-          <h3 className="font-semibold text-white mb-4">結算結果</h3>
+          <h3 className="font-semibold text-white mb-4">Settlement Result</h3>
           <div className="space-y-3">
             <Row
-              label="最終氣溫"
+              label="Final Temperature"
               value={finalTemp !== undefined ? `${Number(finalTemp)}°C` : '—'}
               highlight
             />
             {noWinner ? (
-              <Row label="得獎區間" value="無人猜中（全額退回）" />
+              <Row label="Winning Range" value="No winner (full refund)" />
             ) : (
               <Row
-                label="得獎區間"
+                label="Winning Range"
                 value={
                   winningBucket !== undefined
                     ? getBucketLabel(thresholds ?? [], winningBucket)
@@ -135,9 +135,9 @@ export default function MarketStatus({ marketId }: Props) {
         </div>
       )}
 
-      {/* 溫度區間說明 */}
+      {/* Temperature Ranges */}
       <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800">
-        <h3 className="font-semibold text-white mb-4">溫度區間</h3>
+        <h3 className="font-semibold text-white mb-4">Temperature Ranges</h3>
         <div className="space-y-2">
           {Array.from({ length: 5 }, (_, i) => (
             <div
@@ -159,13 +159,13 @@ export default function MarketStatus({ marketId }: Props) {
         </div>
       </div>
 
-      {/* Oracle 資訊 */}
+      {/* Oracle Info */}
       <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800">
-        <h3 className="font-semibold text-white mb-4">Oracle 資訊</h3>
+        <h3 className="font-semibold text-white mb-4">Oracle Info</h3>
         <div className="space-y-3">
-          <Row label="合約類型" value="AdminOracle（人工提交）" />
+          <Row label="Contract Type" value="AdminOracle (manual submission)" />
           <div className="flex items-center justify-between">
-            <span className="text-slate-400 text-sm">Oracle 地址</span>
+            <span className="text-slate-400 text-sm">Oracle Address</span>
             <a
               href={`https://testnet.arcscan.app/address/${ADMIN_ORACLE_ADDRESS}`}
               target="_blank"
@@ -176,7 +176,7 @@ export default function MarketStatus({ marketId }: Props) {
             </a>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-slate-400 text-sm">WeatherMarket 合約</span>
+            <span className="text-slate-400 text-sm">WeatherMarket Contract</span>
             <a
               href={`https://testnet.arcscan.app/address/${WEATHER_MARKET_ADDRESS}`}
               target="_blank"
@@ -186,7 +186,7 @@ export default function MarketStatus({ marketId }: Props) {
               {shortenAddress(WEATHER_MARKET_ADDRESS)}
             </a>
           </div>
-          <Row label="資料來源" value="OpenWeather + n8n Oracle" />
+          <Row label="Data Source" value="OpenWeather + n8n Oracle" />
         </div>
       </div>
     </div>

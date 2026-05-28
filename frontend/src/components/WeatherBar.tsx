@@ -69,14 +69,14 @@ export default function WeatherBar({ city }: { city: CityName }) {
   return (
     <div className="flex items-center gap-3 bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 mb-5 text-sm flex-wrap">
       {loading && (
-        <span className="text-slate-500 text-xs">天氣資料載入中...</span>
+        <span className="text-slate-500 text-xs">Loading weather data...</span>
       )}
       {error && (
-        <span className="text-slate-500 text-xs">天氣資料暫時無法取得</span>
+        <span className="text-slate-500 text-xs">Weather data unavailable</span>
       )}
       {!loading && !error && data && (
         <>
-          <span className="text-slate-500 text-xs">即時天氣</span>
+          <span className="text-slate-500 text-xs">Live Weather</span>
           <div className="w-px h-3 bg-slate-700" />
           <span className="text-white">🌡 <span className="font-semibold">{data.temp}°C</span></span>
           <div className="w-px h-3 bg-slate-700" />
@@ -84,7 +84,7 @@ export default function WeatherBar({ city }: { city: CityName }) {
           <div className="w-px h-3 bg-slate-700" />
           <span className="text-white">🌧 <span className="font-semibold">{Math.round(data.pop * 100)}%</span></span>
           <div className="w-px h-3 bg-slate-700" />
-          <span className="text-emerald-400 text-xs font-medium">⬤ Oracle 運作中</span>
+          <span className="text-emerald-400 text-xs font-medium">⬤ Oracle Active</span>
         </>
       )}
     </div>

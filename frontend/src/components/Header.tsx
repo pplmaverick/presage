@@ -9,9 +9,9 @@ interface Props {
 }
 
 const NAV = [
-  { id: 'home' as Tab, label: '首頁' },
-  { id: 'myBets' as Tab, label: '我的下注' },
-  { id: 'status' as Tab, label: '市場狀態' },
+  { id: 'home' as Tab, label: 'Home' },
+  { id: 'myBets' as Tab, label: 'My Bets' },
+  { id: 'status' as Tab, label: 'Market Status' },
 ]
 
 export default function Header({ tab, setTab }: Props) {
@@ -25,7 +25,7 @@ export default function Header({ tab, setTab }: Props) {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-2">
             <span className="text-2xl">🌦</span>
-            <span className="font-bold text-white">Arc 天氣市場</span>
+            <span className="font-bold text-white">Arc Weather Market</span>
             <span className="text-xs bg-blue-500/20 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-full ml-1">
               Testnet
             </span>
@@ -45,7 +45,7 @@ export default function Header({ tab, setTab }: Props) {
                 onClick={() => disconnect()}
                 className="text-sm text-slate-400 hover:text-white border border-slate-700 px-3 py-1.5 rounded-lg transition-colors"
               >
-                斷開
+                Disconnect
               </button>
             </div>
           ) : (
@@ -53,7 +53,7 @@ export default function Header({ tab, setTab }: Props) {
               onClick={() => connect({ connector: injected() })}
               className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
             >
-              連接錢包
+              Connect Wallet
             </button>
           )}
         </div>

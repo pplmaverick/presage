@@ -16,7 +16,7 @@ import {
   arcscanTx,
 } from '../config'
 
-// getMarket 回傳 tuple：[city, targetDate, lockTime, status, totalPool, finalTemp, winningBucket, buckets, noWinner]
+// getMarket returns tuple: [city, targetDate, lockTime, status, totalPool, finalTemp, winningBucket, buckets, noWinner]
 type MarketTuple = readonly [string, bigint, bigint, number, bigint, bigint, number, readonly bigint[], boolean]
 
 interface Props {
@@ -34,7 +34,7 @@ export default function Home({ marketId }: Props) {
   const [txHash, setTxHash] = useState('')
   const [isSuccess, setIsSuccess] = useState(false)
 
-  // ── 讀取市場資料 ────────────────────────────────────────────────────────────
+  // ── Read market data ────────────────────────────────────────────────────────
   const { data: marketRaw, isLoading: marketLoading } = useReadContract({
     address: WEATHER_MARKET_ADDRESS,
     abi: WEATHER_MARKET_ABI,
@@ -43,7 +43,7 @@ export default function Home({ marketId }: Props) {
     query: { refetchInterval: 30_000 },
   })
 
-  // ── 讀取每個 bucket 的總下注額 ──────────────────────────────────────────────
+  // ── Read total bets per bucket ───────────────────────────────────────────────
   const { data: bucketTotalsRaw } = useReadContracts({
     contracts: Array.from({ length: BUCKET_COUNT }, (_, i) => ({
       address: WEATHER_MARKET_ADDRESS,
@@ -54,7 +54,7 @@ export default function Home({ marketId }: Props) {
     query: { refetchInterval: 30_000 },
   })
 
-  // ── USDC 餘額與 allowance ────────────────────────────────────────────────────
+  // ── USDC balance and allowance ───────────────────────────────────────────────
   const { data: usdcBalance, refetch: refetchBalance } = useReadContract({
     address: USDC_ADDRESS,
     abi: ERC20_ABI,
@@ -71,7 +71,7 @@ export default function Home({ marketId }: Props) {
     query: { enabled: isConnected && !!address, refetchInterval: 10_000 },
   })
 
-  // ── 解構 tuple（viem 對多回傳值解碼為陣列）────────────────────────────────────
+  // ── Destructure tuple (viem decodes multi-return values as an array) ─────────
   const marketTuple = marketRaw as MarketTuple | undefined
   const [city, targetDate, lockTime, status, totalPool, , winningBucket, thresholds, noWinner] =
     marketTuple ?? ([] as unknown as MarketTuple)
@@ -92,14 +92,14 @@ export default function Home({ marketId }: Props) {
 
   const maxPool = bucketTotals.reduce((a, b) => (b > a ? b : a), 1n)
 
-  // ── 下注流程 ─────────────────────────────────────────────────────────────────
+  // ── Betting flow ─────────────────────────────────────────────────────────────
   async function handleApprove() {
     if (!isConnected || amountUnits === 0n) return
     setTxMsg('')
     setTxHash('')
     setIsSuccess(false)
     try {
-      setTxMsg('授權中...')
+      setTxMsg('Approving...')
       await writeContractAsync({
         address: USDC_ADDRESS,
         abi: ERC20_ABI,
@@ -107,11 +107,11 @@ export default function Home({ marketId }: Props) {
         args: [WEATHER_MARKET_ADDRESS, amountUnits],
         ...GAS_OPTS,
       })
-      setTxMsg('授權成功！請點「下注」')
+      setTxMsg('Approved! Click "Place Bet"')
       await refetchAllowance()
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e)
-      setTxMsg(`❌ 授權失敗：${msg.slice(0, 80)}`)
+      setTxMsg(`❌ Approval failed: ${msg.slice(0, 80)}`)
     }
   }
 
@@ -121,7 +121,7 @@ export default function Home({ marketId }: Props) {
     setTxHash('')
     setIsSuccess(false)
     try {
-      setTxMsg('下注中...')
+      setTxMsg('Placing bet...')
       const hash = await writeContractAsync({
         address: WEATHER_MARKET_ADDRESS,
         abi: WEATHER_MARKET_ABI,
@@ -131,13 +131,13 @@ export default function Home({ marketId }: Props) {
       })
       setIsSuccess(true)
       setTxHash(hash)
-      setTxMsg('✅ 下注成功！')
+      setTxMsg('✅ Bet placed!')
       setBetAmount('')
       setSelectedBucket(null)
       await refetchBalance()
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e)
-      setTxMsg(`❌ 下注失敗：${msg.slice(0, 80)}`)
+      setTxMsg(`❌ Bet failed: ${msg.slice(0, 80)}`)
     }
   }
 
@@ -146,7 +146,7 @@ export default function Home({ marketId }: Props) {
       <div className="flex items-center justify-center py-24 text-slate-400">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          載入市場資料中...
+          Loading market data...
         </div>
       </div>
     )
@@ -154,17 +154,17 @@ export default function Home({ marketId }: Props) {
 
   return (
     <div className="space-y-6">
-      {/* 市場資訊卡 */}
+      {/* Market Info Card */}
       <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800">
         <div className="flex items-start justify-between mb-4">
           <div>
             <h2 className="text-xl font-bold text-white">
-              🌡 {city ?? '—'} 氣溫預測
+              🌡 {city ?? '—'} Temperature Prediction
             </h2>
             <p className="text-slate-400 text-sm mt-1">
-              預測日期：
+              Target Date:&nbsp;
               {targetDate
-                ? new Date(Number(targetDate) * 1000).toLocaleDateString('zh-TW')
+                ? new Date(Number(targetDate) * 1000).toLocaleDateString('en-US')
                 : '—'}
             </p>
           </div>
@@ -179,14 +179,14 @@ export default function Home({ marketId }: Props) {
 
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-slate-800 rounded-xl p-3">
-            <p className="text-slate-400 text-xs mb-1">總獎池</p>
+            <p className="text-slate-400 text-xs mb-1">Total Pool</p>
             <p className="text-white font-bold text-lg">{formatUsdc(totalPool ?? 0n)} USDC</p>
           </div>
           <div className="bg-slate-800 rounded-xl p-3">
-            <p className="text-slate-400 text-xs mb-1">鎖盤時間</p>
+            <p className="text-slate-400 text-xs mb-1">Lock Time</p>
             <p className="text-white font-bold text-sm">
               {lockTime
-                ? new Date(Number(lockTime) * 1000).toLocaleString('zh-TW', {
+                ? new Date(Number(lockTime) * 1000).toLocaleString('en-US', {
                     timeZone: 'Asia/Taipei',
                   })
                 : '—'}
@@ -196,14 +196,14 @@ export default function Home({ marketId }: Props) {
 
         {isConnected && usdcBalance !== undefined && (
           <p className="text-slate-500 text-xs mt-3">
-            錢包 USDC 餘額：{formatUsdc(usdcBalance)} USDC
+            Wallet USDC Balance: {formatUsdc(usdcBalance)} USDC
           </p>
         )}
       </div>
 
-      {/* 溫度區間 */}
+      {/* Temperature Ranges */}
       <div>
-        <h3 className="text-sm font-medium text-slate-400 mb-3">選擇溫度區間下注</h3>
+        <h3 className="text-sm font-medium text-slate-400 mb-3">Select Temperature Range to Bet</h3>
         <div className="space-y-2">
           {Array.from({ length: BUCKET_COUNT }, (_, i) => {
             const total = bucketTotals[i]
@@ -241,7 +241,7 @@ export default function Home({ marketId }: Props) {
                     <span className="font-medium text-white">{label}</span>
                     {isWinning && (
                       <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">
-                        🏆 得獎
+                        🏆 Winner
                       </span>
                     )}
                   </div>
@@ -261,26 +261,26 @@ export default function Home({ marketId }: Props) {
         </div>
       </div>
 
-      {/* 下注表單 */}
+      {/* Bet Form */}
       {isConnected ? (
         <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800">
           <h3 className="font-semibold text-white mb-4">
             {isOpen
-              ? '下注'
+              ? 'Place Bet'
               : status === 1
-              ? '市場已鎖盤，不接受下注'
-              : '市場已結算'}
+              ? 'Market Locked — No Bets Accepted'
+              : 'Market Settled'}
           </h3>
 
           {isOpen && (
             <div className="space-y-4">
               <div>
                 <label className="text-sm text-slate-400 mb-1.5 block">
-                  已選擇：
+                  Selected:&nbsp;
                   <span className="text-white ml-1">
                     {selectedBucket !== null
                       ? getBucketLabel(thresholds ?? [], selectedBucket)
-                      : '請選擇區間'}
+                      : 'Select a range'}
                   </span>
                 </label>
                 <div className="relative">
@@ -288,7 +288,7 @@ export default function Home({ marketId }: Props) {
                     type="number"
                     min="0"
                     step="0.1"
-                    placeholder="輸入 USDC 金額"
+                    placeholder="Enter USDC amount"
                     value={betAmount}
                     onChange={e => setBetAmount(e.target.value)}
                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
@@ -306,7 +306,7 @@ export default function Home({ marketId }: Props) {
                     disabled={isPending || !betAmount || selectedBucket === null}
                     className="flex-1 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 rounded-xl transition-colors"
                   >
-                    {isPending ? '處理中...' : '① 授權 USDC'}
+                    {isPending ? 'Processing...' : '① Approve USDC'}
                   </button>
                 ) : (
                   <button
@@ -314,7 +314,7 @@ export default function Home({ marketId }: Props) {
                     disabled={isPending || !betAmount || selectedBucket === null || amountUnits === 0n}
                     className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 rounded-xl transition-colors"
                   >
-                    {isPending ? '處理中...' : '下注'}
+                    {isPending ? 'Processing...' : 'Place Bet'}
                   </button>
                 )}
               </div>
@@ -343,18 +343,18 @@ export default function Home({ marketId }: Props) {
 
           {!isOpen && status === 2 && noWinner && (
             <p className="text-slate-400 text-sm">
-              無人猜中，請前往「我的下注」頁面領回押金。
+              No winner. Visit "My Bets" to reclaim your deposit.
             </p>
           )}
         </div>
       ) : (
         <div className="bg-slate-900 rounded-2xl p-8 border border-slate-800 text-center">
-          <p className="text-slate-400 mb-4">連接錢包才能下注</p>
+          <p className="text-slate-400 mb-4">Connect your wallet to place a bet</p>
           <button
             onClick={() => connect({ connector: injected() })}
             className="bg-blue-600 hover:bg-blue-500 text-white font-medium px-6 py-3 rounded-xl transition-colors"
           >
-            連接 MetaMask
+            Connect MetaMask
           </button>
         </div>
       )}

@@ -28,7 +28,7 @@ export default function MyBets({ marketId }: Props) {
   const [claimHash, setClaimHash] = useState('')
   const [claimSuccess, setClaimSuccess] = useState(false)
 
-  // ── 讀取市場 ────────────────────────────────────────────────────────────────
+  // ── Read market ─────────────────────────────────────────────────────────────
   const { data: marketRaw } = useReadContract({
     address: WEATHER_MARKET_ADDRESS,
     abi: WEATHER_MARKET_ABI,
@@ -37,12 +37,12 @@ export default function MyBets({ marketId }: Props) {
     query: { refetchInterval: 30_000 },
   })
 
-  // 解構 tuple
+  // Destructure tuple
   const marketTuple = marketRaw as MarketTuple | undefined
   const [city, , , status, totalPool, finalTemp, winningBucket, thresholds, noWinner] =
     marketTuple ?? ([] as unknown as MarketTuple)
 
-  // ── 讀取用戶各 bucket 下注 ──────────────────────────────────────────────────
+  // ── Read user bets per bucket ────────────────────────────────────────────────
   const { data: userBetsRaw } = useReadContracts({
     contracts: Array.from({ length: BUCKET_COUNT }, (_, i) => ({
       address: WEATHER_MARKET_ADDRESS,
@@ -53,7 +53,7 @@ export default function MyBets({ marketId }: Props) {
     query: { enabled: isConnected && !!address, refetchInterval: 15_000 },
   })
 
-  // ── 讀取各 bucket 總額（計算獎金用）──────────────────────────────────────────
+  // ── Read bucket totals (for prize calculation) ───────────────────────────────
   const { data: bucketTotalsRaw } = useReadContracts({
     contracts: Array.from({ length: BUCKET_COUNT }, (_, i) => ({
       address: WEATHER_MARKET_ADDRESS,
@@ -64,7 +64,7 @@ export default function MyBets({ marketId }: Props) {
     query: { enabled: isConnected && !!address },
   })
 
-  // ── 讀取總下注 / 已領取 ─────────────────────────────────────────────────────
+  // ── Read total bets / claimed status ────────────────────────────────────────
   const { data: userTotal } = useReadContract({
     address: WEATHER_MARKET_ADDRESS,
     abi: WEATHER_MARKET_ABI,
@@ -81,7 +81,7 @@ export default function MyBets({ marketId }: Props) {
     query: { enabled: isConnected && !!address },
   })
 
-  // ── 衍生值 ──────────────────────────────────────────────────────────────────
+  // ── Derived values ───────────────────────────────────────────────────────────
   const userBets: bigint[] = Array.from({ length: BUCKET_COUNT }, (_, i) => {
     const r = userBetsRaw?.[i]
     return r?.status === 'success' ? (r.result as bigint) : 0n
@@ -96,7 +96,7 @@ export default function MyBets({ marketId }: Props) {
   const userCanRefund = isSettled && noWinner && hasBets
   const canClaim = (userWon || userCanRefund) && !hasClaimed && !claimSuccess
 
-  // ── 計算預期領獎金額 ─────────────────────────────────────────────────────────
+  // ── Calculate expected winnings ──────────────────────────────────────────────
   const bucketTotals: bigint[] = Array.from({ length: BUCKET_COUNT }, (_, i) => {
     const r = bucketTotalsRaw?.[i]
     return r?.status === 'success' ? (r.result as bigint) : 0n
@@ -112,14 +112,14 @@ export default function MyBets({ marketId }: Props) {
     return (pool * 98n / 100n) * userBets[winningBucket] / bucketTotal
   })()
 
-  // ── 領獎 ─────────────────────────────────────────────────────────────────────
+  // ── Claim winnings ───────────────────────────────────────────────────────────
   async function handleClaim() {
     if (!isConnected) return
     setClaimMsg('')
     setClaimHash('')
     setClaimSuccess(false)
     try {
-      setClaimMsg('領獎中...')
+      setClaimMsg('Claiming...')
       const hash = await writeContractAsync({
         address: WEATHER_MARKET_ADDRESS,
         abi: WEATHER_MARKET_ABI,
@@ -129,23 +129,23 @@ export default function MyBets({ marketId }: Props) {
       })
       setClaimSuccess(true)
       setClaimHash(hash)
-      setClaimMsg('✅ 領獎成功！')
+      setClaimMsg('✅ Claimed successfully!')
       await refetchClaimed()
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e)
-      setClaimMsg(`❌ 失敗：${msg.slice(0, 80)}`)
+      setClaimMsg(`❌ Failed: ${msg.slice(0, 80)}`)
     }
   }
 
   if (!isConnected) {
     return (
       <div className="bg-slate-900 rounded-2xl p-8 border border-slate-800 text-center mt-4">
-        <p className="text-slate-400 mb-4">連接錢包查看你的下注記錄</p>
+        <p className="text-slate-400 mb-4">Connect your wallet to view your bets</p>
         <button
           onClick={() => connect({ connector: injected() })}
           className="bg-blue-600 hover:bg-blue-500 text-white font-medium px-6 py-3 rounded-xl transition-colors"
         >
-          連接 MetaMask
+          Connect MetaMask
         </button>
       </div>
     )
@@ -153,7 +153,7 @@ export default function MyBets({ marketId }: Props) {
 
   return (
     <div className="space-y-6 mt-4">
-      {/* 市場狀態摘要 */}
+      {/* Market Status Summary */}
       <div className="flex items-center gap-3">
         <span
           className={`text-xs font-semibold px-3 py-1 rounded-full ${
@@ -163,11 +163,11 @@ export default function MyBets({ marketId }: Props) {
           {STATUS_LABEL[status ?? 0] ?? '—'}
         </span>
         <span className="text-slate-400 text-sm">
-          市場 #{marketId.toString()} · {city ?? '—'}
+          Market #{marketId.toString()} · {city ?? '—'}
         </span>
       </div>
 
-      {/* 結算結果（已結算） */}
+      {/* Settlement Result */}
       {isSettled && marketTuple && (
         <div
           className={`rounded-2xl p-5 border ${
@@ -178,20 +178,20 @@ export default function MyBets({ marketId }: Props) {
         >
           {noWinner ? (
             <div>
-              <p className="text-amber-400 font-semibold">⚠ 無人猜中</p>
+              <p className="text-amber-400 font-semibold">⚠ No Winner</p>
               <p className="text-slate-400 text-sm mt-1">
-                最終氣溫：{finalTemp !== undefined ? Number(finalTemp) : '—'}°C · 所有押注全額退回
+                Final Temp: {finalTemp !== undefined ? Number(finalTemp) : '—'}°C · All bets refunded
               </p>
             </div>
           ) : (
             <div>
-              <p className="text-yellow-400 font-semibold">🏆 市場已結算</p>
+              <p className="text-yellow-400 font-semibold">🏆 Market Settled</p>
               <p className="text-slate-300 text-sm mt-1">
-                最終氣溫：
+                Final Temp:&nbsp;
                 <span className="text-white font-bold">
                   {finalTemp !== undefined ? Number(finalTemp) : '—'}°C
                 </span>
-                &nbsp;· 得獎區間：
+                &nbsp;· Winning Range:&nbsp;
                 <span className="text-yellow-400 font-bold">
                   {winningBucket !== undefined
                     ? getBucketLabel(thresholds ?? [], winningBucket)
@@ -199,26 +199,26 @@ export default function MyBets({ marketId }: Props) {
                 </span>
               </p>
               {userWon && (
-                <p className="text-emerald-400 text-sm mt-2 font-medium">🎉 恭喜！你猜中了！</p>
+                <p className="text-emerald-400 text-sm mt-2 font-medium">🎉 Congratulations! You won!</p>
               )}
             </div>
           )}
         </div>
       )}
 
-      {/* 我的下注清單 */}
+      {/* My Bets List */}
       <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-800">
-          <h3 className="font-semibold text-white">我的下注</h3>
+          <h3 className="font-semibold text-white">My Bets</h3>
           {hasBets && (
             <p className="text-slate-400 text-sm mt-0.5">
-              合計：{formatUsdc(totalBets)} USDC
+              Total: {formatUsdc(totalBets)} USDC
             </p>
           )}
         </div>
 
         {!hasBetsAnywhere ? (
-          <div className="px-5 py-8 text-center text-slate-500">尚未在此市場下注</div>
+          <div className="px-5 py-8 text-center text-slate-500">No bets placed in this market</div>
         ) : (
           <div className="divide-y divide-slate-800">
             {userBets.map((amount, i) => {
@@ -237,7 +237,7 @@ export default function MyBets({ marketId }: Props) {
                     <span className="text-white font-medium">{label}</span>
                     {isWinning && (
                       <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">
-                        🏆 得獎
+                        🏆 Winner
                       </span>
                     )}
                   </div>
@@ -249,14 +249,14 @@ export default function MyBets({ marketId }: Props) {
         )}
       </div>
 
-      {/* 領獎區塊 */}
+      {/* Claim Section */}
       {isSettled && hasBetsAnywhere && (
         <div className="bg-slate-900 rounded-2xl p-5 border border-slate-800">
           {hasClaimed || claimSuccess ? (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-emerald-400">
                 <span>✓</span>
-                <span className="font-medium">已領取</span>
+                <span className="font-medium">Claimed</span>
               </div>
               {expectedWinnings > 0n && (
                 <span className="text-emerald-400 font-mono font-bold">
@@ -268,7 +268,7 @@ export default function MyBets({ marketId }: Props) {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <p className="text-slate-300 text-sm">
-                  {userCanRefund ? '無人猜中，可領回全額押金' : '你猜中了！請領取獎金'}
+                  {userCanRefund ? 'No winner — you can reclaim your full deposit' : 'You won! Claim your prize'}
                 </p>
                 {expectedWinnings > 0n && (
                   <span className="text-yellow-400 font-mono font-bold">
@@ -281,7 +281,7 @@ export default function MyBets({ marketId }: Props) {
                 disabled={isPending}
                 className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-medium py-3 rounded-xl transition-colors"
               >
-                {isPending ? '處理中...' : userCanRefund ? '領回押金' : '領取獎金'}
+                {isPending ? 'Processing...' : userCanRefund ? 'Reclaim Deposit' : 'Claim Prize'}
               </button>
               {claimMsg && (
                 <p className="text-sm text-slate-400">
@@ -301,7 +301,7 @@ export default function MyBets({ marketId }: Props) {
             </div>
           ) : (
             <p className="text-slate-500 text-sm">
-              {isSettled && !userWon && !noWinner ? '此次未猜中，沒有獎金可領。' : ''}
+              {isSettled && !userWon && !noWinner ? 'You did not win this round. No prize to claim.' : ''}
             </p>
           )}
         </div>
