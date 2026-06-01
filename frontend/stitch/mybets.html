@@ -1,0 +1,481 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2685.6">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;html class="dark" lang="en"&gt;&lt;head&gt;</p>
+<p class="p1">&lt;meta charset="utf-8"/&gt;</p>
+<p class="p1">&lt;meta content="width=device-width, initial-scale=1.0" name="viewport"/&gt;</p>
+<p class="p1">&lt;link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;amp;family=Inter:wght@300;400;500;600&amp;amp;display=swap" rel="stylesheet"/&gt;</p>
+<p class="p1">&lt;link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;amp;display=swap" rel="stylesheet"/&gt;</p>
+<p class="p1">&lt;script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"&gt;&lt;/script&gt;</p>
+<p class="p1">&lt;script id="tailwind-config"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>tailwind.config = {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>darkMode: "class",</p>
+<p class="p1"><span class="Apple-converted-space">        </span>theme: {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>extend: {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>"colors": {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"surface-variant": "#35343a",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"tertiary-container": "#00df76",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-tertiary-fixed": "#00210c",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"tertiary": "#00ff88",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"surface-tint": "#3cd7ff",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"primary-fixed-dim": "#3cd7ff",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"error-container": "#93000a",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"text-secondary": "rgba(255, 255, 255, 0.5)",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"warning-locked": "#FFB800",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"inverse-on-surface": "#303036",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"surface-container-lowest": "#0e0e13",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"surface-dim": "#131318",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"primary": "#a8e8ff",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-secondary": "#2e009c",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-tertiary-fixed-variant": "#005228",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"secondary-container": "#4720ca",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"text-primary": "#FFFFFF",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"border-glass": "rgba(255, 255, 255, 0.10)",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"surface-glass": "rgba(255, 255, 255, 0.05)",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"outline": "#859398",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-primary-container": "#00586b",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-error-container": "#ffdad6",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-secondary-container": "#baaeff",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"tertiary-fixed": "#60ff99",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"tertiary-fixed-dim": "#00e479",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-secondary-fixed": "#1a0063",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"inverse-primary": "#00677e",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-surface-variant": "#bbc9cf",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"primary-container": "#00d4ff",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-primary-fixed": "#001f27",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"danger-alert": "#FF4B4B",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"surface-bright": "#39383e",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-error": "#690005",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"inverse-surface": "#e4e1e9",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"secondary-fixed-dim": "#c9bfff",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-surface": "#e4e1e9",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"surface-container-highest": "#35343a",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-primary": "#003642",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"surface-container-high": "#2a292f",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-primary-fixed-variant": "#004e5f",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"surface-container": "#1f1f25",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-background": "#e4e1e9",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-tertiary": "#003919",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"secondary": "#c9bfff",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-tertiary-container": "#005d2d",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"surface-container-low": "#1b1b20",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"secondary-fixed": "#e5deff",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-secondary-fixed-variant": "#441cc8",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"surface": "#131318",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"primary-fixed": "#b4ebff",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"outline-variant": "#3c494e",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"error": "#ffb4ab",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"background": "#131318"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">            </span>"borderRadius": {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"DEFAULT": "0.125rem",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"lg": "0.25rem",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"xl": "0.5rem",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"full": "0.75rem"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">            </span>"spacing": {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"container-margin": "24px",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"unit": "4px",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"grid-size": "32px",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"gutter": "16px"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">            </span>"fontFamily": {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"h2-headline": ["Space Grotesk"],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"h3-title": ["Space Grotesk"],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"body-sm": ["Inter"],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"body-lg": ["Inter"],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"h2-mobile": ["Space Grotesk"],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"body-md": ["Inter"],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"label-caps": ["Inter"],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"h1-display": ["Space Grotesk"],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"mono-data": ["Space Grotesk"]</p>
+<p class="p1"><span class="Apple-converted-space">            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">            </span>"fontSize": {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"h2-headline": ["32px", {"lineHeight": "1.2", "fontWeight": "600"}],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"h3-title": ["20px", {"lineHeight": "1.4", "fontWeight": "500"}],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"h2-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "600"}],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"h1-display": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"mono-data": ["14px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "400"}]</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>},</p>
+<p class="p1"><span class="Apple-converted-space">        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
+<p class="p1">&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>body {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>background-color: #131318;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>background-image:<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">          </span>radial-gradient(circle at 2px 2px, rgba(255,255,255,0.02) 1px, transparent 0);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>background-size: 32px 32px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>font-family: 'Inter', sans-serif;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>h1, h2, h3, .font-h2-headline, .font-h3-title {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>font-family: 'Space Grotesk', sans-serif;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.glass-panel {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>background: rgba(255, 255, 255, 0.03);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>backdrop-filter: blur(12px);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>border: 1px solid rgba(255, 255, 255, 0.1);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>position: relative;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>overflow: hidden;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>/* Shimmer Effect */</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.glass-panel::after {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>content: "";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>top: 0;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>left: -100%;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>width: 50%;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>height: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>background: linear-gradient(</p>
+<p class="p1"><span class="Apple-converted-space">          </span>to right,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>transparent,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>rgba(255, 255, 255, 0.05),</p>
+<p class="p1"><span class="Apple-converted-space">          </span>transparent</p>
+<p class="p1"><span class="Apple-converted-space">        </span>);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>transform: skewX(-25deg);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>transition: 0.75s;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>pointer-events: none;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.glass-panel:hover::after {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>left: 125%;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>.neon-glow-primary {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.rim-light {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>border-top: 1px solid rgba(255, 255, 255, 0.15);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>border-left: 1px solid rgba(255, 255, 255, 0.1);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.active-pulse {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>animation: pulse 2s infinite ease-in-out;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>@keyframes pulse {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>0%, 100% { opacity: 1; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>50% { opacity: 0.4; }</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>/* Profit Glow Pulse */</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.profit-glow {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>text-shadow: 0 0 10px rgba(0, 255, 136, 0.4);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>animation: profitPulse 3s infinite alternate ease-in-out;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>@keyframes profitPulse {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>from { text-shadow: 0 0 8px rgba(0, 255, 136, 0.4); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>to { text-shadow: 0 0 18px rgba(0, 255, 136, 0.7); }</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>/* Claim Button Pulse */</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.claim-pulse {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>animation: claimPulse 2s infinite ease-in-out;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>@keyframes claimPulse {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>0% { box-shadow: 0 0 0px rgba(0, 212, 255, 0.4); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>50% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.7); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>100% { box-shadow: 0 0 0px rgba(0, 212, 255, 0.4); }</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>/* Table Row Interaction */</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.table-row-hover:hover {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>background: rgba(255, 255, 255, 0.05);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.table-row-hover:hover .city-thumb {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>transform: translateY(-2px) scale(1.02);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>::-webkit-scrollbar { width: 6px; }</p>
+<p class="p1"><span class="Apple-converted-space">      </span>::-webkit-scrollbar-track { background: transparent; }</p>
+<p class="p1"><span class="Apple-converted-space">      </span>::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body class="text-text-primary font-body-md overflow-x-hidden min-h-screen"&gt;</p>
+<p class="p1">&lt;!-- TopNavBar --&gt;</p>
+<p class="p1">&lt;nav class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-container-margin py-4 bg-surface-glass backdrop-blur-xl border-b border-glass"&gt;</p>
+<p class="p1">&lt;div class="font-h2-headline text-h2-headline font-bold text-primary tracking-tighter"&gt;Arc Weather Market&lt;/div&gt;</p>
+<p class="p1">&lt;div class="hidden md:flex items-center gap-8"&gt;</p>
+<p class="p1">&lt;a class="font-mono-data text-h3-title text-text-secondary hover:text-primary transition-colors duration-200" href="#"&gt;Betting&lt;/a&gt;</p>
+<p class="p1">&lt;a class="font-mono-data text-h3-title text-primary border-b-2 border-primary pb-1" href="#"&gt;My Bets&lt;/a&gt;</p>
+<p class="p1">&lt;a class="font-mono-data text-h3-title text-text-secondary hover:text-primary transition-colors duration-200" href="#"&gt;Market Status&lt;/a&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="flex items-center gap-4"&gt;</p>
+<p class="p1">&lt;button class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-variant/40 border border-glass font-mono-data text-primary text-body-sm hover:bg-surface-variant transition-all"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-[18px]"&gt;hub&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>0x...4f2e</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/button&gt;</p>
+<p class="p1">&lt;button class="px-6 py-2 rounded bg-primary-container text-on-primary font-bold hover:brightness-110 active:scale-95 transition-all neon-glow-primary"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>Connect Wallet</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/button&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/nav&gt;</p>
+<p class="p1">&lt;!-- SideNavBar (Desktop Only) --&gt;</p>
+<p class="p1">&lt;aside class="hidden lg:flex flex-col h-screen fixed left-0 top-0 pt-24 w-64 bg-surface-glass backdrop-blur-md border-r border-glass z-40"&gt;</p>
+<p class="p1">&lt;div class="px-6 mb-10"&gt;</p>
+<p class="p1">&lt;div class="flex items-center gap-3 mb-2"&gt;</p>
+<p class="p1">&lt;div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-primary"&gt;account_balance_wallet&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div&gt;</p>
+<p class="p1">&lt;div class="font-label-caps text-label-caps text-primary"&gt;Arc Network&lt;/div&gt;</p>
+<p class="p1">&lt;div class="text-[10px] text-tertiary-container flex items-center gap-1"&gt;</p>
+<p class="p1">&lt;span class="w-1.5 h-1.5 rounded-full bg-tertiary active-pulse"&gt;&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>Mainnet Active</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;nav class="flex-1 space-y-1 px-3"&gt;</p>
+<p class="p1">&lt;a class="flex items-center gap-3 px-4 py-3 rounded-lg text-text-secondary hover:bg-surface-variant/20 transition-all group" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined group-hover:text-primary"&gt;show_chart&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-body-md"&gt;Betting&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;a class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary font-bold border-r-4 border-primary bg-primary/10 group transition-all translate-x-1" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined"&gt;receipt_long&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-body-md"&gt;My Bets&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;a class="flex items-center gap-3 px-4 py-3 rounded-lg text-text-secondary hover:bg-surface-variant/20 transition-all group" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined group-hover:text-primary"&gt;analytics&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-body-md"&gt;Market Status&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;/nav&gt;</p>
+<p class="p1">&lt;div class="p-4 border-t border-glass"&gt;</p>
+<p class="p1">&lt;button class="w-full py-3 rounded bg-primary text-on-primary font-bold hover:brightness-110 transition-all mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>Place New Trade</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/button&gt;</p>
+<p class="p1">&lt;div class="space-y-1"&gt;</p>
+<p class="p1">&lt;a class="flex items-center gap-3 px-4 py-2 text-text-secondary hover:text-primary transition-colors" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-[20px]"&gt;help&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-body-sm"&gt;Support&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;a class="flex items-center gap-3 px-4 py-2 text-text-secondary hover:text-primary transition-colors" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-[20px]"&gt;description&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-body-sm"&gt;Docs&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/aside&gt;</p>
+<p class="p1">&lt;!-- Main Content Canvas --&gt;</p>
+<p class="p1">&lt;main class="lg:pl-64 pt-28 pb-24 px-container-margin min-h-screen"&gt;</p>
+<p class="p1">&lt;div class="max-w-6xl mx-auto space-y-8"&gt;</p>
+<p class="p1">&lt;!-- Summary Stats Header --&gt;</p>
+<p class="p1">&lt;header class="grid grid-cols-1 md:grid-cols-3 gap-gutter"&gt;</p>
+<p class="p1">&lt;div class="glass-panel rim-light p-6 rounded-xl flex flex-col gap-2"&gt;</p>
+<p class="p1">&lt;div class="flex justify-between items-center relative z-10"&gt;</p>
+<p class="p1">&lt;span class="font-label-caps text-label-caps text-text-secondary"&gt;Active Stake&lt;/span&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-primary/50"&gt;token&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="font-h2-headline text-h2-headline font-mono-data relative z-10"&gt;1,250 &lt;span class="text-body-sm opacity-60"&gt;USDC&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="w-full bg-surface-variant/50 h-1 rounded-full mt-2 overflow-hidden relative z-10"&gt;</p>
+<p class="p1">&lt;div class="bg-primary h-full w-2/3 shadow-[0_0_8px_#a8e8ff]"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="glass-panel rim-light p-6 rounded-xl flex flex-col gap-2"&gt;</p>
+<p class="p1">&lt;div class="flex justify-between items-center relative z-10"&gt;</p>
+<p class="p1">&lt;span class="font-label-caps text-label-caps text-text-secondary"&gt;Total Profit&lt;/span&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-tertiary/50"&gt;trending_up&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="font-h2-headline text-h2-headline font-mono-data text-tertiary profit-glow relative z-10"&gt;+420.50 &lt;span class="text-body-sm opacity-60"&gt;USDC&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="text-[10px] text-tertiary/70 font-mono-data relative z-10"&gt;+12.4% vs last month&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="glass-panel rim-light p-6 rounded-xl flex flex-col gap-2"&gt;</p>
+<p class="p1">&lt;div class="flex justify-between items-center relative z-10"&gt;</p>
+<p class="p1">&lt;span class="font-label-caps text-label-caps text-text-secondary"&gt;Win Rate&lt;/span&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-surface-tint/50"&gt;auto_graph&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="font-h2-headline text-h2-headline font-mono-data relative z-10"&gt;68&lt;span class="text-body-sm opacity-60"&gt;%&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="flex gap-1 mt-2 relative z-10"&gt;</p>
+<p class="p1">&lt;div class="h-1 flex-1 bg-tertiary rounded-full"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="h-1 flex-1 bg-tertiary rounded-full"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="h-1 flex-1 bg-tertiary rounded-full"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="h-1 flex-1 bg-surface-variant rounded-full"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/header&gt;</p>
+<p class="p1">&lt;!-- Active Bets Table Section --&gt;</p>
+<p class="p1">&lt;section class="space-y-4"&gt;</p>
+<p class="p1">&lt;div class="flex items-center justify-between"&gt;</p>
+<p class="p1">&lt;h2 class="font-h3-title text-h3-title flex items-center gap-2"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-primary"&gt;data_usage&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>Live &amp;amp; Recent Positions</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/h2&gt;</p>
+<p class="p1">&lt;div class="flex items-center gap-2 bg-surface-glass p-1 rounded border border-glass"&gt;</p>
+<p class="p1">&lt;button class="px-4 py-1 text-label-caps bg-primary text-on-primary rounded-sm transition-all"&gt;Live&lt;/button&gt;</p>
+<p class="p1">&lt;button class="px-4 py-1 text-label-caps text-text-secondary hover:text-white transition-all"&gt;Settled&lt;/button&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="glass-panel rim-light rounded-xl overflow-hidden"&gt;</p>
+<p class="p1">&lt;div class="overflow-x-auto"&gt;</p>
+<p class="p1">&lt;table class="w-full text-left border-collapse"&gt;</p>
+<p class="p1">&lt;thead&gt;</p>
+<p class="p1">&lt;tr class="bg-surface-variant/30 border-b border-glass"&gt;</p>
+<p class="p1">&lt;th class="px-6 py-4 font-label-caps text-label-caps text-text-secondary"&gt;Market&lt;/th&gt;</p>
+<p class="p1">&lt;th class="px-6 py-4 font-label-caps text-label-caps text-text-secondary"&gt;Target Date&lt;/th&gt;</p>
+<p class="p1">&lt;th class="px-6 py-4 font-label-caps text-label-caps text-text-secondary"&gt;Range&lt;/th&gt;</p>
+<p class="p1">&lt;th class="px-6 py-4 font-label-caps text-label-caps text-text-secondary"&gt;Stake&lt;/th&gt;</p>
+<p class="p1">&lt;th class="px-6 py-4 font-label-caps text-label-caps text-text-secondary"&gt;Status&lt;/th&gt;</p>
+<p class="p1">&lt;th class="px-6 py-4 font-label-caps text-label-caps text-text-secondary text-right"&gt;Action&lt;/th&gt;</p>
+<p class="p1">&lt;/tr&gt;</p>
+<p class="p1">&lt;/thead&gt;</p>
+<p class="p1">&lt;tbody class="divide-y divide-glass"&gt;</p>
+<p class="p1">&lt;!-- Row 1 --&gt;</p>
+<p class="p1">&lt;tr class="table-row-hover transition-colors"&gt;</p>
+<p class="p1">&lt;td class="px-6 py-5"&gt;</p>
+<p class="p1">&lt;div class="flex items-center gap-3"&gt;</p>
+<p class="p1">&lt;div class="city-thumb w-12 h-12 rounded overflow-hidden border border-glass relative transition-transform duration-300 ease-out"&gt;</p>
+<p class="p1">&lt;img alt="Taipei" class="w-full h-full object-cover grayscale brightness-75" data-alt="A moody, high-contrast aerial shot of Taipei city skyline at twilight. The architecture is sharp and modern, reflected in subtle glass textures and atmospheric haze. The overall mood is futuristic, tech-heavy, and sophisticated, using deep navy and cyan tones to align with the crypto-trading interface's aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2Ci_Rv-MTR1eak4i4_KiKWpFNVLGY9sm7cVfEY-jV5i2uq5pILUIOFhymwcHN-NpfI9FHDimPibk9FfP_M5SMkTHwfKaA-W2WMck2NEFTfNHPP_YpDCwrm-EtnIYur3Xb-l9m-Kfb4f5oqv2lrO0cvCCod3vk5Rs1chnklBZXMRLY8ediax4-kkmm1cpGGuZeBsEljthPvWz08RZp4qXKQPdueihYZYpSXTlG-Ldezxf0ppNWjQk6vqoEvkcigUuHUMi9buuf1eZq"/&gt;</p>
+<p class="p1">&lt;div class="absolute inset-0 bg-primary/10 mix-blend-overlay"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;span class="font-mono-data font-bold"&gt;Taipei&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/td&gt;</p>
+<p class="p1">&lt;td class="px-6 py-5 font-mono-data text-body-sm"&gt;Oct 24, 2023&lt;/td&gt;</p>
+<p class="p1">&lt;td class="px-6 py-5 font-mono-data text-primary text-body-sm"&gt;27-29°C&lt;/td&gt;</p>
+<p class="p1">&lt;td class="px-6 py-5 font-mono-data text-body-sm"&gt;500.00 USDC&lt;/td&gt;</p>
+<p class="p1">&lt;td class="px-6 py-5"&gt;</p>
+<p class="p1">&lt;span class="flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-tertiary-container/30 bg-tertiary-container/10 text-[10px] text-tertiary uppercase font-bold tracking-wider"&gt;</p>
+<p class="p1">&lt;span class="w-1 h-1 rounded-full bg-tertiary active-pulse"&gt;&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                        </span>OPEN</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>&lt;/span&gt;</p>
+<p class="p1">&lt;/td&gt;</p>
+<p class="p1">&lt;td class="px-6 py-5 text-right"&gt;</p>
+<p class="p1">&lt;button class="opacity-50 cursor-not-allowed px-4 py-1.5 rounded border border-glass font-label-caps text-[10px]"&gt;LOCKED&lt;/button&gt;</p>
+<p class="p1">&lt;/td&gt;</p>
+<p class="p1">&lt;/tr&gt;</p>
+<p class="p1">&lt;!-- Row 2 --&gt;</p>
+<p class="p1">&lt;tr class="table-row-hover transition-colors"&gt;</p>
+<p class="p1">&lt;td class="px-6 py-5"&gt;</p>
+<p class="p1">&lt;div class="flex items-center gap-3"&gt;</p>
+<p class="p1">&lt;div class="city-thumb w-12 h-12 rounded overflow-hidden border border-glass relative transition-transform duration-300 ease-out"&gt;</p>
+<p class="p1">&lt;img alt="Tokyo" class="w-full h-full object-cover grayscale brightness-75" data-alt="A detailed, low-angle shot of a Tokyo street corner at night, featuring neon lights reflecting on wet pavement. The scene is rendered in a cyberpunk style with vibrant cyan and magenta accents against deep obsidian shadows. The lighting is cinematic and sharp, capturing the precision and high-tech energy of an Oracle-driven trading environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8NBuV2q_PM8RPS5jplIdEiScG5eCyfv4Q4MK4J0WwJf0LQjVoYhuHH05JkALDqi-Ik7F5iRy9nefnxD1jGr7tfeNHN31NAdhKONNdBdtOUCthm5npHjwHBnRBlpGT_EKNPhbAp2X4RcDCEF3eWXT-uA8OTyWL_uq0LTRahfwwwqmY7YjK-oDpwqMm-ipXUt7ZaDkZzcqFyCp6GXMUsw1tqAo-Djgdhhoo8vQcV3ZU29W3GLxv2xAKrX-hTvkPnNyr01aQS6_HhSIA"/&gt;</p>
+<p class="p1">&lt;div class="absolute inset-0 bg-primary/10 mix-blend-overlay"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;span class="font-mono-data font-bold"&gt;Tokyo&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/td&gt;</p>
+<p class="p1">&lt;td class="px-6 py-5 font-mono-data text-body-sm"&gt;Oct 22, 2023&lt;/td&gt;</p>
+<p class="p1">&lt;td class="px-6 py-5 font-mono-data text-primary text-body-sm"&gt;&amp;gt; 22°C&lt;/td&gt;</p>
+<p class="p1">&lt;td class="px-6 py-5 font-mono-data text-body-sm"&gt;750.00 USDC&lt;/td&gt;</p>
+<p class="p1">&lt;td class="px-6 py-5"&gt;</p>
+<p class="p1">&lt;span class="flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-warning-locked/30 bg-warning-locked/10 text-[10px] text-warning-locked uppercase font-bold tracking-wider"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;"&gt;lock&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                        </span>LOCKED</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>&lt;/span&gt;</p>
+<p class="p1">&lt;/td&gt;</p>
+<p class="p1">&lt;td class="px-6 py-5 text-right"&gt;</p>
+<p class="p1">&lt;button class="px-6 py-1.5 rounded bg-primary-container text-on-primary font-bold text-label-caps hover:brightness-110 active:scale-95 transition-all neon-glow-primary claim-pulse"&gt;CLAIM&lt;/button&gt;</p>
+<p class="p1">&lt;/td&gt;</p>
+<p class="p1">&lt;/tr&gt;</p>
+<p class="p1">&lt;!-- Row 3 (Seoul) --&gt;</p>
+<p class="p1">&lt;tr class="table-row-hover transition-colors"&gt;</p>
+<p class="p1">&lt;td class="px-6 py-5"&gt;</p>
+<p class="p1">&lt;div class="flex items-center gap-3"&gt;</p>
+<p class="p1">&lt;div class="city-thumb w-12 h-12 rounded overflow-hidden border border-glass relative transition-transform duration-300 ease-out"&gt;</p>
+<p class="p1">&lt;img alt="Seoul" class="w-full h-full object-cover grayscale brightness-75" data-alt="A sweeping vista of Seoul's architectural landmarks at sunrise, showing a blend of traditional design and ultra-modern skyscrapers. The color palette is cool and futuristic, dominated by icy blues, silvers, and deep navy tones. Soft morning light creates long, sharp shadows and highlights the clean, glass-like textures of the urban environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcxeaY6EOkdxOO1cWvIhZX2F6t81I4QgnHssXIwLaUxuEZcD0vXE9tQ8de631-gCvlZW3fQzdYwj1pPj5VnhKaEJPqWKD3FaWvBGeqs9maqmaql1ojRHr_wUhZ8-IuocjE9vMWy4yqZGn5ixGIORDN3U8vVTgvAQJ0chYShjxT8CG3BvxheEcYQ-jidZHQVZcqLn0yJuCTQrgT-AG-64B38hU0FrpNEA-4_qmSSO6bRCdV8nCgkul-QVwfZIwpoYyJ1M05jJu4ZWU8"/&gt;</p>
+<p class="p1">&lt;div class="absolute inset-0 bg-primary/10 mix-blend-overlay"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;span class="font-mono-data font-bold"&gt;Seoul&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/td&gt;</p>
+<p class="p1">&lt;td class="px-6 py-5 font-mono-data text-body-sm"&gt;Oct 25, 2023&lt;/td&gt;</p>
+<p class="p1">&lt;td class="px-6 py-5 font-mono-data text-primary text-body-sm"&gt;15-18°C&lt;/td&gt;</p>
+<p class="p1">&lt;td class="px-6 py-5 font-mono-data text-body-sm"&gt;250.00 USDC&lt;/td&gt;</p>
+<p class="p1">&lt;td class="px-6 py-5"&gt;</p>
+<p class="p1">&lt;span class="flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-tertiary-container/30 bg-tertiary-container/10 text-[10px] text-tertiary uppercase font-bold tracking-wider"&gt;</p>
+<p class="p1">&lt;span class="w-1 h-1 rounded-full bg-tertiary active-pulse"&gt;&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                        </span>OPEN</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>&lt;/span&gt;</p>
+<p class="p1">&lt;/td&gt;</p>
+<p class="p1">&lt;td class="px-6 py-5 text-right"&gt;</p>
+<p class="p1">&lt;button class="opacity-50 cursor-not-allowed px-4 py-1.5 rounded border border-glass font-label-caps text-[10px]"&gt;LOCKED&lt;/button&gt;</p>
+<p class="p1">&lt;/td&gt;</p>
+<p class="p1">&lt;/tr&gt;</p>
+<p class="p1">&lt;/tbody&gt;</p>
+<p class="p1">&lt;/table&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/section&gt;</p>
+<p class="p1">&lt;!-- Bottom Floating Decorative Grid --&gt;</p>
+<p class="p1">&lt;div class="grid grid-cols-1 md:grid-cols-2 gap-gutter opacity-40 grayscale"&gt;</p>
+<p class="p1">&lt;div class="h-32 rounded-xl border border-dashed border-glass flex items-center justify-center font-mono-data text-[10px] tracking-widest text-text-secondary"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>// SYSTEM_TELEMETRY_STREAM_01</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1">&lt;div class="h-32 rounded-xl border border-dashed border-glass flex items-center justify-center font-mono-data text-[10px] tracking-widest text-text-secondary"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>// ORACLE_SYNC_STATUS_OK</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/main&gt;</p>
+<p class="p1">&lt;!-- BottomNavBar (Mobile Only) --&gt;</p>
+<p class="p1">&lt;nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center py-3 lg:hidden bg-surface-glass backdrop-blur-lg border-t border-glass rounded-t-xl shadow-[0_-4px_20px_rgba(0,212,255,0.1)]"&gt;</p>
+<p class="p1">&lt;a class="flex flex-col items-center justify-center text-text-secondary opacity-60 hover:opacity-100 transition-opacity" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined"&gt;location_on&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-label-caps text-[10px]"&gt;Taipei&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;a class="flex flex-col items-center justify-center text-text-secondary opacity-60 hover:opacity-100 transition-opacity" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined"&gt;location_on&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-label-caps text-[10px]"&gt;Tokyo&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;a class="flex flex-col items-center justify-center text-primary drop-shadow-[0_0_8px_rgba(60,215,255,0.6)] scale-110" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined"&gt;receipt_long&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-label-caps text-[10px]"&gt;My Bets&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;a class="flex flex-col items-center justify-center text-text-secondary opacity-60 hover:opacity-100 transition-opacity" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined"&gt;location_on&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-label-caps text-[10px]"&gt;Seoul&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;/nav&gt;</p>
+<p class="p1">&lt;!-- Footer --&gt;</p>
+<p class="p1">&lt;footer class="w-full flex justify-between items-center px-container-margin py-6 text-[10px] bg-surface-dim border-t border-outline-variant/30 font-mono-data text-text-secondary"&gt;</p>
+<p class="p1">&lt;div class="text-on-surface-variant font-label-caps uppercase"&gt;Arc Weather Oracle v2.4&lt;/div&gt;</p>
+<p class="p1">&lt;div class="flex gap-6"&gt;</p>
+<p class="p1">&lt;span class="text-tertiary font-bold"&gt;Oracle Active&lt;/span&gt;</p>
+<p class="p1">&lt;a class="hover:text-primary transition-colors" href="#"&gt;System Status&lt;/a&gt;</p>
+<p class="p1">&lt;a class="hover:text-primary transition-colors" href="#"&gt;Terms&lt;/a&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/footer&gt;</p>
+<p class="p1">&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Micro-interactions for table rows</p>
+<p class="p1"><span class="Apple-converted-space">    </span>document.querySelectorAll('tbody tr').forEach(row =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>row.addEventListener('mouseenter', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>row.style.transform = 'translateX(4px)';</p>
+<p class="p1"><span class="Apple-converted-space">            </span>row.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p1"><span class="Apple-converted-space">        </span>row.addEventListener('mouseleave', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>row.style.transform = 'translateX(0)';</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Glowing effect enhancements</p>
+<p class="p1"><span class="Apple-converted-space">    </span>document.querySelectorAll('.neon-glow-primary').forEach(btn =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>btn.addEventListener('mouseover', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!btn.classList.contains('claim-pulse')) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>btn.style.boxShadow = '0 0 25px rgba(0, 212, 255, 0.6)';</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p1"><span class="Apple-converted-space">        </span>btn.addEventListener('mouseout', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!btn.classList.contains('claim-pulse')) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>btn.style.boxShadow = '0 0 15px rgba(0, 212, 255, 0.3)';</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p1">&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;&lt;/html&gt;</p>
+</body>
+</html>

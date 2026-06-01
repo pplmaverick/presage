@@ -1,0 +1,425 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2685.6">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;html class="dark" lang="en"&gt;&lt;head&gt;</p>
+<p class="p1">&lt;meta charset="utf-8"/&gt;</p>
+<p class="p1">&lt;meta content="width=device-width, initial-scale=1.0" name="viewport"/&gt;</p>
+<p class="p1">&lt;title&gt;Arc Weather Market | Market Status&lt;/title&gt;</p>
+<p class="p1">&lt;script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"&gt;&lt;/script&gt;</p>
+<p class="p1">&lt;link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;amp;family=Inter:wght@300;400;500;600&amp;amp;display=swap" rel="stylesheet"/&gt;</p>
+<p class="p1">&lt;link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;amp;display=swap" rel="stylesheet"/&gt;</p>
+<p class="p1">&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>:root {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>--purple-accent: #7B61FF;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>body {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #131318;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-image:<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.02) 1px, transparent 0);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-size: 32px 32px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #e4e1e9;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.glass-panel {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(255, 255, 255, 0.05);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>backdrop-filter: blur(12px);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: 1px solid rgba(255, 255, 255, 0.1);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: relative;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>overflow: hidden;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.glass-panel::after {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>content: "";</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>top: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>right: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>bottom: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>left: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transform: translateX(-100%);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>animation: shimmer 3s infinite;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>pointer-events: none;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@keyframes shimmer {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>100% { transform: translateX(100%); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.rim-light-purple {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: inset 0 0 10px rgba(123, 97, 255, 0.1), 0 0 20px rgba(123, 97, 255, 0.05);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.neon-glow-primary {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.hide-scrollbar::-webkit-scrollbar {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: none;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.settlement-text {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: var(--purple-accent);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-shadow: 0 0 15px rgba(123, 97, 255, 0.6), 0 0 30px rgba(123, 97, 255, 0.2);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.animate-scale-x {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>animation: scaleXIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transform-origin: left;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@keyframes scaleXIn {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>from { transform: scaleX(0); }</p>
+<p class="p1"><span class="Apple-converted-space">            </span>to { transform: scaleX(1); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.animate-slide-up {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>opacity: 0;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@keyframes slideUp {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>from { transform: translateY(20px); opacity: 0; }</p>
+<p class="p1"><span class="Apple-converted-space">            </span>to { transform: translateY(0); opacity: 1; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.badge-glow:hover {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 0 12px currentColor;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-color: currentColor;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: rgba(255,255,255,0.05);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body class="font-body-md text-body-md overflow-x-hidden"&gt;</p>
+<p class="p1">&lt;!-- TopNavBar --&gt;</p>
+<p class="p1">&lt;header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-container-margin py-4 bg-surface-glass backdrop-blur-xl border-b border-glass"&gt;</p>
+<p class="p1">&lt;div class="font-h2-headline text-h2-headline font-bold text-primary tracking-tighter"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>Arc Weather Market</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1">&lt;div class="hidden md:flex items-center gap-8"&gt;</p>
+<p class="p1">&lt;nav class="flex gap-6"&gt;</p>
+<p class="p1">&lt;a class="font-mono-data text-mono-data text-text-secondary hover:text-primary-container transition-colors duration-200" href="#"&gt;Markets&lt;/a&gt;</p>
+<p class="p1">&lt;a class="font-mono-data text-mono-data text-primary border-b-2 border-primary pb-1" href="#"&gt;Status&lt;/a&gt;</p>
+<p class="p1">&lt;a class="font-mono-data text-mono-data text-text-secondary hover:text-primary-container transition-colors duration-200" href="#"&gt;History&lt;/a&gt;</p>
+<p class="p1">&lt;/nav&gt;</p>
+<p class="p1">&lt;div class="flex items-center gap-4"&gt;</p>
+<p class="p1">&lt;button class="bg-surface-glass border border-glass px-4 py-2 font-mono-data text-mono-data text-text-primary rounded-lg hover:bg-surface-variant/20 transition-all active:scale-95"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>0x...4f2e</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
+<p class="p1">&lt;button class="bg-primary-container text-on-primary font-mono-data text-mono-data px-4 py-2 rounded-lg font-bold neon-glow-primary hover:brightness-110 transition-all active:scale-95"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>Connect Wallet</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="md:hidden flex gap-4"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-primary"&gt;account_balance_wallet&lt;/span&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-primary"&gt;hub&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/header&gt;</p>
+<p class="p1">&lt;!-- SideNavBar (Desktop Only) --&gt;</p>
+<p class="p1">&lt;aside class="hidden lg:flex flex-col h-screen fixed left-0 top-0 pt-24 w-64 bg-surface-glass backdrop-blur-md border-r border-glass z-40"&gt;</p>
+<p class="p1">&lt;div class="px-6 mb-8"&gt;</p>
+<p class="p1">&lt;div class="flex items-center gap-3 mb-2"&gt;</p>
+<p class="p1">&lt;div class="w-2 h-2 rounded-full bg-tertiary animate-pulse"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;span class="font-label-caps text-label-caps text-tertiary"&gt;Mainnet Active&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;h2 class="font-h2-headline text-h2-headline text-primary"&gt;Arc Network&lt;/h2&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;nav class="flex-1 px-4 space-y-2"&gt;</p>
+<p class="p1">&lt;a class="flex items-center gap-4 p-3 text-text-secondary hover:bg-surface-variant/20 transition-all group" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined"&gt;show_chart&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-body-md text-body-md"&gt;Betting&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;a class="flex items-center gap-4 p-3 text-text-secondary hover:bg-surface-variant/20 transition-all group" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined"&gt;receipt_long&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-body-md text-body-md"&gt;My Bets&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;a class="flex items-center gap-4 p-3 text-primary font-bold border-r-4 border-primary bg-primary/10 group" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined"&gt;analytics&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-body-md text-body-md"&gt;Market Status&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;/nav&gt;</p>
+<p class="p1">&lt;div class="p-4 border-t border-glass"&gt;</p>
+<p class="p1">&lt;button class="w-full bg-primary-container text-on-primary py-3 rounded font-bold hover:brightness-110 transition-all flex items-center justify-center gap-2"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined"&gt;add&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>Place New Trade</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/button&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;footer class="p-6 space-y-4"&gt;</p>
+<p class="p1">&lt;a class="flex items-center gap-3 text-text-secondary text-sm hover:text-primary transition-colors" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-sm"&gt;help&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>Support</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/a&gt;</p>
+<p class="p1">&lt;a class="flex items-center gap-3 text-text-secondary text-sm hover:text-primary transition-colors" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-sm"&gt;description&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>Docs</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/a&gt;</p>
+<p class="p1">&lt;/footer&gt;</p>
+<p class="p1">&lt;/aside&gt;</p>
+<p class="p1">&lt;!-- Main Content Canvas --&gt;</p>
+<p class="p1">&lt;main class="lg:ml-64 pt-24 pb-20 px-container-margin min-h-screen"&gt;</p>
+<p class="p1">&lt;div class="max-w-7xl mx-auto space-y-8"&gt;</p>
+<p class="p1">&lt;!-- Header Section --&gt;</p>
+<p class="p1">&lt;div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-glass pb-6"&gt;</p>
+<p class="p1">&lt;div class="animate-slide-up" style="animation-delay: 0.1s;"&gt;</p>
+<p class="p1">&lt;h1 class="font-h1-display text-h1-display text-text-primary"&gt;Market Status&lt;/h1&gt;</p>
+<p class="p1">&lt;p class="text-text-secondary font-body-lg text-body-lg"&gt;Real-time oracle verification and historical settlements.&lt;/p&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="flex items-center gap-6 font-mono-data text-mono-data animate-slide-up" style="animation-delay: 0.2s;"&gt;</p>
+<p class="p1">&lt;div class="text-right"&gt;</p>
+<p class="p1">&lt;span class="block text-xs uppercase opacity-40"&gt;Current Epoch&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-primary"&gt;#4,291&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="text-right"&gt;</p>
+<p class="p1">&lt;span class="block text-xs uppercase opacity-40"&gt;Global Volume&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-primary"&gt;$12.4M&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="grid grid-cols-1 xl:grid-cols-3 gap-8"&gt;</p>
+<p class="p1">&lt;!-- Recent Settlements Column --&gt;</p>
+<p class="p1">&lt;div class="xl:col-span-2 space-y-6"&gt;</p>
+<p class="p1">&lt;div class="flex items-center justify-between animate-slide-up" style="animation-delay: 0.3s;"&gt;</p>
+<p class="p1">&lt;h3 class="font-h3-title text-h3-title flex items-center gap-2"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-tertiary"&gt;verified&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>Recent Settlements</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/h3&gt;</p>
+<p class="p1">&lt;button class="text-primary font-label-caps text-label-caps hover:underline"&gt;View All Archive&lt;/button&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="grid grid-cols-1 md:grid-cols-2 gap-4"&gt;</p>
+<p class="p1">&lt;!-- Settlement Card 1 --&gt;</p>
+<p class="p1">&lt;div class="glass-panel p-6 rounded-xl rim-light-purple transition-transform hover:scale-[1.01] animate-slide-up" style="animation-delay: 0.4s;"&gt;</p>
+<p class="p1">&lt;div class="flex justify-between items-start mb-4"&gt;</p>
+<p class="p1">&lt;div&gt;</p>
+<p class="p1">&lt;span class="font-label-caps text-label-caps bg-surface-variant px-2 py-1 rounded text-on-surface-variant"&gt;TAIPEI STATION&lt;/span&gt;</p>
+<p class="p1">&lt;p class="text-xs text-text-secondary mt-2"&gt;Closed Dec 14, 22:00 UTC&lt;/p&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-[var(--purple-accent)]"&gt;history&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="flex items-baseline gap-2 mb-6"&gt;</p>
+<p class="p1">&lt;span class="font-h1-display text-h1-display settlement-text"&gt;26.4°C&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-text-secondary font-mono-data"&gt;Final&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="space-y-2"&gt;</p>
+<p class="p1">&lt;div class="flex justify-between text-xs font-mono-data"&gt;</p>
+<p class="p1">&lt;span class="text-text-secondary"&gt;Pool Distribution&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-primary"&gt;$42,109.00&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="w-full h-1.5 flex rounded-full overflow-hidden bg-surface-variant"&gt;</p>
+<p class="p1">&lt;div class="h-full bg-[var(--purple-accent)] animate-scale-x" style="width: 65%; animation-delay: 0.8s;"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="h-full bg-tertiary/60 animate-scale-x" style="width: 25%; animation-delay: 1s;"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="h-full bg-error-container animate-scale-x" style="width: 10%; animation-delay: 1.2s;"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="flex justify-between text-[10px] font-mono-data opacity-50"&gt;</p>
+<p class="p1">&lt;span&gt;Hot (65%)&lt;/span&gt;</p>
+<p class="p1">&lt;span&gt;Mild (25%)&lt;/span&gt;</p>
+<p class="p1">&lt;span&gt;Cool (10%)&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;!-- Settlement Card 2 --&gt;</p>
+<p class="p1">&lt;div class="glass-panel p-6 rounded-xl rim-light-purple transition-transform hover:scale-[1.01] animate-slide-up" style="animation-delay: 0.5s;"&gt;</p>
+<p class="p1">&lt;div class="flex justify-between items-start mb-4"&gt;</p>
+<p class="p1">&lt;div&gt;</p>
+<p class="p1">&lt;span class="font-label-caps text-label-caps bg-surface-variant px-2 py-1 rounded text-on-surface-variant"&gt;TOKYO SHIBUYA&lt;/span&gt;</p>
+<p class="p1">&lt;p class="text-xs text-text-secondary mt-2"&gt;Closed Dec 14, 21:00 UTC&lt;/p&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-[var(--purple-accent)]"&gt;history&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="flex items-baseline gap-2 mb-6"&gt;</p>
+<p class="p1">&lt;span class="font-h1-display text-h1-display settlement-text"&gt;14.2°C&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-text-secondary font-mono-data"&gt;Final&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="space-y-2"&gt;</p>
+<p class="p1">&lt;div class="flex justify-between text-xs font-mono-data"&gt;</p>
+<p class="p1">&lt;span class="text-text-secondary"&gt;Pool Distribution&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-primary"&gt;$18,450.00&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="w-full h-1.5 flex rounded-full overflow-hidden bg-surface-variant"&gt;</p>
+<p class="p1">&lt;div class="h-full bg-[var(--purple-accent)] animate-scale-x" style="width: 20%; animation-delay: 0.9s;"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="h-full bg-tertiary/60 animate-scale-x" style="width: 70%; animation-delay: 1.1s;"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="h-full bg-error-container animate-scale-x" style="width: 10%; animation-delay: 1.3s;"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="flex justify-between text-[10px] font-mono-data opacity-50"&gt;</p>
+<p class="p1">&lt;span&gt;Hot (20%)&lt;/span&gt;</p>
+<p class="p1">&lt;span&gt;Mild (70%)&lt;/span&gt;</p>
+<p class="p1">&lt;span&gt;Cool (10%)&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;!-- Market Volume Trends --&gt;</p>
+<p class="p1">&lt;div class="glass-panel p-8 rounded-xl relative overflow-hidden animate-slide-up" style="animation-delay: 0.6s;"&gt;</p>
+<p class="p1">&lt;div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[80px]"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;h4 class="font-h3-title text-h3-title mb-8"&gt;System Confidence Index&lt;/h4&gt;</p>
+<p class="p1">&lt;div class="flex flex-col md:flex-row gap-12 items-center"&gt;</p>
+<p class="p1">&lt;div class="relative w-40 h-40"&gt;</p>
+<p class="p1">&lt;svg class="w-full h-full -rotate-90" viewbox="0 0 100 100"&gt;</p>
+<p class="p1">&lt;circle cx="50" cy="50" fill="none" r="45" stroke="rgba(255,255,255,0.05)" stroke-width="8"&gt;&lt;/circle&gt;</p>
+<p class="p1">&lt;circle class="animate-scale-x" cx="50" cy="50" fill="none" r="45" stroke="url(#cyan-grad)" stroke-dasharray="283" stroke-dashoffset="28" stroke-linecap="round" stroke-width="8" style="animation-delay: 0.8s;"&gt;&lt;/circle&gt;</p>
+<p class="p1">&lt;defs&gt;</p>
+<p class="p1">&lt;lineargradient id="cyan-grad" x1="0%" x2="100%" y1="0%" y2="100%"&gt;</p>
+<p class="p1">&lt;stop offset="0%" style="stop-color:#00D4FF;stop-opacity:1"&gt;&lt;/stop&gt;</p>
+<p class="p1">&lt;stop offset="100%" style="stop-color:#00ff88;stop-opacity:1"&gt;&lt;/stop&gt;</p>
+<p class="p1">&lt;/lineargradient&gt;</p>
+<p class="p1">&lt;/defs&gt;</p>
+<p class="p1">&lt;/svg&gt;</p>
+<p class="p1">&lt;div class="absolute inset-0 flex flex-col items-center justify-center"&gt;</p>
+<p class="p1">&lt;span class="text-3xl font-bold text-primary"&gt;92%&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-[10px] uppercase tracking-widest opacity-40"&gt;Sync&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="flex-1 grid grid-cols-2 gap-4"&gt;</p>
+<p class="p1">&lt;div class="p-4 bg-surface-variant/30 border border-glass rounded hover:bg-surface-variant/50 transition-colors group"&gt;</p>
+<p class="p1">&lt;span class="block text-[10px] uppercase opacity-50 mb-1 group-hover:text-primary transition-colors"&gt;Latency&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-xl font-mono-data text-tertiary"&gt;42ms&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="p-4 bg-surface-variant/30 border border-glass rounded hover:bg-surface-variant/50 transition-colors group"&gt;</p>
+<p class="p1">&lt;span class="block text-[10px] uppercase opacity-50 mb-1 group-hover:text-primary transition-colors"&gt;Oracle Consensus&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-xl font-mono-data text-primary"&gt;High&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="p-4 bg-surface-variant/30 border border-glass rounded hover:bg-surface-variant/50 transition-colors group"&gt;</p>
+<p class="p1">&lt;span class="block text-[10px] uppercase opacity-50 mb-1 group-hover:text-primary transition-colors"&gt;Total Stakes&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-xl font-mono-data"&gt;841.2k ARC&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="p-4 bg-surface-variant/30 border border-glass rounded hover:bg-surface-variant/50 transition-colors group"&gt;</p>
+<p class="p1">&lt;span class="block text-[10px] uppercase opacity-50 mb-1 group-hover:text-primary transition-colors"&gt;Validators&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-xl font-mono-data"&gt;1,024&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;!-- Oracle Info Panel Column --&gt;</p>
+<p class="p1">&lt;div class="space-y-6"&gt;</p>
+<p class="p1">&lt;h3 class="font-h3-title text-h3-title flex items-center gap-2 animate-slide-up" style="animation-delay: 0.35s;"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-primary"&gt;hub&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>Oracle Network</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/h3&gt;</p>
+<p class="p1">&lt;div class="glass-panel rounded-2xl overflow-hidden animate-slide-up" style="animation-delay: 0.45s;"&gt;</p>
+<p class="p1">&lt;div class="relative h-32 bg-surface-container overflow-hidden"&gt;</p>
+<p class="p1">&lt;img class="w-full h-full object-cover opacity-30 grayscale hover:grayscale-0 transition-all duration-700" data-alt="Oracle node infrastructure" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC76RnfjLLt3x3SI-cjdPFDXZ1M3vS3higtCeVS06qXIIyxUoMHzSI1lo_I9jhktxv86TDgbhO0QfsouluHg5C37EykklcdznhcMrqF9vpm0ARp3e6FB6li7Ak4E1pZsGA9vDcBZ4kBo8B2qq3oQfv4vH1Z-rxsP4jMOmKclf-gO6NGmGzl6PPw1SpS2t-uPvHWhS2V_FG90SwfRYFHWysYxWE72alSuP5v1iEQBdE9fQGiDgetz53mWE1zIMysmZPiNUV3jn6cf_Sk"/&gt;</p>
+<p class="p1">&lt;div class="absolute inset-0 bg-gradient-to-t from-surface-dim to-transparent"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="absolute bottom-4 left-6 flex items-center gap-3"&gt;</p>
+<p class="p1">&lt;div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center neon-glow-primary"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-on-primary"&gt;radar&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div&gt;</p>
+<p class="p1">&lt;p class="font-bold text-primary"&gt;Oracle Node Status&lt;/p&gt;</p>
+<p class="p1">&lt;p class="text-xs text-tertiary"&gt;Operational&lt;/p&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="p-6 space-y-6"&gt;</p>
+<p class="p1">&lt;div class="space-y-4"&gt;</p>
+<p class="p1">&lt;div class="flex justify-between items-center group cursor-pointer"&gt;</p>
+<p class="p1">&lt;span class="text-xs text-text-secondary"&gt;Contract Address&lt;/span&gt;</p>
+<p class="p1">&lt;div class="flex items-center gap-2 bg-surface-variant/40 px-3 py-1.5 rounded font-mono-data text-primary group-hover:bg-primary/10 transition-colors"&gt;</p>
+<p class="p1">&lt;span&gt;0x...4f2e&lt;/span&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-sm"&gt;content_copy&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="flex justify-between items-center"&gt;</p>
+<p class="p1">&lt;span class="text-xs text-text-secondary"&gt;Data Source&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-mono-data"&gt;Tempo Weather API&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="flex flex-wrap gap-2 pt-4 border-t border-glass"&gt;</p>
+<p class="p1">&lt;span class="badge-glow bg-primary/10 text-primary text-[10px] px-2 py-1 rounded-full font-bold border border-primary/20 transition-all cursor-default"&gt;Arc Network Native&lt;/span&gt;</p>
+<p class="p1">&lt;span class="badge-glow bg-tertiary/10 text-tertiary text-[10px] px-2 py-1 rounded-full font-bold border border-tertiary/20 transition-all cursor-default"&gt;Zero-Knowledge Proofs&lt;/span&gt;</p>
+<p class="p1">&lt;span class="badge-glow bg-surface-variant text-on-surface-variant text-[10px] px-2 py-1 rounded-full font-bold border border-glass transition-all cursor-default"&gt;Mainnet Active&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="p-4 bg-surface-container-low rounded-xl border border-glass space-y-3"&gt;</p>
+<p class="p1">&lt;p class="text-xs text-text-secondary leading-relaxed"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>The Arc Weather Oracle utilizes ZK-Rollups to aggregate multi-sourced meteorological data points, ensuring tamper-proof settlement for all prediction markets.</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;/p&gt;</p>
+<p class="p1">&lt;a class="text-xs text-primary font-bold flex items-center gap-1 hover:gap-2 transition-all" href="#"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>Verifiable Audit Logs</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>&lt;span class="material-symbols-outlined text-xs"&gt;arrow_forward&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;!-- Secondary Map Card --&gt;</p>
+<p class="p1">&lt;div class="glass-panel p-4 rounded-2xl animate-slide-up" style="animation-delay: 0.55s;"&gt;</p>
+<p class="p1">&lt;div class="h-48 rounded-xl overflow-hidden relative mb-4"&gt;</p>
+<p class="p1">&lt;img class="w-full h-full object-cover" data-alt="Dark mode satellite weather map" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiN_LMZpws7a741SPiLT2FLI0bh6wgPkp7AvKFtuvRP6tKZyadVraou3voQ2rx7z9qHRrGsn6Bt73oWjv-M1T7P-k6S6culyGDybTQHMRtcXVe7-oyExuDfMSVheaiJ2g6MNVJNgeJPalV9g4e-PHg48CtLsk7SRrXKTLDTo8RAS5R3k7wtC3R5dNuZplkqYedR3O23aexsl_KMLLgPyjsEqscfbWd5bL7APp8RKjARVy-iNueX4Xoz0inBwFGtIqBYH0wN-n_yOCj"/&gt;</p>
+<p class="p1">&lt;div class="absolute inset-0 bg-primary/10 pointer-events-none"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="absolute top-4 right-4 bg-surface-dim/80 backdrop-blur px-3 py-1 rounded-full border border-glass flex items-center gap-2"&gt;</p>
+<p class="p1">&lt;div class="w-2 h-2 rounded-full bg-danger-alert animate-ping"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;span class="text-[10px] font-bold"&gt;LIVE RADAR&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="flex justify-between items-center"&gt;</p>
+<p class="p1">&lt;span class="font-mono-data text-xs"&gt;Active Markets Near You&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-primary font-bold text-xs"&gt;4 Active&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/main&gt;</p>
+<p class="p1">&lt;!-- BottomNavBar (Mobile Only) --&gt;</p>
+<p class="p1">&lt;nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center py-3 lg:hidden bg-surface-glass backdrop-blur-lg border-t border-glass shadow-[0_-4px_20px_rgba(0,212,255,0.1)] rounded-t-xl"&gt;</p>
+<p class="p1">&lt;a class="flex flex-col items-center justify-center text-text-secondary opacity-60 hover:opacity-100 transition-opacity" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined"&gt;location_on&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-label-caps text-label-caps mt-1"&gt;Taipei&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;a class="flex flex-col items-center justify-center text-text-secondary opacity-60 hover:opacity-100 transition-opacity" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined"&gt;location_on&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-label-caps text-label-caps mt-1"&gt;Tokyo&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;a class="flex flex-col items-center justify-center text-primary drop-shadow-[0_0_8px_rgba(60,215,255,0.6)] scale-110" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined"&gt;location_on&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-label-caps text-label-caps mt-1"&gt;Bangkok&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;a class="flex flex-col items-center justify-center text-text-secondary opacity-60 hover:opacity-100 transition-opacity" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined"&gt;location_on&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-label-caps text-label-caps mt-1"&gt;Seoul&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;/nav&gt;</p>
+<p class="p1">&lt;!-- Footer --&gt;</p>
+<p class="p1">&lt;footer class="w-full flex justify-between items-center px-container-margin py-2 text-[10px] bg-surface-dim border-t border-outline-variant/30 font-mono-data text-mono-data"&gt;</p>
+<p class="p1">&lt;div class="text-on-surface-variant font-label-caps text-label-caps"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>Arc Weather Oracle v2.4</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1">&lt;div class="flex gap-4"&gt;</p>
+<p class="p1">&lt;span class="text-tertiary font-bold"&gt;Oracle Active&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-text-secondary hover:text-primary transition-colors cursor-pointer"&gt;System Status&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-text-secondary hover:text-primary transition-colors cursor-pointer"&gt;Terms&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/footer&gt;</p>
+<p class="p1">&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Micro-interactions for chart elements or hover states</p>
+<p class="p1"><span class="Apple-converted-space">    </span>document.querySelectorAll('.glass-panel').forEach(panel =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>panel.addEventListener('mousemove', (e) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const rect = panel.getBoundingClientRect();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const x = e.clientX - rect.left;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const y = e.clientY - rect.top;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>panel.style.setProperty('--mouse-x', `${x}px`);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>panel.style.setProperty('--mouse-y', `${y}px`);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Intersection Observer to trigger entrance animations</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const observerOptions = {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>threshold: 0.1</p>
+<p class="p1"><span class="Apple-converted-space">    </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>const observer = new IntersectionObserver((entries) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>entries.forEach(entry =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (entry.isIntersecting) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>entry.target.style.animationPlayState = 'running';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>observer.unobserve(entry.target);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}, observerOptions);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>document.querySelectorAll('.animate-slide-up, .animate-scale-x').forEach(el =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>el.style.animationPlayState = 'paused';</p>
+<p class="p1"><span class="Apple-converted-space">        </span>observer.observe(el);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p1">&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;&lt;/html&gt;</p>
+</body>
+</html>

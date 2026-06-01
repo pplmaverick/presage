@@ -1,0 +1,528 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2685.6">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;html class="dark" lang="en"&gt;&lt;head&gt;</p>
+<p class="p1">&lt;meta charset="utf-8"/&gt;</p>
+<p class="p1">&lt;meta content="width=device-width, initial-scale=1.0" name="viewport"/&gt;</p>
+<p class="p1">&lt;title&gt;Arc Weather Market | Taipei&lt;/title&gt;</p>
+<p class="p1">&lt;script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"&gt;&lt;/script&gt;</p>
+<p class="p1">&lt;link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;amp;family=Inter:wght@400;500;600&amp;amp;display=swap" rel="stylesheet"/&gt;</p>
+<p class="p1">&lt;link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;amp;display=swap" rel="stylesheet"/&gt;</p>
+<p class="p1">&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>body {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #0A0A0F;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-image:<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),</p>
+<p class="p1"><span class="Apple-converted-space">                </span>linear-gradient(90px, rgba(255, 255, 255, 0.02) 1px, transparent 1px);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-size: 32px 32px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #FFFFFF;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.glass-card {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>backdrop-filter: blur(12px);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(255, 255, 255, 0.05);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: 1px solid rgba(255, 255, 255, 0.1);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: relative;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>overflow: hidden;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* Scanline Shimmer Effect */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.glass-card::before {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>content: '';</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>top: -100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>left: -100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 300%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 300%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: linear-gradient(</p>
+<p class="p1"><span class="Apple-converted-space">                </span>45deg,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>transparent 45%,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>rgba(60, 215, 255, 0.03) 48%,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>rgba(60, 215, 255, 0.07) 50%,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>rgba(60, 215, 255, 0.03) 52%,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>transparent 55%</p>
+<p class="p1"><span class="Apple-converted-space">            </span>);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transform: rotate(-45deg);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>animation: shimmer 8s linear infinite;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>pointer-events: none;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@keyframes shimmer {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>0% { transform: translateX(-50%) translateY(-50%) rotate(-45deg); }</p>
+<p class="p1"><span class="Apple-converted-space">            </span>100% { transform: translateX(50%) translateY(50%) rotate(-45deg); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.glow-cyan {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.glow-text-cyan {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.6));</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@keyframes pulse-dot {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>0%, 100% { opacity: 1; transform: scale(1); }</p>
+<p class="p1"><span class="Apple-converted-space">            </span>50% { opacity: 0.4; transform: scale(1.4); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.animate-pulse-dot {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@keyframes float {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>0%, 100% { transform: translateY(0px); }</p>
+<p class="p1"><span class="Apple-converted-space">            </span>50% { transform: translateY(-6px); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.animate-float {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>animation: float 5s ease-in-out infinite;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.city-tab-glow:hover span {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-shadow: 0 0 10px rgba(168, 232, 255, 0.5);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.btn-glow:hover {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.no-scrollbar::-webkit-scrollbar {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: none;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.no-scrollbar {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>-ms-overflow-style: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>scrollbar-width: none;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
+<p class="p1">&lt;script id="tailwind-config"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>tailwind.config = {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>darkMode: "class",</p>
+<p class="p1"><span class="Apple-converted-space">        </span>theme: {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>extend: {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>"colors": {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"surface-variant": "#35343a",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"tertiary-container": "#00df76",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-tertiary-fixed": "#00210c",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"tertiary": "#00ff88",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"surface-tint": "#3cd7ff",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"primary-fixed-dim": "#3cd7ff",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"error-container": "#93000a",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"text-secondary": "rgba(255, 255, 255, 0.5)",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"warning-locked": "#FFB800",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"inverse-on-surface": "#303036",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"surface-container-lowest": "#0e0e13",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"surface-dim": "#131318",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"primary": "#a8e8ff",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-secondary": "#2e009c",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-tertiary-fixed-variant": "#005228",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"secondary-container": "#4720ca",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"text-primary": "#FFFFFF",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"border-glass": "rgba(255, 255, 255, 0.10)",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"surface-glass": "rgba(255, 255, 255, 0.05)",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"outline": "#859398",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-primary-container": "#00586b",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-error-container": "#ffdad6",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-secondary-container": "#baaeff",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"tertiary-fixed": "#60ff99",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"tertiary-fixed-dim": "#00e479",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-secondary-fixed": "#1a0063",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"inverse-primary": "#00677e",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-surface-variant": "#bbc9cf",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"primary-container": "#00d4ff",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-primary-fixed": "#001f27",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"danger-alert": "#FF4B4B",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"surface-bright": "#39383e",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-error": "#690005",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"inverse-surface": "#e4e1e9",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"secondary-fixed-dim": "#c9bfff",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-surface": "#e4e1e9",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"surface-container-highest": "#35343a",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-primary": "#003642",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"surface-container-high": "#2a292f",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-primary-fixed-variant": "#004e5f",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"surface-container": "#1f1f25",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-background": "#e4e1e9",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-tertiary": "#003919",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"secondary": "#c9bfff",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-tertiary-container": "#005d2d",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"surface-container-low": "#1b1b20",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"secondary-fixed": "#e5deff",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"on-secondary-fixed-variant": "#441cc8",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"surface": "#131318",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"primary-fixed": "#b4ebff",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"outline-variant": "#3c494e",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"error": "#ffb4ab",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"background": "#131318"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">            </span>"borderRadius": {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"DEFAULT": "0.125rem",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"lg": "0.25rem",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"xl": "0.5rem",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"full": "0.75rem"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">            </span>"spacing": {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"container-margin": "24px",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"unit": "4px",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"grid-size": "32px",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"gutter": "16px"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">            </span>"fontFamily": {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"h2-headline": ["Space Grotesk"],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"h3-title": ["Space Grotesk"],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"body-sm": ["Inter"],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"body-lg": ["Inter"],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"h2-mobile": ["Space Grotesk"],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"body-md": ["Inter"],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"label-caps": ["Inter"],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"h1-display": ["Space Grotesk"],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"mono-data": ["Space Grotesk"]</p>
+<p class="p1"><span class="Apple-converted-space">            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">            </span>"fontSize": {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"h2-headline": ["32px", {"lineHeight": "1.2", "fontWeight": "600"}],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"h3-title": ["20px", {"lineHeight": "1.4", "fontWeight": "500"}],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"h2-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "600"}],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"h1-display": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"mono-data": ["14px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "400"}]</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>},</p>
+<p class="p1"><span class="Apple-converted-space">        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body class="antialiased min-h-screen pb-24 lg:pb-0 font-body-md text-body-md text-on-background bg-background"&gt;</p>
+<p class="p1">&lt;!-- TopNavBar --&gt;</p>
+<p class="p1">&lt;nav class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-container-margin py-4 bg-surface-glass backdrop-blur-xl border-b border-glass"&gt;</p>
+<p class="p1">&lt;div class="flex items-center gap-8"&gt;</p>
+<p class="p1">&lt;span class="font-h2-headline text-h2-headline font-bold text-primary tracking-tighter"&gt;Arc Weather Market&lt;/span&gt;</p>
+<p class="p1">&lt;div class="hidden md:flex gap-6"&gt;</p>
+<p class="p1">&lt;a class="font-h3-title text-h3-title text-primary border-b-2 border-primary pb-1" href="#"&gt;Betting&lt;/a&gt;</p>
+<p class="p1">&lt;a class="font-h3-title text-h3-title text-text-secondary hover:text-primary-container transition-colors duration-200" href="#"&gt;My Bets&lt;/a&gt;</p>
+<p class="p1">&lt;a class="font-h3-title text-h3-title text-text-secondary hover:text-primary-container transition-colors duration-200" href="#"&gt;Market Status&lt;/a&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="flex items-center gap-4"&gt;</p>
+<p class="p1">&lt;div class="hidden sm:flex flex-col items-end mr-2"&gt;</p>
+<p class="p1">&lt;span class="font-mono-data text-mono-data text-primary"&gt;0x...4f2e&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-[10px] uppercase tracking-widest text-tertiary"&gt;Mainnet Active&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;button class="bg-primary-container text-on-primary-container px-4 py-2 font-mono-data text-sm rounded-lg font-bold glow-cyan btn-glow active:scale-95 transition-all"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>Connect Wallet</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/button&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-primary cursor-pointer hover:rotate-90 transition-transform duration-500"&gt;hub&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/nav&gt;</p>
+<p class="p1">&lt;!-- SideNavBar (Desktop Only) --&gt;</p>
+<p class="p1">&lt;aside class="hidden lg:flex flex-col h-screen fixed left-0 top-0 pt-24 w-64 bg-surface-glass backdrop-blur-md border-r border-glass z-40"&gt;</p>
+<p class="p1">&lt;div class="px-6 mb-8"&gt;</p>
+<p class="p1">&lt;div class="flex items-center gap-3 p-3 rounded-lg bg-surface-variant/20"&gt;</p>
+<p class="p1">&lt;div class="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-tertiary"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div&gt;</p>
+<p class="p1">&lt;p class="font-label-caps text-label-caps text-primary"&gt;Arc Network&lt;/p&gt;</p>
+<p class="p1">&lt;p class="text-[10px] text-text-secondary"&gt;User Wallet&lt;/p&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;nav class="flex-1 px-4 space-y-2"&gt;</p>
+<p class="p1">&lt;a class="flex items-center gap-3 p-3 text-primary font-bold border-r-4 border-primary bg-primary/10 transition-all translate-x-1" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined"&gt;show_chart&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-body-md text-body-md"&gt;Betting&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;a class="flex items-center gap-3 p-3 text-text-secondary hover:bg-surface-variant/20 transition-all" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined"&gt;receipt_long&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-body-md text-body-md"&gt;My Bets&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;a class="flex items-center gap-3 p-3 text-text-secondary hover:bg-surface-variant/20 transition-all" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined"&gt;analytics&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-body-md text-body-md"&gt;Market Status&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;div class="pt-8 px-2"&gt;</p>
+<p class="p1">&lt;button class="w-full py-3 bg-transparent border border-primary text-primary font-bold rounded hover:bg-primary/10 btn-glow transition-all"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>Place New Trade</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/nav&gt;</p>
+<p class="p1">&lt;footer class="p-4 space-y-2 border-t border-glass"&gt;</p>
+<p class="p1">&lt;a class="flex items-center gap-3 p-2 text-text-secondary hover:text-primary transition-all" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-sm"&gt;help&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-xs font-mono-data"&gt;Support&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;a class="flex items-center gap-3 p-2 text-text-secondary hover:text-primary transition-all" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-sm"&gt;description&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-xs font-mono-data"&gt;Docs&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;/footer&gt;</p>
+<p class="p1">&lt;/aside&gt;</p>
+<p class="p1">&lt;!-- Main Content Canvas --&gt;</p>
+<p class="p1">&lt;main class="lg:ml-64 pt-24 px-container-margin max-w-7xl mx-auto"&gt;</p>
+<p class="p1">&lt;!-- City Tab Bar --&gt;</p>
+<p class="p1">&lt;div class="flex items-center gap-8 mb-8 overflow-x-auto no-scrollbar"&gt;</p>
+<p class="p1">&lt;button class="flex flex-col items-start min-w-fit group city-tab-glow"&gt;</p>
+<p class="p1">&lt;span class="font-h3-title text-h3-title text-primary drop-shadow-[0_0_8px_rgba(60,215,255,0.6)]"&gt;Taipei&lt;/span&gt;</p>
+<p class="p1">&lt;div class="h-[2px] w-full bg-primary mt-1 glow-cyan"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/button&gt;</p>
+<p class="p1">&lt;button class="flex flex-col items-start min-w-fit group opacity-60 hover:opacity-100 transition-all city-tab-glow"&gt;</p>
+<p class="p1">&lt;span class="font-h3-title text-h3-title text-text-secondary group-hover:text-primary transition-colors"&gt;Tokyo&lt;/span&gt;</p>
+<p class="p1">&lt;div class="h-[2px] w-0 group-hover:w-full bg-primary mt-1 transition-all duration-300"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/button&gt;</p>
+<p class="p1">&lt;button class="flex flex-col items-start min-w-fit group opacity-60 hover:opacity-100 transition-all city-tab-glow"&gt;</p>
+<p class="p1">&lt;span class="font-h3-title text-h3-title text-text-secondary group-hover:text-primary transition-colors"&gt;Bangkok&lt;/span&gt;</p>
+<p class="p1">&lt;div class="h-[2px] w-0 group-hover:w-full bg-primary mt-1 transition-all duration-300"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/button&gt;</p>
+<p class="p1">&lt;button class="flex flex-col items-start min-w-fit group opacity-60 hover:opacity-100 transition-all city-tab-glow"&gt;</p>
+<p class="p1">&lt;span class="font-h3-title text-h3-title text-text-secondary group-hover:text-primary transition-colors"&gt;Seoul&lt;/span&gt;</p>
+<p class="p1">&lt;div class="h-[2px] w-0 group-hover:w-full bg-primary mt-1 transition-all duration-300"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/button&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;!-- Live Weather Header Card --&gt;</p>
+<p class="p1">&lt;div class="glass-card animate-float rounded-xl p-8 mb-8 grid grid-cols-1 md:grid-cols-3 items-center gap-8 relative"&gt;</p>
+<p class="p1">&lt;div class="absolute top-0 right-0 p-4 z-10"&gt;</p>
+<p class="p1">&lt;div class="flex items-center gap-2"&gt;</p>
+<p class="p1">&lt;span class="w-2 h-2 rounded-full bg-tertiary animate-pulse-dot shadow-[0_0_8px_#00ff88]"&gt;&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-label-caps text-label-caps text-tertiary"&gt;Oracle Active&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="flex flex-col"&gt;</p>
+<p class="p1">&lt;h1 class="font-h1-display text-h1-display tracking-tight text-white"&gt;Taipei&lt;/h1&gt;</p>
+<p class="p1">&lt;p class="font-mono-data text-mono-data text-text-secondary"&gt;OCT 24, 2024 • 10:42 UTC&lt;/p&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="flex justify-center md:justify-center items-baseline gap-2"&gt;</p>
+<p class="p1">&lt;span class="font-h1-display text-[80px] font-bold text-primary-container glow-text-cyan leading-none"&gt;28&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-h2-headline text-h2-headline text-primary-container glow-text-cyan"&gt;°C&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="flex flex-col md:items-end gap-4"&gt;</p>
+<p class="p1">&lt;div class="flex items-center gap-12 md:gap-8"&gt;</p>
+<p class="p1">&lt;div class="text-right"&gt;</p>
+<p class="p1">&lt;p class="font-label-caps text-label-caps text-text-secondary"&gt;Humidity&lt;/p&gt;</p>
+<p class="p1">&lt;p class="font-h3-title text-h3-title text-white"&gt;65%&lt;/p&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="text-right"&gt;</p>
+<p class="p1">&lt;p class="font-label-caps text-label-caps text-text-secondary"&gt;Rain Chance&lt;/p&gt;</p>
+<p class="p1">&lt;p class="font-h3-title text-h3-title text-white"&gt;10%&lt;/p&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="w-full md:w-48 h-1 bg-white/10 rounded-full overflow-hidden"&gt;</p>
+<p class="p1">&lt;div class="h-full bg-gradient-to-r from-primary to-tertiary w-2/3"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;!-- Market Card Section --&gt;</p>
+<p class="p1">&lt;section&gt;</p>
+<p class="p1">&lt;div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4"&gt;</p>
+<p class="p1">&lt;div&gt;</p>
+<p class="p1">&lt;h2 class="font-h2-headline text-h2-headline text-white mb-1"&gt;Temperature Prediction - Taipei&lt;/h2&gt;</p>
+<p class="p1">&lt;p class="font-body-md text-body-md text-text-secondary"&gt;Settles at &lt;span class="text-primary font-mono-data"&gt;12:00 UTC, Oct 24&lt;/span&gt;&lt;/p&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="flex items-center gap-4"&gt;</p>
+<p class="p1">&lt;span class="px-3 py-1 rounded bg-tertiary/10 border border-tertiary/30 text-tertiary font-label-caps text-label-caps tracking-widest shadow-[0_0_10px_rgba(0,255,136,0.2)]"&gt;OPEN&lt;/span&gt;</p>
+<p class="p1">&lt;div class="text-right"&gt;</p>
+<p class="p1">&lt;p class="text-[10px] text-text-secondary uppercase"&gt;Total Pool&lt;/p&gt;</p>
+<p class="p1">&lt;p class="font-h3-title text-h3-title text-white"&gt;45,000 &lt;span class="text-primary-container font-mono-data text-sm"&gt;USDC&lt;/span&gt;&lt;/p&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="space-y-4"&gt;</p>
+<p class="p1">&lt;!-- Bucket Row 1 --&gt;</p>
+<p class="p1">&lt;div class="glass-card group hover:bg-white/[0.08] transition-all duration-300 rounded-lg p-5 flex flex-col md:flex-row items-center gap-6"&gt;</p>
+<p class="p1">&lt;div class="w-full md:w-32"&gt;</p>
+<p class="p1">&lt;span class="font-h3-title text-h3-title text-white"&gt;&amp;lt; 25°C&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="flex-1 w-full"&gt;</p>
+<p class="p1">&lt;div class="flex justify-between items-center mb-2"&gt;</p>
+<p class="p1">&lt;span class="font-mono-data text-mono-data text-text-secondary"&gt;12% Share&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-mono-data text-mono-data text-primary"&gt;5,400 USDC&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="w-full h-[6px] bg-white/5 rounded-full overflow-hidden"&gt;</p>
+<p class="p1">&lt;div class="h-full bg-primary glow-cyan transition-all duration-1000" style="width: 12%;"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="w-full md:w-auto"&gt;</p>
+<p class="p1">&lt;button class="w-full md:w-32 py-3 border border-primary text-primary font-bold rounded hover:bg-primary hover:text-black btn-glow transition-all active:scale-95"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>Bet</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/button&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;!-- Bucket Row 2 --&gt;</p>
+<p class="p1">&lt;div class="glass-card group hover:bg-white/[0.08] transition-all duration-300 rounded-lg p-5 flex flex-col md:flex-row items-center gap-6"&gt;</p>
+<p class="p1">&lt;div class="w-full md:w-32"&gt;</p>
+<p class="p1">&lt;span class="font-h3-title text-h3-title text-white"&gt;25-27°C&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="flex-1 w-full"&gt;</p>
+<p class="p1">&lt;div class="flex justify-between items-center mb-2"&gt;</p>
+<p class="p1">&lt;span class="font-mono-data text-mono-data text-text-secondary"&gt;28% Share&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-mono-data text-mono-data text-primary"&gt;12,600 USDC&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="w-full h-[6px] bg-white/5 rounded-full overflow-hidden"&gt;</p>
+<p class="p1">&lt;div class="h-full bg-primary glow-cyan transition-all duration-1000" style="width: 28%;"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="w-full md:w-auto"&gt;</p>
+<p class="p1">&lt;button class="w-full md:w-32 py-3 border border-primary text-primary font-bold rounded hover:bg-primary hover:text-black btn-glow transition-all active:scale-95"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>Bet</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/button&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;!-- Bucket Row 3 (Active Style Hint) --&gt;</p>
+<p class="p1">&lt;div class="glass-card group bg-primary/10 border-primary/40 transition-all duration-300 rounded-lg p-5 flex flex-col md:flex-row items-center gap-6"&gt;</p>
+<p class="p1">&lt;div class="w-full md:w-32"&gt;</p>
+<p class="p1">&lt;span class="font-h3-title text-h3-title text-white"&gt;27-29°C&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="flex-1 w-full"&gt;</p>
+<p class="p1">&lt;div class="flex justify-between items-center mb-2"&gt;</p>
+<p class="p1">&lt;span class="font-mono-data text-mono-data text-primary-container"&gt;45% Share (Market Lead)&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-mono-data text-mono-data text-primary"&gt;20,250 USDC&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="w-full h-[6px] bg-white/5 rounded-full overflow-hidden"&gt;</p>
+<p class="p1">&lt;div class="h-full bg-primary glow-cyan transition-all duration-1000" style="width: 45%;"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="w-full md:w-auto"&gt;</p>
+<p class="p1">&lt;button class="w-full md:w-32 py-3 bg-primary text-black font-bold rounded glow-cyan btn-glow active:scale-95"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>Bet</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/button&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;!-- Bucket Row 4 --&gt;</p>
+<p class="p1">&lt;div class="glass-card group hover:bg-white/[0.08] transition-all duration-300 rounded-lg p-5 flex flex-col md:flex-row items-center gap-6"&gt;</p>
+<p class="p1">&lt;div class="w-full md:w-32"&gt;</p>
+<p class="p1">&lt;span class="font-h3-title text-h3-title text-white"&gt;&amp;gt; 29°C&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="flex-1 w-full"&gt;</p>
+<p class="p1">&lt;div class="flex justify-between items-center mb-2"&gt;</p>
+<p class="p1">&lt;span class="font-mono-data text-mono-data text-text-secondary"&gt;15% Share&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-mono-data text-mono-data text-primary"&gt;6,750 USDC&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="w-full h-[6px] bg-white/5 rounded-full overflow-hidden"&gt;</p>
+<p class="p1">&lt;div class="h-full bg-primary glow-cyan transition-all duration-1000" style="width: 15%;"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="w-full md:w-auto"&gt;</p>
+<p class="p1">&lt;button class="w-full md:w-32 py-3 border border-primary text-primary font-bold rounded hover:bg-primary hover:text-black btn-glow transition-all active:scale-95"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>Bet</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/button&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/section&gt;</p>
+<p class="p1">&lt;!-- Additional Data Visualization Card (Bento Style) --&gt;</p>
+<p class="p1">&lt;section class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 mb-12"&gt;</p>
+<p class="p1">&lt;div class="glass-card rounded-xl p-6"&gt;</p>
+<p class="p1">&lt;h4 class="font-label-caps text-label-caps text-text-secondary mb-4 flex items-center gap-2"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-sm"&gt;timeline&lt;/span&gt; HISTORICAL TEMPERATURE TREND</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/h4&gt;</p>
+<p class="p1">&lt;div class="relative h-48 w-full"&gt;</p>
+<p class="p1">&lt;!-- Faux Chart with CSS --&gt;</p>
+<p class="p1">&lt;div class="absolute inset-0 flex items-end justify-between px-2"&gt;</p>
+<p class="p1">&lt;div class="w-1/12 bg-primary/20 rounded-t h-[40%] hover:bg-primary/40 transition-all"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="w-1/12 bg-primary/20 rounded-t h-[45%] hover:bg-primary/40 transition-all"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="w-1/12 bg-primary/30 rounded-t h-[60%] hover:bg-primary/50 transition-all"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="w-1/12 bg-primary/40 rounded-t h-[55%] hover:bg-primary/60 transition-all"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="w-1/12 bg-primary/20 rounded-t h-[40%] hover:bg-primary/40 transition-all"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="w-1/12 bg-primary/50 rounded-t h-[75%] border-t-2 border-primary hover:bg-primary/70 transition-all"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="w-1/12 bg-primary/30 rounded-t h-[65%] hover:bg-primary/50 transition-all"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="w-1/12 bg-primary/20 rounded-t h-[50%] hover:bg-primary/40 transition-all"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="w-1/12 bg-primary/10 rounded-t h-[30%] hover:bg-primary/30 transition-all"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="w-1/12 bg-primary/20 rounded-t h-[40%] hover:bg-primary/40 transition-all"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="w-1/12 bg-primary/20 rounded-t h-[45%] hover:bg-primary/40 transition-all"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="w-1/12 bg-primary/20 rounded-t h-[42%] hover:bg-primary/40 transition-all"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="glass-card rounded-xl p-6 flex flex-col justify-between"&gt;</p>
+<p class="p1">&lt;div&gt;</p>
+<p class="p1">&lt;h4 class="font-label-caps text-label-caps text-text-secondary mb-4 flex items-center gap-2"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined text-sm"&gt;token&lt;/span&gt; TOP LIQUIDITY PROVIDERS</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/h4&gt;</p>
+<p class="p1">&lt;ul class="space-y-3"&gt;</p>
+<p class="p1">&lt;li class="flex justify-between items-center text-xs group cursor-default"&gt;</p>
+<p class="p1">&lt;span class="font-mono-data text-white group-hover:text-primary transition-colors"&gt;0x882...e9a1&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-tertiary"&gt;12,400 USDC&lt;/span&gt;</p>
+<p class="p1">&lt;/li&gt;</p>
+<p class="p1">&lt;li class="flex justify-between items-center text-xs group cursor-default"&gt;</p>
+<p class="p1">&lt;span class="font-mono-data text-white group-hover:text-primary transition-colors"&gt;0x21a...f002&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-tertiary"&gt;8,210 USDC&lt;/span&gt;</p>
+<p class="p1">&lt;/li&gt;</p>
+<p class="p1">&lt;li class="flex justify-between items-center text-xs group cursor-default"&gt;</p>
+<p class="p1">&lt;span class="font-mono-data text-white group-hover:text-primary transition-colors"&gt;0xccc...33b1&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-tertiary"&gt;4,550 USDC&lt;/span&gt;</p>
+<p class="p1">&lt;/li&gt;</p>
+<p class="p1">&lt;/ul&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;button class="mt-4 w-full py-2 bg-surface-variant/20 border border-white/10 rounded text-xs font-mono-data hover:bg-surface-variant/40 hover:border-primary/50 transition-all"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>VIEW ALL TRANSACTIONS</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/section&gt;</p>
+<p class="p1">&lt;/main&gt;</p>
+<p class="p1">&lt;!-- BottomNavBar (Mobile Only) --&gt;</p>
+<p class="p1">&lt;nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center py-3 bg-surface-glass backdrop-blur-lg border-t border-glass shadow-[0_-4px_20px_rgba(0,212,255,0.1)] lg:hidden"&gt;</p>
+<p class="p1">&lt;a class="flex flex-col items-center justify-center text-primary drop-shadow-[0_0_8px_rgba(60,215,255,0.6)] active:scale-110" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined"&gt;location_on&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-label-caps text-label-caps"&gt;Taipei&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;a class="flex flex-col items-center justify-center text-text-secondary opacity-60 hover:opacity-100 transition-all active:scale-110" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined"&gt;location_on&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-label-caps text-label-caps"&gt;Tokyo&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;a class="flex flex-col items-center justify-center text-text-secondary opacity-60 hover:opacity-100 transition-all active:scale-110" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined"&gt;location_on&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-label-caps text-label-caps"&gt;Bangkok&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;a class="flex flex-col items-center justify-center text-text-secondary opacity-60 hover:opacity-100 transition-all active:scale-110" href="#"&gt;</p>
+<p class="p1">&lt;span class="material-symbols-outlined"&gt;location_on&lt;/span&gt;</p>
+<p class="p1">&lt;span class="font-label-caps text-label-caps"&gt;Seoul&lt;/span&gt;</p>
+<p class="p1">&lt;/a&gt;</p>
+<p class="p1">&lt;/nav&gt;</p>
+<p class="p1">&lt;!-- Footer --&gt;</p>
+<p class="p1">&lt;footer class="w-full flex justify-between items-center px-container-margin py-4 bg-surface-dim border-t border-outline-variant/30 text-[10px] lg:ml-64 lg:w-[calc(100%-16rem)]"&gt;</p>
+<p class="p1">&lt;span class="font-mono-data text-text-secondary uppercase tracking-widest"&gt;Arc Weather Oracle v2.4&lt;/span&gt;</p>
+<p class="p1">&lt;div class="flex gap-4"&gt;</p>
+<p class="p1">&lt;div class="flex items-center gap-1"&gt;</p>
+<p class="p1">&lt;span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"&gt;&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-tertiary font-bold font-mono-data"&gt;Oracle Active&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;span class="text-text-secondary font-mono-data hover:text-primary cursor-pointer transition-colors"&gt;System Status&lt;/span&gt;</p>
+<p class="p1">&lt;span class="text-text-secondary font-mono-data hover:text-primary cursor-pointer transition-colors"&gt;Terms&lt;/span&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/footer&gt;</p>
+<p class="p1">&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Simple logic for bet button interactions</p>
+<p class="p1"><span class="Apple-converted-space">        </span>document.querySelectorAll('button').forEach(btn =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>btn.addEventListener('click', function() {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if(this.innerText.trim() === 'Bet') {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const originalText = this.innerText;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>this.innerText = 'Processing...';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>this.disabled = true;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>setTimeout(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>this.innerText = 'Confirmed';</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const isPrimary = this.classList.contains('bg-primary');</p>
+<p class="p2"><span class="Apple-converted-space">                        </span></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>if(!isPrimary) {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>this.classList.add('bg-tertiary', 'text-black');</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>this.classList.remove('border-primary', 'text-primary');</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>this.classList.replace('bg-primary', 'bg-tertiary');</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>setTimeout(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>this.innerText = originalText;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>this.disabled = false;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>if(!isPrimary) {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>this.classList.remove('bg-tertiary', 'text-black');</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>this.classList.add('border-primary', 'text-primary');</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>this.classList.replace('bg-tertiary', 'bg-primary');</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}, 2000);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}, 800);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;&lt;/html&gt;</p>
+</body>
+</html>
