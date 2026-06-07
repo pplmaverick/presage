@@ -140,10 +140,22 @@ npx hardhat run scripts/submitResult.ts --network arc
 
 **n8n Oracle Setup**
 
-In your self-hosted n8n instance, create a workflow that:
-1. Triggers after each market's `lockTime`
-2. Calls the OpenWeather API for the target city and date
-3. Executes a Write Contract node calling `AdminOracle.submitResult(city, temp, marketId)`
+The oracle follows a strict two-phase settlement sequence:
+
+1. **lockMarket(marketId)** — closes the betting window; no new bets accepted after this point
+2. **submitResult(city, temp, marketId)** — submits the final temperature and triggers payout calculation
+
+> ⚠️ submitResult will revert if called before lockMarket. Always execute in order.
+
+In your self-hosted n8n instance, configure the workflow as follows:
+
+- **Trigger**: Schedule node fires after each market's `lockTime`
+- **Phase 1**: Write Contract node → `WeatherMarket.lockMarket(marketId)`
+- **Wait**: 30-second delay node to ensure lockMarket is confirmed on-chain
+- **Phase 2**: HTTP Request node → OpenWeather API for target city and date
+- **Phase 3**: Write Contract node → `AdminOracle.submitResult(city, temp, marketId)`
+- **Error handling**: Enable n8n built-in retry (3 attempts, 10s interval) on both Write Contract nodes
+- **Notifications**: Connect an error branch to a Telegram or email node for settlement failure alerts
 
 ## Contract Interface
 
@@ -199,6 +211,8 @@ Oracle rounding: raw float values are floored before submission (e.g. 24.76°C �
 - n8n Oracle automation live on VPS
 - ERC-8004 Agent registered (agentId: 6762)
 - React frontend deployed to Vercel
+- Multi-city support: Taipei, Tokyo, Bangkok, Seoul
+- ArcScan explorer links integrated (tx hashes clickable)
 - First market fully settled (Taipei, 54 USDC)
 - Circle Developer Grant application submitted (under review)
 
