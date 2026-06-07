@@ -1,26 +1,22 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { WagmiProvider, createConfig, http } from 'wagmi'
-import { injected } from 'wagmi/connectors'
+import { BrowserRouter } from 'react-router-dom'
+import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { arcTestnet } from './config'
+import { wagmiConfig } from './lib/wagmi'
 import App from './App'
 import './index.css'
-
-const config = createConfig({
-  chains: [arcTestnet],
-  connectors: [injected()],
-  transports: { [arcTestnet.id]: http() },
-})
 
 const queryClient = new QueryClient()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <WagmiProvider config={config}>
+    <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <App />
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
       </QueryClientProvider>
     </WagmiProvider>
-  </StrictMode>,
+  </StrictMode>
 )
