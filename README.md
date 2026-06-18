@@ -57,10 +57,10 @@ ERC-8004 AI Agent (agentId: 6762)
 
 | Contract | Address |
 |---|---|
-| WeatherMarket (v2) | `0xcac5b9d2817325e78090e3ce4b9c299c819cf953` |
-| AdminOracle | `0xbdc53e50b1167ce1199bfad54a034f7ab1741051` |
-| MarketFactory | `0x914c40a644493b47336de847b0404e729e06c68d` |
-| USDC (Arc native) | `0x3600000000000000000000000000000000000000` |
+| WeatherMarket (v2) | [0xcac5b9d2...f953](https://testnet.arcscan.app/address/0xcac5b9d2817325e78090e3ce4b9c299c819cf953) |
+| AdminOracle | [0xbdc53e50...051](https://testnet.arcscan.app/address/0xbdc53e50b1167ce1199bfad54a034f7ab1741051) |
+| MarketFactory | [0x914c40a6...68d](https://testnet.arcscan.app/address/0x914c40a644493b47336de847b0404e729e06c68d) |
+| USDC (Arc native) | [0x3600...0000](https://testnet.arcscan.app/address/0x3600000000000000000000000000000000000000) |
 
 **ERC-8004 AI Agent**
 
