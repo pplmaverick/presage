@@ -5,14 +5,14 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Status](https://img.shields.io/badge/grant-under_review-orange)
 
-**Live Demo → [arc-projects.vercel.app](https://arc-projects.vercel.app)** · Network: Arc Testnet (Chain ID 5042002)
+**Live Demo → [arc-weather-market.vercel.app](https://arc-weather-market.vercel.app)** · Network: Arc Testnet (Chain ID 5042002)
 
 ---
 
 A USDC-native prediction market infrastructure built on Arc Network (Circle's EVM chain). Weather is the first use case — MarketFactory supports any quantifiable real-world event. An n8n-powered oracle fetches verified data and settles on-chain automatically via ERC-8004 AI Agent — no custodian, no manual intervention.
 
 ## 🌐 Live Demo
-**[Try Demo](https://arc-projects.vercel.app)** · Arc Testnet (Chain ID 5042002)
+**[Try Demo](https://arc-weather-market.vercel.app)** · Arc Testnet (Chain ID 5042002)
 
 | Contract | Address |
 |---|---|
@@ -21,7 +21,7 @@ A USDC-native prediction market infrastructure built on Arc Network (Circle's EV
 | MarketFactory | [0x914c40a6...68d](https://testnet.arcscan.app/address/0x914c40a644493b47336de847b0404e729e06c68d) |
 
 **Quick Test**
-1. Visit [arc-projects.vercel.app](https://arc-projects.vercel.app)
+1. Visit [arc-weather-market.vercel.app](https://arc-weather-market.vercel.app)
 2. Connect wallet to Arc Testnet (Chain ID 5042002)
 3. Get test USDC from the Arc Faucet
 4. Place a bet on any open market
