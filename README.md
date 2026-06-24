@@ -11,6 +11,22 @@
 
 A USDC-native prediction market infrastructure built on Arc Network (Circle's EVM chain). Weather is the first use case — MarketFactory supports any quantifiable real-world event. An n8n-powered oracle fetches verified data and settles on-chain automatically via ERC-8004 AI Agent — no custodian, no manual intervention.
 
+## 🌐 Live Demo
+**[Try Demo](https://arc-projects.vercel.app)** · Arc Testnet (Chain ID 5042002)
+
+| Contract | Address |
+|---|---|
+| WeatherMarket | [0xcac5b9d2...f953](https://testnet.arcscan.app/address/0xcac5b9d2817325e78090e3ce4b9c299c819cf953) |
+| AdminOracle | [0xbdc53e50...051](https://testnet.arcscan.app/address/0xbdc53e50b1167ce1199bfad54a034f7ab1741051) |
+| MarketFactory | [0x914c40a6...68d](https://testnet.arcscan.app/address/0x914c40a644493b47336de847b0404e729e06c68d) |
+
+**Quick Test**
+1. Visit [arc-projects.vercel.app](https://arc-projects.vercel.app)
+2. Connect wallet to Arc Testnet (Chain ID 5042002)
+3. Get test USDC from the Arc Faucet
+4. Place a bet on any open market
+5. Return after lock time to claim winnings
+
 ## Overview
 
 Each market defines a city, a target date, and a set of temperature buckets (e.g. ≤25 / 26–28 / 29–31 / 32–34 / >34°C). Users deposit USDC into a bucket before the lock time. After the oracle submits the final temperature, winners split the net pool proportionally to their stake.
@@ -215,6 +231,7 @@ Oracle rounding: raw float values are floored before submission (e.g. 24.76°C �
 - ArcScan explorer links integrated (tx hashes clickable)
 - First market fully settled (Taipei, 54 USDC)
 - Circle Developer Grant application submitted (under review)
+- 55+ successful on-chain transactions (WeatherMarket contract)
 
 **⬜ M2 — Mainnet Launch (targeting Summer 2026)**
 - Deploy to Arc Mainnet
@@ -241,9 +258,8 @@ Oracle rounding: raw float values are floored before submission (e.g. 24.76°C �
 | Settlement token | Circle USDC on Arc Network |
 
 ## Developer
-
-GitHub: [pplmaverick](https://github.com/pplmaverick)
-Wallet: `0x529...d35b9` — 800+ mainnet transactions across multiple chains
+GitHub: [pplmaverick](https://github.com/pplmaverick)  
+Dev Wallet: `0xed2B5717c9b936ecC76d75401026A99143e278F5` — 55+ successful on-chain interactions on Arc Testnet
 
 ## License
 
