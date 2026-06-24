@@ -1,6 +1,6 @@
 import { useAccount, usePublicClient, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { useEffect, useState } from 'react'
-import { formatUnits } from 'viem'
+import { formatUnits, parseGwei } from 'viem'
 import { CONTRACT_ADDRESS, getBucketLabel, type CityName } from '../lib/wagmi'
 import { WEATHER_MARKET_ABI } from '../abi'
 import { useMarket, useClaimed } from '../hooks/useMarket'
@@ -59,6 +59,9 @@ function BetRow({ bet }: { bet: BetRecord }) {
       abi: WEATHER_MARKET_ABI,
       functionName: 'claimWinnings',
       args: [bet.marketId],
+      gas: 200_000n,
+      maxPriorityFeePerGas: parseGwei('10'),
+      maxFeePerGas: parseGwei('100'),
     })
   }
 

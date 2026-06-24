@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
-import { parseUnits, formatUnits } from 'viem'
+import { parseUnits, formatUnits, parseGwei } from 'viem'
 import { CONTRACT_ADDRESS, USDC_ADDRESS, getBucketLabel } from '../lib/wagmi'
 import { WEATHER_MARKET_ABI, ERC20_ABI } from '../abi'
 
@@ -66,6 +66,12 @@ export default function BetModal({ marketId, bucketIndex, buckets, onClose, onSu
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isConfirmed])
 
+  const GAS_OPTS = {
+    gas: 200_000n,
+    maxPriorityFeePerGas: parseGwei('10'),
+    maxFeePerGas: parseGwei('100'),
+  } as const
+
   function sendApprove() {
     setStep('approving')
     writeContract({
@@ -73,6 +79,7 @@ export default function BetModal({ marketId, bucketIndex, buckets, onClose, onSu
       abi: ERC20_ABI,
       functionName: 'approve',
       args: [CONTRACT_ADDRESS, amountBigInt],
+      ...GAS_OPTS,
     })
   }
 
@@ -82,6 +89,7 @@ export default function BetModal({ marketId, bucketIndex, buckets, onClose, onSu
       abi: WEATHER_MARKET_ABI,
       functionName: 'placeBet',
       args: [marketId, bucketIndex, amountBigInt],
+      ...GAS_OPTS,
     })
   }
 
