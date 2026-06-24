@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useChainId, useSwitchChain } from 'wagmi'
 import { parseUnits, formatUnits } from 'viem'
-import { CONTRACT_ADDRESS, USDC_ADDRESS, getBucketLabel } from '../lib/wagmi'
+import { CONTRACT_ADDRESS, USDC_ADDRESS, getBucketLabel, arcTestnet } from '../lib/wagmi'
 import { WEATHER_MARKET_ABI, ERC20_ABI } from '../abi'
 
 interface BetModalProps {
@@ -16,6 +16,10 @@ type Step = 'input' | 'approving' | 'betting' | 'done' | 'error'
 
 export default function BetModal({ marketId, bucketIndex, buckets, onClose, onSuccess }: BetModalProps) {
   const { address } = useAccount()
+  const chainId = useChainId()
+  const { switchChain, isPending: isSwitching } = useSwitchChain()
+  const isWrongChain = chainId !== arcTestnet.id
+
   const [amount, setAmount] = useState('')
   const [step, setStep] = useState<Step>('input')
   const [errorMsg, setErrorMsg] = useState('')
@@ -175,24 +179,41 @@ export default function BetModal({ marketId, bucketIndex, buckets, onClose, onSu
               </div>
             </div>
 
-            <button
-              onClick={handleSubmit}
-              disabled={!address || amountBigInt === 0n || isLoading}
-              className="w-full btn-primary disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {isLoading ? (
-                <>
-                  <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                  {step === 'approving' ? 'Approving...' : 'Placing Bet...'}
-                </>
-              ) : !address ? (
-                'Connect Wallet First'
-              ) : needsApproval ? (
-                `Approve ${amount || '0'} USDC`
-              ) : (
-                `Confirm Bet – ${amount || '0'} USDC`
-              )}
-            </button>
+            {isWrongChain ? (
+              <button
+                onClick={() => switchChain({ chainId: arcTestnet.id })}
+                disabled={isSwitching}
+                className="w-full btn-outline flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {isSwitching ? (
+                  <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />Switching...</>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-base">swap_horiz</span>
+                    Switch to Arc Testnet
+                  </>
+                )}
+              </button>
+            ) : (
+              <button
+                onClick={handleSubmit}
+                disabled={!address || amountBigInt === 0n || isLoading}
+                className="w-full btn-primary disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isLoading ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    {step === 'approving' ? 'Approving...' : 'Placing Bet...'}
+                  </>
+                ) : !address ? (
+                  'Connect Wallet First'
+                ) : needsApproval ? (
+                  `Approve ${amount || '0'} USDC`
+                ) : (
+                  `Confirm Bet – ${amount || '0'} USDC`
+                )}
+              </button>
+            )}
 
             <p className="text-[10px] text-[rgba(255,255,255,0.3)] text-center mt-3 font-mono">
               2% fee · Markets settle at lock time
