@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useAccount, useReadContract, usePublicClient, useWalletClient } from 'wagmi'
-import { parseUnits, formatUnits, parseGwei } from 'viem'
+import { useAccount, useReadContract, usePublicClient } from 'wagmi'
+import { parseUnits, formatUnits, encodeFunctionData } from 'viem'
 import { CONTRACT_ADDRESS, USDC_ADDRESS, getBucketLabel } from '../lib/wagmi'
 import { WEATHER_MARKET_ABI, ERC20_ABI } from '../abi'
 
@@ -14,10 +14,19 @@ interface BetModalProps {
 
 type Step = 'input' | 'approving' | 'betting' | 'done' | 'error'
 
-const GAS_OPTS = {
-  gas: 500_000n,
-  gasPrice: parseGwei('50'),
-} as const
+// 50 gwei, 500k gas — hex strings for eth_sendTransaction
+const GAS_PRICE = '0x' + (50_000_000_000).toString(16)
+const GAS_LIMIT = '0x' + (500_000).toString(16)
+
+type EthereumProvider = {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>
+}
+
+function getEthereum(): EthereumProvider {
+  const eth = (window as unknown as { ethereum?: EthereumProvider }).ethereum
+  if (!eth) throw new Error('MetaMask not found')
+  return eth
+}
 
 export default function BetModal({ marketId, bucketIndex, buckets, onClose, onSuccess }: BetModalProps) {
   const { address } = useAccount()
@@ -27,7 +36,6 @@ export default function BetModal({ marketId, bucketIndex, buckets, onClose, onSu
   const [isLoading, setIsLoading] = useState(false)
 
   const publicClient = usePublicClient()
-  const { data: walletClient } = useWalletClient()
 
   const amountBigInt = amount && !isNaN(Number(amount)) && Number(amount) > 0
     ? parseUnits(amount, 6)
@@ -51,54 +59,46 @@ export default function BetModal({ marketId, bucketIndex, buckets, onClose, onSu
 
   const needsApproval = !allowance || allowance < amountBigInt
 
-  async function sendTx(fn: () => Promise<`0x${string}`>) {
-    if (!publicClient) throw new Error('No public client')
-    const hash = await fn()
-    await publicClient.waitForTransactionReceipt({ hash })
+  async function sendTx(to: string, data: `0x${string}`): Promise<`0x${string}`> {
+    const eth = getEthereum()
+    const hash = await eth.request({
+      method: 'eth_sendTransaction',
+      params: [{ from: address, to, data, gas: GAS_LIMIT, gasPrice: GAS_PRICE }],
+    }) as `0x${string}`
+    await publicClient!.waitForTransactionReceipt({ hash })
     return hash
   }
 
   async function handleSubmit() {
-    if (!address || !walletClient || !publicClient || amountBigInt === 0n) return
+    if (!address || amountBigInt === 0n) return
     setIsLoading(true)
     setErrorMsg('')
     try {
-      const nonce = await publicClient.getTransactionCount({ address })
-
       if (needsApproval) {
         setStep('approving')
-        await sendTx(() =>
-          walletClient.writeContract({
-            address: USDC_ADDRESS,
-            abi: ERC20_ABI,
-            functionName: 'approve',
-            args: [CONTRACT_ADDRESS, amountBigInt],
-            ...GAS_OPTS,
-            nonce,
-          })
-        )
+        const data = encodeFunctionData({
+          abi: ERC20_ABI,
+          functionName: 'approve',
+          args: [CONTRACT_ADDRESS, amountBigInt],
+        })
+        await sendTx(USDC_ADDRESS, data)
         await refetchAllowance()
       }
 
       setStep('betting')
-      const betNonce = await publicClient.getTransactionCount({ address })
-      await sendTx(() =>
-        walletClient.writeContract({
-          address: CONTRACT_ADDRESS,
-          abi: WEATHER_MARKET_ABI,
-          functionName: 'placeBet',
-          args: [marketId, bucketIndex, amountBigInt],
-          ...GAS_OPTS,
-          nonce: betNonce,
-        })
-      )
+      const data = encodeFunctionData({
+        abi: WEATHER_MARKET_ABI,
+        functionName: 'placeBet',
+        args: [marketId, bucketIndex, amountBigInt],
+      })
+      await sendTx(CONTRACT_ADDRESS, data)
 
       setStep('done')
       onSuccess()
     } catch (err: unknown) {
       setStep('error')
       const msg = err instanceof Error ? err.message : String(err)
-      setErrorMsg(msg.slice(0, 150))
+      setErrorMsg(msg.slice(0, 200))
     } finally {
       setIsLoading(false)
     }
