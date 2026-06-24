@@ -59,7 +59,7 @@ function BetRow({ bet }: { bet: BetRecord }) {
       abi: WEATHER_MARKET_ABI,
       functionName: 'claimWinnings',
       args: [bet.marketId],
-      gas: 200_000n,
+      gas: 500_000n,
       maxPriorityFeePerGas: parseGwei('10'),
       maxFeePerGas: parseGwei('100'),
     })
