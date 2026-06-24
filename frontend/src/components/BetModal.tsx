@@ -68,8 +68,7 @@ export default function BetModal({ marketId, bucketIndex, buckets, onClose, onSu
 
   const GAS_OPTS = {
     gas: 500_000n,
-    maxPriorityFeePerGas: parseGwei('10'),
-    maxFeePerGas: parseGwei('100'),
+    gasPrice: parseGwei('50'),
   } as const
 
   function sendApprove() {

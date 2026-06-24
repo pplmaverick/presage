@@ -60,8 +60,7 @@ function BetRow({ bet }: { bet: BetRecord }) {
       functionName: 'claimWinnings',
       args: [bet.marketId],
       gas: 500_000n,
-      maxPriorityFeePerGas: parseGwei('10'),
-      maxFeePerGas: parseGwei('100'),
+      gasPrice: parseGwei('50'),
     })
   }
 
