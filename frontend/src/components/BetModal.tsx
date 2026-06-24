@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { useState } from 'react'
+import { useAccount, useReadContract, usePublicClient, useWalletClient } from 'wagmi'
 import { parseUnits, formatUnits, parseGwei } from 'viem'
 import { CONTRACT_ADDRESS, USDC_ADDRESS, getBucketLabel } from '../lib/wagmi'
 import { WEATHER_MARKET_ABI, ERC20_ABI } from '../abi'
@@ -14,11 +14,20 @@ interface BetModalProps {
 
 type Step = 'input' | 'approving' | 'betting' | 'done' | 'error'
 
+const GAS_OPTS = {
+  gas: 500_000n,
+  gasPrice: parseGwei('50'),
+} as const
+
 export default function BetModal({ marketId, bucketIndex, buckets, onClose, onSuccess }: BetModalProps) {
   const { address } = useAccount()
   const [amount, setAmount] = useState('')
   const [step, setStep] = useState<Step>('input')
   const [errorMsg, setErrorMsg] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  const publicClient = usePublicClient()
+  const { data: walletClient } = useWalletClient()
 
   const amountBigInt = amount && !isNaN(Number(amount)) && Number(amount) > 0
     ? parseUnits(amount, 6)
@@ -40,71 +49,64 @@ export default function BetModal({ marketId, bucketIndex, buckets, onClose, onSu
     query: { enabled: !!address },
   })
 
-  const { writeContract, data: txHash, isPending: isWriting, error: writeError } = useWriteContract()
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash: txHash })
-
   const needsApproval = !allowance || allowance < amountBigInt
 
-  useEffect(() => {
-    if (writeError) {
-      setStep('error')
-      setErrorMsg(writeError.message.slice(0, 120))
-    }
-  }, [writeError])
+  async function sendTx(fn: () => Promise<`0x${string}`>) {
+    if (!publicClient) throw new Error('No public client')
+    const hash = await fn()
+    await publicClient.waitForTransactionReceipt({ hash })
+    return hash
+  }
 
-  useEffect(() => {
-    if (isConfirmed) {
-      if (step === 'approving') {
-        void refetchAllowance()
-        setStep('betting')
-        sendBet()
-      } else if (step === 'betting') {
-        setStep('done')
-        onSuccess()
+  async function handleSubmit() {
+    if (!address || !walletClient || !publicClient || amountBigInt === 0n) return
+    setIsLoading(true)
+    setErrorMsg('')
+    try {
+      const nonce = await publicClient.getTransactionCount({ address })
+
+      if (needsApproval) {
+        setStep('approving')
+        await sendTx(() =>
+          walletClient.writeContract({
+            address: USDC_ADDRESS,
+            abi: ERC20_ABI,
+            functionName: 'approve',
+            args: [CONTRACT_ADDRESS, amountBigInt],
+            ...GAS_OPTS,
+            nonce,
+          })
+        )
+        await refetchAllowance()
       }
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isConfirmed])
 
-  const GAS_OPTS = {
-    gas: 500_000n,
-    gasPrice: parseGwei('50'),
-  } as const
-
-  function sendApprove() {
-    setStep('approving')
-    writeContract({
-      address: USDC_ADDRESS,
-      abi: ERC20_ABI,
-      functionName: 'approve',
-      args: [CONTRACT_ADDRESS, amountBigInt],
-      ...GAS_OPTS,
-    })
-  }
-
-  function sendBet() {
-    writeContract({
-      address: CONTRACT_ADDRESS,
-      abi: WEATHER_MARKET_ABI,
-      functionName: 'placeBet',
-      args: [marketId, bucketIndex, amountBigInt],
-      ...GAS_OPTS,
-    })
-  }
-
-  function handleSubmit() {
-    if (!address || amountBigInt === 0n) return
-    if (needsApproval) {
-      sendApprove()
-    } else {
       setStep('betting')
-      sendBet()
+      const betNonce = await publicClient.getTransactionCount({ address })
+      await sendTx(() =>
+        walletClient.writeContract({
+          address: CONTRACT_ADDRESS,
+          abi: WEATHER_MARKET_ABI,
+          functionName: 'placeBet',
+          args: [marketId, bucketIndex, amountBigInt],
+          ...GAS_OPTS,
+          nonce: betNonce,
+        })
+      )
+
+      setStep('done')
+      onSuccess()
+    } catch (err: unknown) {
+      setStep('error')
+      const msg = err instanceof Error ? err.message : String(err)
+      setErrorMsg(msg.slice(0, 150))
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const bucketLabel = getBucketLabel(buckets, bucketIndex)
   const balanceFormatted = balance ? Number(formatUnits(balance, 6)).toFixed(2) : '–'
-  const isLoading = isWriting || isConfirming
+  const approveOk = !!(allowance && allowance >= amountBigInt && amountBigInt > 0n)
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -164,11 +166,9 @@ export default function BetModal({ marketId, bucketIndex, buckets, onClose, onSu
               </p>
             </div>
 
-            {/* Step indicators */}
             <div className="flex items-center gap-2 mb-6">
-              <div className={`flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider ${step === 'approving' ? 'text-warning-locked' : (allowance && allowance >= amountBigInt && amountBigInt > 0n) ? 'text-tertiary' : 'text-[rgba(255,255,255,0.3)]'}`}>
-                <span className="w-5 h-5 rounded-full border flex items-center justify-center text-[8px]
-                  border-current">1</span>
+              <div className={`flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider ${step === 'approving' ? 'text-warning-locked' : approveOk ? 'text-tertiary' : 'text-[rgba(255,255,255,0.3)]'}`}>
+                <span className="w-5 h-5 rounded-full border flex items-center justify-center text-[8px] border-current">1</span>
                 Approve
               </div>
               <div className="flex-1 h-px bg-[rgba(255,255,255,0.1)]" />
@@ -179,7 +179,7 @@ export default function BetModal({ marketId, bucketIndex, buckets, onClose, onSu
             </div>
 
             <button
-              onClick={handleSubmit}
+              onClick={() => void handleSubmit()}
               disabled={!address || amountBigInt === 0n || isLoading}
               className="w-full btn-primary disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
