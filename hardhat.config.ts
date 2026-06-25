@@ -7,6 +7,23 @@ dotenv.config();
 export default defineConfig({
   plugins: [hardhatToolboxViem],
   solidity: "0.8.28",
+  chainDescriptors: {
+    5042002: {
+      name: "Arc Testnet",
+      blockExplorers: {
+        etherscan: {
+          name: "ArcScan",
+          url: "https://testnet.arcscan.app",
+          apiUrl: "https://testnet.arcscan.app/api",
+        },
+      },
+    },
+  },
+  verify: {
+    etherscan: {
+      apiKey: "placeholder",
+    },
+  },
   networks: {
     arc: {
       type: "http",

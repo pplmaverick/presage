@@ -6,7 +6,7 @@
   "contracts": {
     "WeatherMarket": "0xcac5b9d2817325e78090e3ce4b9c299c819cf953",
     "AdminOracle": "0xbdc53e50b1167ce1199bfad54a034f7ab1741051",
-    "MarketFactory": "0x914c40a644493b47336de847b0404e729e06c68d",
+    "MarketFactory": "0xdd8436bfb47b39a3a69a6e0d6be4f6de7814f063",
     "USDC": "0x3600000000000000000000000000000000000000"
   },
   "agent": {

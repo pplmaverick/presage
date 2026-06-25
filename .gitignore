@@ -31,3 +31,4 @@ frontend/dist
 # Snapshot cheatcodes output
 /snapshots
 .vercel
+.env*.local
