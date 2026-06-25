@@ -18,7 +18,7 @@ A USDC-native prediction market infrastructure built on Arc Network (Circle's EV
 |---|---|
 | WeatherMarket | [0xcac5b9d2...f953](https://testnet.arcscan.app/address/0xcac5b9d2817325e78090e3ce4b9c299c819cf953) |
 | AdminOracle | [0xbdc53e50...051](https://testnet.arcscan.app/address/0xbdc53e50b1167ce1199bfad54a034f7ab1741051) |
-| MarketFactory | [0xdd8436bf...063](https://testnet.arcscan.app/address/0xdd8436bfb47b39a3a69a6e0d6be4f6de7814f063) |
+| MarketFactory | [0x1321b178...eef](https://testnet.arcscan.app/address/0x1321b1782838b193df74118fc134eac278a33eef) |
 
 **Quick Test**
 1. Visit [arc-projects.vercel.app](https://arc-projects.vercel.app)
@@ -75,7 +75,7 @@ ERC-8004 AI Agent (agentId: 6762)
 |---|---|
 | WeatherMarket (v2) | [0xcac5b9d2...f953](https://testnet.arcscan.app/address/0xcac5b9d2817325e78090e3ce4b9c299c819cf953) |
 | AdminOracle | [0xbdc53e50...051](https://testnet.arcscan.app/address/0xbdc53e50b1167ce1199bfad54a034f7ab1741051) |
-| MarketFactory | [0xdd8436bf...063](https://testnet.arcscan.app/address/0xdd8436bfb47b39a3a69a6e0d6be4f6de7814f063) |
+| MarketFactory | [0x1321b178...eef](https://testnet.arcscan.app/address/0x1321b1782838b193df74118fc134eac278a33eef) |
 | USDC (Arc native) | [0x3600...0000](https://testnet.arcscan.app/address/0x3600000000000000000000000000000000000000) |
 
 **ERC-8004 AI Agent**

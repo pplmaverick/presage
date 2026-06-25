@@ -25,7 +25,7 @@ const arc = defineChain({
 });
 
 const GAS_OPTS = {
-  gas: 3_000_000n,
+  gas: 8_000_000n,
   maxPriorityFeePerGas: parseGwei("10"),
   maxFeePerGas: parseGwei("100"),
 } as const;
@@ -62,6 +62,9 @@ async function main() {
   console.log("  tx:", txHash);
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+  if (receipt.status === "reverted") {
+    throw new Error(`Deployment reverted. gasUsed: ${receipt.gasUsed}`);
+  }
   const marketFactoryAddress = receipt.contractAddress!;
   console.log("  MarketFactory deployed:", marketFactoryAddress);
 
