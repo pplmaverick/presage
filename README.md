@@ -1,6 +1,6 @@
 # Arc Weather Market
 
-[![CI](https://github.com/pplmaverick/arc-projects/actions/workflows/test.yml/badge.svg)](https://github.com/pplmaverick/arc-projects/actions/workflows/test.yml)
+[![CI](https://github.com/pplmaverick/arc-projects/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/pplmaverick/arc-projects/actions/workflows/test.yml)
 ![Arc Testnet](https://img.shields.io/badge/Arc_Testnet-5042002-blue)
 ![Solidity](https://img.shields.io/badge/Solidity-0.8.28-purple)
 ![License](https://img.shields.io/badge/license-MIT-green)
