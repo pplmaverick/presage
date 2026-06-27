@@ -4,6 +4,12 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+const DUMMY_KEY =
+  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+const deployerKey = process.env.PRIVATE_KEY
+  ? `0x${process.env.PRIVATE_KEY}`
+  : DUMMY_KEY;
+
 export default defineConfig({
   plugins: [hardhatToolboxViem],
   solidity: "0.8.28",
@@ -28,19 +34,19 @@ export default defineConfig({
     arc: {
       type: "http",
       url: "https://rpc.testnet.arc.network",
-      accounts: [`0x${process.env.PRIVATE_KEY}`],
+      accounts: [deployerKey],
       chainId: 5042002,
     },
     pharos: {
       type: "http",
       url: "https://atlantic.dplabs-internal.com",
-      accounts: [`0x${process.env.PRIVATE_KEY}`],
+      accounts: [deployerKey],
       chainId: 688689,
     },
     pharosMainnet: {
       type: "http",
       url: "https://rpc.pharos.xyz",
-      accounts: [`0x${process.env.PRIVATE_KEY}`],
+      accounts: [deployerKey],
       chainId: 1672,
     },
   },
