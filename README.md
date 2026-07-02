@@ -245,7 +245,7 @@ Oracle rounding: raw float values are floored before submission (e.g. 24.76°C �
 **⬜ M3 — Autonomous Agent (post-mainnet)**
 - ERC-8004 Agent autonomously creates markets (no manual `createMarket`)
 - ERC-8004 Agent autonomously submits oracle results
-- Chainlink Oracle integration (pending Arc mainnet availability)
+- Decentralized oracle integration (pending Arc mainnet availability)
 
 ## Stack
 
