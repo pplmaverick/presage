@@ -22,6 +22,10 @@ const CITY_BY_MARKET_ID: Record<string, CityName> = {
   '12': 'Tokyo',
   '13': 'Bangkok',
   '14': 'Seoul',
+  '15': 'Taipei',
+  '16': 'Tokyo',
+  '17': 'Bangkok',
+  '18': 'Seoul',
 }
 
 function BetRow({ bet }: { bet: BetRecord }) {
