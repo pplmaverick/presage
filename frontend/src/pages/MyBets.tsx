@@ -1,7 +1,7 @@
 import { useAccount, usePublicClient, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { useEffect, useState } from 'react'
 import { formatUnits } from 'viem'
-import { CONTRACT_ADDRESS, getBucketLabel, type CityName } from '../lib/wagmi'
+import { CONTRACT_ADDRESS, DEPLOY_BLOCK, getBucketLabel, type CityName } from '../lib/wagmi'
 import { WEATHER_MARKET_ABI } from '../abi'
 import { useMarket, useClaimed } from '../hooks/useMarket'
 
@@ -111,12 +111,15 @@ function BetRow({ bet }: { bet: BetRecord }) {
   )
 }
 
+const LOG_BATCH_SIZE = 9_000n
+
 export default function MyBets() {
   const { address, isConnected } = useAccount()
   const publicClient = usePublicClient()
   const [bets, setBets] = useState<BetRecord[]>([])
   const [loading, setLoading] = useState(false)
   const [fetched, setFetched] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!address || !publicClient) return
@@ -124,22 +127,32 @@ export default function MyBets() {
     async function fetchBets() {
       if (!address || !publicClient) return
       setLoading(true)
+      setError(null)
       try {
-        const logs = await publicClient.getLogs({
-          address: CONTRACT_ADDRESS,
-          event: {
-            type: 'event',
-            name: 'BetPlaced',
-            inputs: [
-              { indexed: true, name: 'marketId', type: 'uint256' },
-              { indexed: true, name: 'user', type: 'address' },
-              { indexed: false, name: 'bucket', type: 'uint8' },
-              { indexed: false, name: 'amount', type: 'uint256' },
-            ],
-          },
-          args: { user: address },
-          fromBlock: 0n,
-        })
+        const latestBlock = await publicClient.getBlockNumber()
+        const logs = []
+        for (let fromBlock = DEPLOY_BLOCK; fromBlock <= latestBlock; fromBlock += LOG_BATCH_SIZE) {
+          const toBlock =
+            fromBlock + LOG_BATCH_SIZE - 1n > latestBlock ? latestBlock : fromBlock + LOG_BATCH_SIZE - 1n
+
+          const batch = await publicClient.getLogs({
+            address: CONTRACT_ADDRESS,
+            event: {
+              type: 'event',
+              name: 'BetPlaced',
+              inputs: [
+                { indexed: true, name: 'marketId', type: 'uint256' },
+                { indexed: true, name: 'user', type: 'address' },
+                { indexed: false, name: 'bucket', type: 'uint8' },
+                { indexed: false, name: 'amount', type: 'uint256' },
+              ],
+            },
+            args: { user: address },
+            fromBlock,
+            toBlock,
+          })
+          logs.push(...batch)
+        }
 
         const records: BetRecord[] = logs.map((log) => {
           const args = log.args as { marketId: bigint; user: string; bucket: number; amount: bigint }
@@ -156,6 +169,7 @@ export default function MyBets() {
         setBets(records.reverse())
       } catch (e) {
         console.error('Failed to fetch bets:', e)
+        setError(e instanceof Error ? e.message : 'Failed to load betting history')
       } finally {
         setLoading(false)
         setFetched(true)
@@ -206,6 +220,14 @@ export default function MyBets() {
           <div className="p-12 text-center">
             <div className="w-8 h-8 border-2 border-primary/40 border-t-primary rounded-full animate-spin mx-auto mb-4" />
             <p className="text-[rgba(255,255,255,0.4)] font-mono text-sm">Scanning chain for your bets...</p>
+          </div>
+        ) : error ? (
+          <div className="p-12 text-center">
+            <span className="material-symbols-outlined text-4xl text-red-400/60 block mb-3">
+              error
+            </span>
+            <p className="text-red-400/80 text-sm">Failed to load betting history</p>
+            <p className="text-[rgba(255,255,255,0.3)] font-mono text-xs mt-1">{error}</p>
           </div>
         ) : fetched && bets.length === 0 ? (
           <div className="p-12 text-center">

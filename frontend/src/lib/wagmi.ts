@@ -29,6 +29,10 @@ export const CONTRACT_ADDRESS = (
   import.meta.env.VITE_CONTRACT_TESTNET ?? '0xcAC5B9d2817325E78090E3Ce4b9C299C819cF953'
 ) as `0x${string}`
 
+// WeatherMarket deployment block on Arc Testnet (deployments/arc-testnet.json, deployedAt 2026-05-13T04:45:22Z).
+// Confirmed via eth_getCode: no bytecode at block 41942063, bytecode present at 41942064.
+export const DEPLOY_BLOCK = 41_942_064n
+
 export const USDC_ADDRESS = '0x3600000000000000000000000000000000000000' as `0x${string}`
 
 export const ORACLE_URL =
