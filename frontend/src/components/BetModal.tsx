@@ -3,6 +3,7 @@ import { useAccount, useReadContract, useWriteContract, useWaitForTransactionRec
 import { parseUnits, formatUnits } from 'viem'
 import { CONTRACT_ADDRESS, USDC_ADDRESS, getBucketLabel, arcTestnet } from '../lib/wagmi'
 import { WEATHER_MARKET_ABI, ERC20_ABI } from '../abi'
+import { addCachedBet } from '../lib/betCache'
 
 interface BetModalProps {
   marketId: bigint
@@ -63,6 +64,15 @@ export default function BetModal({ marketId, bucketIndex, buckets, onClose, onSu
         setStep('betting')
         sendBet()
       } else if (step === 'betting') {
+        if (address && txHash) {
+          addCachedBet(address, {
+            marketId: marketId.toString(),
+            bucket: bucketIndex,
+            amount: amountBigInt.toString(),
+            timestamp: Date.now(),
+            txHash,
+          })
+        }
         setStep('done')
         onSuccess()
       }

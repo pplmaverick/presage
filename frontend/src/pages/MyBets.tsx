@@ -1,9 +1,10 @@
 import { useAccount, usePublicClient, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { formatUnits } from 'viem'
 import { CONTRACT_ADDRESS, DEPLOY_BLOCK, getBucketLabel, type CityName } from '../lib/wagmi'
 import { WEATHER_MARKET_ABI } from '../abi'
 import { useMarket, useClaimed } from '../hooks/useMarket'
+import { getCachedBets, type CachedBet } from '../lib/betCache'
 
 interface BetRecord {
   marketId: bigint
@@ -11,6 +12,7 @@ interface BetRecord {
   amount: bigint
   city: CityName
   blockNumber: bigint
+  txHash: string
 }
 
 const CITY_BY_MARKET_ID: Record<string, CityName> = {
@@ -26,6 +28,29 @@ const CITY_BY_MARKET_ID: Record<string, CityName> = {
   '16': 'Tokyo',
   '17': 'Bangkok',
   '18': 'Seoul',
+}
+
+function cachedBetToRecord(bet: CachedBet): BetRecord {
+  const cityName = CITY_BY_MARKET_ID[bet.marketId] ?? 'Taipei'
+  return {
+    marketId: BigInt(bet.marketId),
+    bucket: bet.bucket,
+    amount: BigInt(bet.amount),
+    city: cityName as CityName,
+    blockNumber: 0n,
+    txHash: bet.txHash,
+  }
+}
+
+function mergeBetsByTxHash(chainRecords: BetRecord[], cachedRecords: BetRecord[]): BetRecord[] {
+  const byTxHash = new Map<string, BetRecord>()
+  for (const r of cachedRecords) byTxHash.set(r.txHash, r)
+  for (const r of chainRecords) byTxHash.set(r.txHash, r) // chain data wins on conflict
+  return Array.from(byTxHash.values()).sort((a, b) => {
+    if (a.blockNumber === 0n && b.blockNumber !== 0n) return -1
+    if (b.blockNumber === 0n && a.blockNumber !== 0n) return 1
+    return a.blockNumber === b.blockNumber ? 0 : a.blockNumber < b.blockNumber ? 1 : -1
+  })
 }
 
 function BetRow({ bet }: { bet: BetRecord }) {
@@ -152,6 +177,19 @@ export default function MyBets() {
   const [progress, setProgress] = useState(0)
   const [fetched, setFetched] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const cachedRecordsRef = useRef<BetRecord[]>([])
+
+  // Load cached bets synchronously so recent bets show up instantly, before the chain scan finishes.
+  useEffect(() => {
+    if (!address) {
+      cachedRecordsRef.current = []
+      setBets([])
+      return
+    }
+    const cached = getCachedBets(address).map(cachedBetToRecord)
+    cachedRecordsRef.current = cached
+    setBets(cached)
+  }, [address])
 
   useEffect(() => {
     if (!address || !publicClient) return
@@ -202,10 +240,11 @@ export default function MyBets() {
             amount: args.amount,
             city: cityName as CityName,
             blockNumber: log.blockNumber ?? 0n,
+            txHash: log.transactionHash ?? '',
           }
         })
 
-        setBets(records.reverse())
+        setBets(mergeBetsByTxHash(records, cachedRecordsRef.current))
       } catch (e) {
         console.error('Failed to fetch bets:', e)
         setError(e instanceof Error ? e.message : 'Failed to load betting history')
@@ -248,14 +287,22 @@ export default function MyBets() {
             <span className="material-symbols-outlined text-primary text-xl">data_usage</span>
             Positions
           </h2>
-          {address && (
-            <span className="font-mono text-xs text-[rgba(255,255,255,0.3)]">
-              {address.slice(0, 8)}...{address.slice(-6)}
-            </span>
-          )}
+          <div className="flex items-center gap-3">
+            {loading && bets.length > 0 && (
+              <span className="flex items-center gap-1.5 text-[10px] font-mono text-[rgba(255,255,255,0.35)]">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                Syncing chain history...
+              </span>
+            )}
+            {address && (
+              <span className="font-mono text-xs text-[rgba(255,255,255,0.3)]">
+                {address.slice(0, 8)}...{address.slice(-6)}
+              </span>
+            )}
+          </div>
         </div>
 
-        {loading ? (
+        {bets.length === 0 && loading ? (
           <div className="p-12 text-center">
             <div className="w-8 h-8 border-2 border-primary/40 border-t-primary rounded-full animate-spin mx-auto mb-4" />
             <p className="text-[rgba(255,255,255,0.4)] font-mono text-sm">Scanning blocks... {progress}%</p>
@@ -266,7 +313,7 @@ export default function MyBets() {
               />
             </div>
           </div>
-        ) : error ? (
+        ) : bets.length === 0 && error ? (
           <div className="p-12 text-center">
             <span className="material-symbols-outlined text-4xl text-red-400/60 block mb-3">
               error
@@ -274,7 +321,7 @@ export default function MyBets() {
             <p className="text-red-400/80 text-sm">Failed to load betting history</p>
             <p className="text-[rgba(255,255,255,0.3)] font-mono text-xs mt-1">{error}</p>
           </div>
-        ) : fetched && bets.length === 0 ? (
+        ) : fetched && !loading && bets.length === 0 ? (
           <div className="p-12 text-center">
             <span className="material-symbols-outlined text-4xl text-[rgba(255,255,255,0.15)] block mb-3">
               receipt_long
