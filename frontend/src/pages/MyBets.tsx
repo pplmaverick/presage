@@ -112,12 +112,44 @@ function BetRow({ bet }: { bet: BetRecord }) {
 }
 
 const LOG_BATCH_SIZE = 9_000n
+const MAX_CONCURRENT_REQUESTS = 20
+
+function buildBlockRanges(fromBlock: bigint, toBlock: bigint, step: bigint) {
+  const ranges: { fromBlock: bigint; toBlock: bigint }[] = []
+  for (let start = fromBlock; start <= toBlock; start += step) {
+    const end = start + step - 1n > toBlock ? toBlock : start + step - 1n
+    ranges.push({ fromBlock: start, toBlock: end })
+  }
+  return ranges
+}
+
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  fn: (item: T) => Promise<R>,
+  onItemDone: () => void
+): Promise<R[]> {
+  const results = new Array<R>(items.length)
+  let nextIndex = 0
+
+  async function worker() {
+    while (nextIndex < items.length) {
+      const current = nextIndex++
+      results[current] = await fn(items[current])
+      onItemDone()
+    }
+  }
+
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
+  return results
+}
 
 export default function MyBets() {
   const { address, isConnected } = useAccount()
   const publicClient = usePublicClient()
   const [bets, setBets] = useState<BetRecord[]>([])
   const [loading, setLoading] = useState(false)
+  const [progress, setProgress] = useState(0)
   const [fetched, setFetched] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -128,31 +160,38 @@ export default function MyBets() {
       if (!address || !publicClient) return
       setLoading(true)
       setError(null)
+      setProgress(0)
       try {
         const latestBlock = await publicClient.getBlockNumber()
-        const logs = []
-        for (let fromBlock = DEPLOY_BLOCK; fromBlock <= latestBlock; fromBlock += LOG_BATCH_SIZE) {
-          const toBlock =
-            fromBlock + LOG_BATCH_SIZE - 1n > latestBlock ? latestBlock : fromBlock + LOG_BATCH_SIZE - 1n
+        const ranges = buildBlockRanges(DEPLOY_BLOCK, latestBlock, LOG_BATCH_SIZE)
+        let completed = 0
 
-          const batch = await publicClient.getLogs({
-            address: CONTRACT_ADDRESS,
-            event: {
-              type: 'event',
-              name: 'BetPlaced',
-              inputs: [
-                { indexed: true, name: 'marketId', type: 'uint256' },
-                { indexed: true, name: 'user', type: 'address' },
-                { indexed: false, name: 'bucket', type: 'uint8' },
-                { indexed: false, name: 'amount', type: 'uint256' },
-              ],
-            },
-            args: { user: address },
-            fromBlock,
-            toBlock,
-          })
-          logs.push(...batch)
-        }
+        const batches = await mapWithConcurrency(
+          ranges,
+          MAX_CONCURRENT_REQUESTS,
+          ({ fromBlock, toBlock }) =>
+            publicClient.getLogs({
+              address: CONTRACT_ADDRESS,
+              event: {
+                type: 'event',
+                name: 'BetPlaced',
+                inputs: [
+                  { indexed: true, name: 'marketId', type: 'uint256' },
+                  { indexed: true, name: 'user', type: 'address' },
+                  { indexed: false, name: 'bucket', type: 'uint8' },
+                  { indexed: false, name: 'amount', type: 'uint256' },
+                ],
+              },
+              args: { user: address },
+              fromBlock,
+              toBlock,
+            }),
+          () => {
+            completed++
+            setProgress(Math.round((completed / ranges.length) * 100))
+          }
+        )
+        const logs = batches.flat()
 
         const records: BetRecord[] = logs.map((log) => {
           const args = log.args as { marketId: bigint; user: string; bucket: number; amount: bigint }
@@ -219,7 +258,13 @@ export default function MyBets() {
         {loading ? (
           <div className="p-12 text-center">
             <div className="w-8 h-8 border-2 border-primary/40 border-t-primary rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-[rgba(255,255,255,0.4)] font-mono text-sm">Scanning chain for your bets...</p>
+            <p className="text-[rgba(255,255,255,0.4)] font-mono text-sm">Scanning blocks... {progress}%</p>
+            <div className="w-48 h-1 bg-[rgba(255,255,255,0.08)] rounded-full mx-auto mt-3 overflow-hidden">
+              <div
+                className="h-full bg-primary transition-all duration-200"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
           </div>
         ) : error ? (
           <div className="p-12 text-center">
