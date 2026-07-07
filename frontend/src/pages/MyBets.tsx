@@ -4,7 +4,7 @@ import { formatUnits } from 'viem'
 import { CONTRACT_ADDRESS, DEPLOY_BLOCK, getBucketLabel, type CityName } from '../lib/wagmi'
 import { WEATHER_MARKET_ABI } from '../abi'
 import { useMarket, useClaimed } from '../hooks/useMarket'
-import { getCachedBets, type CachedBet } from '../lib/betCache'
+import { getCachedBets, setCachedBets, type CachedBet } from '../lib/betCache'
 
 interface BetRecord {
   marketId: bigint
@@ -39,6 +39,16 @@ function cachedBetToRecord(bet: CachedBet): BetRecord {
     city: cityName as CityName,
     blockNumber: 0n,
     txHash: bet.txHash,
+  }
+}
+
+function recordToCachedBet(record: BetRecord): CachedBet {
+  return {
+    marketId: record.marketId.toString(),
+    bucket: record.bucket,
+    amount: record.amount.toString(),
+    timestamp: Date.now(),
+    txHash: record.txHash,
   }
 }
 
@@ -244,7 +254,10 @@ export default function MyBets() {
           }
         })
 
-        setBets(mergeBetsByTxHash(records, cachedRecordsRef.current))
+        const merged = mergeBetsByTxHash(records, cachedRecordsRef.current)
+        cachedRecordsRef.current = merged
+        setBets(merged)
+        setCachedBets(address, merged.map(recordToCachedBet))
       } catch (e) {
         console.error('Failed to fetch bets:', e)
         setError(e instanceof Error ? e.message : 'Failed to load betting history')
