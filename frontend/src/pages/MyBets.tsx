@@ -28,6 +28,10 @@ const CITY_BY_MARKET_ID: Record<string, CityName> = {
   '16': 'Tokyo',
   '17': 'Bangkok',
   '18': 'Seoul',
+  '19': 'Taipei',
+  '20': 'Tokyo',
+  '21': 'Bangkok',
+  '22': 'Seoul',
 }
 
 function cachedBetToRecord(bet: CachedBet): BetRecord {

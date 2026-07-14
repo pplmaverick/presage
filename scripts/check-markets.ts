@@ -17,7 +17,7 @@ async function main() {
   const publicClient = createPublicClient({ chain: arc, transport: http() });
   const artifact = await hre.artifacts.readArtifact("WeatherMarket");
 
-  for (let id = 15; id <= 18; id++) {
+  for (let id = 19; id <= 22; id++) {
     try {
       const result = (await publicClient.readContract({
         address: WEATHER_MARKET,

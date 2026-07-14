@@ -24,7 +24,7 @@ const arc = defineChain({
 });
 
 const STATUS_LABEL = ["OPEN", "LOCKED", "SETTLED"];
-const MARKET_IDS = [11n, 13n, 14n]; // #12 Tokyo totalPool=0，跳過
+const MARKET_IDS = [15n, 16n, 17n, 18n];
 
 async function main() {
   const __dirname = dirname(fileURLToPath(import.meta.url));

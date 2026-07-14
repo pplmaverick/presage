@@ -25,10 +25,10 @@ const arc = defineChain({
 const STATUS_LABEL = ["OPEN", "LOCKED", "SETTLED"];
 
 const SUBMISSIONS = [
-  { marketId: 11n, finalTemp: 33n },
-  { marketId: 12n, finalTemp: 26n },
-  { marketId: 13n, finalTemp: 34n },
-  { marketId: 14n, finalTemp: 31n },
+  { marketId: 15n, finalTemp: 27n },
+  { marketId: 16n, finalTemp: 29n },
+  { marketId: 17n, finalTemp: 34n },
+  { marketId: 18n, finalTemp: 26n },
 ];
 
 async function main() {
