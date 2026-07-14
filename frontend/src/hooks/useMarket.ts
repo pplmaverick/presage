@@ -105,7 +105,7 @@ export function useLiveWeather(citySlug: string): WeatherData {
         setData((prev) => ({ ...prev, loading: true, error: false, offline: false }))
       }
       try {
-        const res = await fetch(`/api/oracle/weather/${citySlug}`, {
+        const res = await fetch(`/api/weather/${citySlug}`, {
           signal: AbortSignal.timeout(8000),
         })
         if (!res.ok) throw new Error('non-ok')
@@ -126,7 +126,7 @@ export function useLiveWeather(citySlug: string): WeatherData {
             ...prev,
             loading: false,
             error: true,
-            offline: prev.temp === null,
+            offline: true,
           }))
         }
       }
