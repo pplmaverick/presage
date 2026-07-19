@@ -39,10 +39,10 @@ export const ORACLE_URL =
   import.meta.env.VITE_ORACLE_URL ?? 'http://46.62.246.244:3001'
 
 export const CITIES = {
-  Taipei: { marketId: 19n, slug: 'taipei' },
-  Tokyo: { marketId: 20n, slug: 'tokyo' },
-  Bangkok: { marketId: 21n, slug: 'bangkok' },
-  Seoul: { marketId: 22n, slug: 'seoul' },
+  Taipei: { marketId: 23n, slug: 'taipei' },
+  Tokyo: { marketId: 24n, slug: 'tokyo' },
+  Bangkok: { marketId: 25n, slug: 'bangkok' },
+  Seoul: { marketId: 26n, slug: 'seoul' },
 } as const
 
 export type CityName = keyof typeof CITIES
