@@ -1,7 +1,7 @@
 import { useAccount, usePublicClient, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { useEffect, useRef, useState } from 'react'
 import { formatUnits } from 'viem'
-import { CONTRACT_ADDRESS, DEPLOY_BLOCK, getBucketLabel, type CityName } from '../lib/wagmi'
+import { CONTRACT_ADDRESS, DEPLOY_BLOCK, getBucketLabel } from '../lib/wagmi'
 import { WEATHER_MARKET_ABI } from '../abi'
 import { useMarket, useClaimed } from '../hooks/useMarket'
 import { getCachedBets, setCachedBets, type CachedBet } from '../lib/betCache'
@@ -10,37 +10,15 @@ interface BetRecord {
   marketId: bigint
   bucket: number
   amount: bigint
-  city: CityName
   blockNumber: bigint
   txHash: string
 }
 
-const CITY_BY_MARKET_ID: Record<string, CityName> = {
-  '1': 'Taipei',
-  '3': 'Tokyo',
-  '4': 'Bangkok',
-  '5': 'Seoul',
-  '11': 'Taipei',
-  '12': 'Tokyo',
-  '13': 'Bangkok',
-  '14': 'Seoul',
-  '15': 'Taipei',
-  '16': 'Tokyo',
-  '17': 'Bangkok',
-  '18': 'Seoul',
-  '19': 'Taipei',
-  '20': 'Tokyo',
-  '21': 'Bangkok',
-  '22': 'Seoul',
-}
-
 function cachedBetToRecord(bet: CachedBet): BetRecord {
-  const cityName = CITY_BY_MARKET_ID[bet.marketId] ?? 'Taipei'
   return {
     marketId: BigInt(bet.marketId),
     bucket: bet.bucket,
     amount: BigInt(bet.amount),
-    city: cityName as CityName,
     blockNumber: 0n,
     txHash: bet.txHash,
   }
@@ -109,7 +87,7 @@ function BetRow({ bet }: { bet: BetRecord }) {
     <tr className="border-b border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.03)] transition-colors">
       <td className="px-5 py-4">
         <div className="flex flex-col">
-          <span className="font-display text-sm font-semibold text-white">{bet.city}</span>
+          <span className="font-display text-sm font-semibold text-white">{market.city}</span>
           <span className="text-[10px] font-mono text-[rgba(255,255,255,0.3)]">
             Market #{bet.marketId.toString()}
           </span>
@@ -247,12 +225,10 @@ export default function MyBets() {
 
         const records: BetRecord[] = logs.map((log) => {
           const args = log.args as { marketId: bigint; user: string; bucket: number; amount: bigint }
-          const cityName = CITY_BY_MARKET_ID[args.marketId.toString()] ?? 'Taipei'
           return {
             marketId: args.marketId,
             bucket: args.bucket,
             amount: args.amount,
-            city: cityName as CityName,
             blockNumber: log.blockNumber ?? 0n,
             txHash: log.transactionHash ?? '',
           }

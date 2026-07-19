@@ -1,6 +1,6 @@
 import { formatUnits } from 'viem'
-import { CITIES, CITY_NAMES, CONTRACT_ADDRESS, getBucketLabel, BUCKET_COUNT, type CityName } from '../lib/wagmi'
-import { useMarket } from '../hooks/useMarket'
+import { CITY_NAMES, CONTRACT_ADDRESS, getBucketLabel, BUCKET_COUNT, type CityName } from '../lib/wagmi'
+import { useMarket, useLatestMarketIds } from '../hooks/useMarket'
 
 const STATUS_LABELS = ['OPEN', 'LOCKED', 'SETTLED']
 const STATUS_CLASSES = ['status-open', 'status-locked', 'status-settled']
@@ -21,11 +21,13 @@ function formatDateShort(ts: bigint): string {
 
 interface CityMarketCardProps {
   cityName: CityName
+  marketId: bigint | undefined
+  isResolvingMarket: boolean
 }
 
-function CityMarketCard({ cityName }: CityMarketCardProps) {
-  const city = CITIES[cityName]
-  const { market, isLoading } = useMarket(city.marketId)
+function CityMarketCard({ cityName, marketId, isResolvingMarket }: CityMarketCardProps) {
+  const { market, isLoading: isLoadingMarket } = useMarket(marketId)
+  const isLoading = isResolvingMarket || isLoadingMarket
 
   const defaultBuckets: readonly bigint[] = [25n, 28n, 31n, 34n]
   const buckets = market?.buckets?.length ? market.buckets : defaultBuckets
@@ -37,7 +39,7 @@ function CityMarketCard({ cityName }: CityMarketCardProps) {
         <div>
           <h3 className="font-display text-xl font-bold text-white">{cityName}</h3>
           <p className="font-mono text-[10px] text-[rgba(255,255,255,0.3)] mt-0.5">
-            Market #{city.marketId.toString()}
+            {marketId !== undefined ? `Market #${marketId.toString()}` : 'Resolving market…'}
           </p>
         </div>
         {isLoading ? (
@@ -126,6 +128,7 @@ function CityMarketCard({ cityName }: CityMarketCardProps) {
 
 export default function MarketStatus() {
   const settledCities = CITY_NAMES // Show all
+  const { marketIds, isLoading: isResolvingMarket } = useLatestMarketIds(CITY_NAMES)
 
   return (
     <div className="px-6 py-6 max-w-6xl mx-auto">
@@ -152,7 +155,12 @@ export default function MarketStatus() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {settledCities.map((cityName) => (
-              <CityMarketCard key={cityName} cityName={cityName} />
+              <CityMarketCard
+                key={cityName}
+                cityName={cityName}
+                marketId={marketIds[cityName]}
+                isResolvingMarket={isResolvingMarket}
+              />
             ))}
           </div>
         </div>
@@ -235,7 +243,7 @@ export default function MarketStatus() {
                     <span className="font-display text-sm text-white">{cityName}</span>
                   </div>
                   <span className="font-mono text-[10px] text-[rgba(255,255,255,0.3)]">
-                    ID #{CITIES[cityName].marketId.toString()}
+                    {marketIds[cityName] !== undefined ? `ID #${marketIds[cityName]!.toString()}` : '…'}
                   </span>
                 </div>
               ))}

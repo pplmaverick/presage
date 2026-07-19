@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { formatUnits } from 'viem'
 import { CITIES, CITY_NAMES, getBucketLabel, BUCKET_COUNT, type CityName } from '../lib/wagmi'
-import { useMarket, useLiveWeather } from '../hooks/useMarket'
+import { useMarket, useLiveWeather, useLatestMarketIds } from '../hooks/useMarket'
 import BetModal from '../components/BetModal'
 
 const STATUS_LABELS = ['OPEN', 'LOCKED', 'SETTLED']
@@ -160,7 +160,10 @@ export default function Betting() {
   const [betBucket, setBetBucket] = useState<number | null>(null)
 
   const city = CITIES[selectedCity]
-  const { market, isLoading, refetch } = useMarket(city.marketId)
+  const { marketIds, isLoading: isResolvingMarket } = useLatestMarketIds(CITY_NAMES)
+  const marketId = marketIds[selectedCity]
+  const { market, isLoading: isLoadingMarket, refetch } = useMarket(marketId)
+  const isLoading = isResolvingMarket || isLoadingMarket
 
   const defaultBuckets: readonly bigint[] = [25n, 28n, 31n, 34n]
   const buckets = market?.buckets?.length ? market.buckets : defaultBuckets
@@ -261,14 +264,16 @@ export default function Betting() {
         <div className="glass-card rounded-xl p-12 text-center">
           <span className="material-symbols-outlined text-4xl text-[rgba(255,255,255,0.2)] mb-4 block">error_outline</span>
           <p className="text-[rgba(255,255,255,0.4)] font-mono text-sm">Market not found on chain</p>
-          <p className="text-[rgba(255,255,255,0.2)] font-mono text-xs mt-1">MarketId: {city.marketId.toString()}</p>
+          {marketId !== undefined && (
+            <p className="text-[rgba(255,255,255,0.2)] font-mono text-xs mt-1">MarketId: {marketId.toString()}</p>
+          )}
         </div>
       )}
 
       {/* Bet Modal */}
-      {betBucket !== null && market && (
+      {betBucket !== null && market && marketId !== undefined && (
         <BetModal
-          marketId={city.marketId}
+          marketId={marketId}
           bucketIndex={betBucket}
           buckets={buckets}
           onClose={() => setBetBucket(null)}

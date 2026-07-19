@@ -38,11 +38,13 @@ export const USDC_ADDRESS = '0x3600000000000000000000000000000000000000' as `0x$
 export const ORACLE_URL =
   import.meta.env.VITE_ORACLE_URL ?? 'http://46.62.246.244:3001'
 
+// City -> marketId is resolved dynamically on-chain (see useLatestMarketIds in hooks/useMarket.ts),
+// not hardcoded here, since a new round of markets gets created periodically as old ones settle.
 export const CITIES = {
-  Taipei: { marketId: 23n, slug: 'taipei' },
-  Tokyo: { marketId: 24n, slug: 'tokyo' },
-  Bangkok: { marketId: 25n, slug: 'bangkok' },
-  Seoul: { marketId: 26n, slug: 'seoul' },
+  Taipei: { slug: 'taipei' },
+  Tokyo: { slug: 'tokyo' },
+  Bangkok: { slug: 'bangkok' },
+  Seoul: { slug: 'seoul' },
 } as const
 
 export type CityName = keyof typeof CITIES
