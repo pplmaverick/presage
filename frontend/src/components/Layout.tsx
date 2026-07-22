@@ -49,12 +49,14 @@ export default function Layout({ children }: LayoutProps) {
       {/* Top Nav */}
       <nav className="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-[rgba(255,255,255,0.05)] backdrop-blur-xl border-b border-[rgba(255,255,255,0.10)]">
         <div className="flex items-center gap-8">
-          <span
-            className="font-display text-2xl font-bold text-primary tracking-tighter cursor-pointer"
-            onClick={() => navigate('/betting')}
-          >
-            Arc Weather Market
-          </span>
+          <div className="flex flex-col cursor-pointer" onClick={() => navigate('/betting')}>
+            <span className="font-display text-2xl font-bold text-primary tracking-tighter">
+              Presage
+            </span>
+            <span className="hidden sm:block text-[10px] uppercase tracking-widest text-[rgba(255,255,255,0.4)]">
+              On-chain prediction markets, built on Arc
+            </span>
+          </div>
           <div className="hidden md:flex gap-6">
             {navItems.map((item) => (
               <NavLink

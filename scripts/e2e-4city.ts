@@ -99,7 +99,7 @@ async function main() {
   const publicClient  = createPublicClient({ chain: arc, transport: http() });
 
   console.log("=".repeat(60));
-  console.log("Arc Weather Market — 4 城市 E2E 測試");
+  console.log("Presage — 4 城市 E2E 測試");
   console.log("  帳戶     :", account.address);
   console.log("  lockDelay:", LOCK_DELAY, "s");
   console.log("  溫度     :", FIXED_TEMP.toString(), "°C");

@@ -1,4 +1,6 @@
-# Arc Weather Market
+# Presage
+
+**On-chain prediction markets, built on Arc. Weather is just the beginning.**
 
 [![CI](https://github.com/pplmaverick/arc-projects/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/pplmaverick/arc-projects/actions/workflows/test.yml)
 ![Arc Testnet](https://img.shields.io/badge/Arc_Testnet-5042002-blue)

@@ -254,7 +254,7 @@ export default function MarketStatus() {
 
       {/* Footer */}
       <footer className="mt-12 flex justify-between items-center py-4 border-t border-[rgba(255,255,255,0.06)] text-[10px] font-mono text-[rgba(255,255,255,0.3)]">
-        <span className="uppercase tracking-widest">Arc Weather Oracle v1.0</span>
+        <span className="uppercase tracking-widest">Presage Oracle v1.0</span>
         <div className="flex gap-4">
           <span className="text-tertiary font-bold">Oracle Active</span>
         </div>

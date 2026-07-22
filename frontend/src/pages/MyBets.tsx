@@ -269,7 +269,7 @@ export default function MyBets() {
       <div className="mb-8">
         <h1 className="font-display text-4xl font-bold text-white mb-2">My Bets</h1>
         <p className="text-[rgba(255,255,255,0.5)] text-sm">
-          Your active and historical positions on Arc Weather Market
+          Your active and historical positions on Presage
         </p>
       </div>
 
