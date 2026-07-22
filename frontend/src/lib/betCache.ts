@@ -48,3 +48,28 @@ export function setCachedBets(address: string, bets: CachedBet[]) {
     // localStorage unavailable (private mode / quota) — the RPC scan is still the source of truth
   }
 }
+
+function fetchTimestampKey(address: string) {
+  return `arc_bets_fetched_${address.toLowerCase()}`
+}
+
+// null means "never successfully scanned" — callers use this to decide between
+// a full historical eth_getLogs scan and a narrow recent-blocks scan.
+export function getLastFetchedAt(address: string): number | null {
+  try {
+    const raw = localStorage.getItem(fetchTimestampKey(address))
+    if (!raw) return null
+    const ts = Number(raw)
+    return Number.isFinite(ts) ? ts : null
+  } catch {
+    return null
+  }
+}
+
+export function setLastFetchedAt(address: string, timestamp: number) {
+  try {
+    localStorage.setItem(fetchTimestampKey(address), String(timestamp))
+  } catch {
+    // localStorage unavailable (private mode / quota) — falls back to scanning every time
+  }
+}

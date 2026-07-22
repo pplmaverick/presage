@@ -4,7 +4,13 @@ import { formatUnits } from 'viem'
 import { CONTRACT_ADDRESS, DEPLOY_BLOCK, getBucketLabel } from '../lib/wagmi'
 import { WEATHER_MARKET_ABI } from '../abi'
 import { useMarket, useClaimed } from '../hooks/useMarket'
-import { getCachedBets, setCachedBets, type CachedBet } from '../lib/betCache'
+import {
+  getCachedBets,
+  setCachedBets,
+  getLastFetchedAt,
+  setLastFetchedAt,
+  type CachedBet,
+} from '../lib/betCache'
 
 interface BetRecord {
   marketId: bigint
@@ -131,6 +137,46 @@ function BetRow({ bet }: { bet: BetRecord }) {
 const LOG_BATCH_SIZE = 9_000n
 const MAX_CONCURRENT_REQUESTS = 20
 
+// Once we've scanned an address at least once, later loads only need to cover blocks since
+// then plus this trailing window (cheap insurance against reorgs/clock skew) — the rest of
+// the address's history already lives in localStorage. A brand-new address/device still gets
+// one full DEPLOY_BLOCK -> latest scan so no historical bets are silently dropped.
+const RECENT_SCAN_WINDOW = 50_000n
+
+// Switching tabs and back re-mounts this page; skip re-scanning if we fetched very recently.
+const FETCH_CACHE_TTL_MS = 30_000
+
+const MAX_LOG_FETCH_ATTEMPTS = 3
+const RATE_LIMIT_PATTERN = /request limit|rate limit|too many requests|429/i
+
+function isRateLimitError(err: unknown): boolean {
+  const message = err instanceof Error ? err.message : String(err)
+  return RATE_LIMIT_PATTERN.test(message)
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+// Retries only on rate-limit errors, with exponential backoff (2s, 4s), up to MAX_LOG_FETCH_ATTEMPTS
+// total attempts. Any other error (or exhausted retries) propagates to the caller immediately.
+async function withRateLimitRetry<T>(fn: () => Promise<T>): Promise<T> {
+  let attempt = 0
+  for (;;) {
+    try {
+      return await fn()
+    } catch (err) {
+      attempt++
+      if (attempt >= MAX_LOG_FETCH_ATTEMPTS || !isRateLimitError(err)) throw err
+      await sleep(2000 * 2 ** (attempt - 1))
+    }
+  }
+}
+
+function maxBigInt(a: bigint, b: bigint): bigint {
+  return a > b ? a : b
+}
+
 function buildBlockRanges(fromBlock: bigint, toBlock: bigint, step: bigint) {
   const ranges: { fromBlock: bigint; toBlock: bigint }[] = []
   for (let start = fromBlock; start <= toBlock; start += step) {
@@ -188,34 +234,47 @@ export default function MyBets() {
 
     async function fetchBets() {
       if (!address || !publicClient) return
+
+      const lastFetchedAt = getLastFetchedAt(address)
+      const hasScannedBefore = lastFetchedAt !== null
+      if (hasScannedBefore && Date.now() - lastFetchedAt < FETCH_CACHE_TTL_MS) {
+        setFetched(true)
+        return
+      }
+
       setLoading(true)
       setError(null)
       setProgress(0)
       try {
         const latestBlock = await publicClient.getBlockNumber()
-        const ranges = buildBlockRanges(DEPLOY_BLOCK, latestBlock, LOG_BATCH_SIZE)
+        const fromBlock = hasScannedBefore
+          ? maxBigInt(DEPLOY_BLOCK, latestBlock - RECENT_SCAN_WINDOW)
+          : DEPLOY_BLOCK
+        const ranges = buildBlockRanges(fromBlock, latestBlock, LOG_BATCH_SIZE)
         let completed = 0
 
         const batches = await mapWithConcurrency(
           ranges,
           MAX_CONCURRENT_REQUESTS,
           ({ fromBlock, toBlock }) =>
-            publicClient.getLogs({
-              address: CONTRACT_ADDRESS,
-              event: {
-                type: 'event',
-                name: 'BetPlaced',
-                inputs: [
-                  { indexed: true, name: 'marketId', type: 'uint256' },
-                  { indexed: true, name: 'user', type: 'address' },
-                  { indexed: false, name: 'bucket', type: 'uint8' },
-                  { indexed: false, name: 'amount', type: 'uint256' },
-                ],
-              },
-              args: { user: address },
-              fromBlock,
-              toBlock,
-            }),
+            withRateLimitRetry(() =>
+              publicClient.getLogs({
+                address: CONTRACT_ADDRESS,
+                event: {
+                  type: 'event',
+                  name: 'BetPlaced',
+                  inputs: [
+                    { indexed: true, name: 'marketId', type: 'uint256' },
+                    { indexed: true, name: 'user', type: 'address' },
+                    { indexed: false, name: 'bucket', type: 'uint8' },
+                    { indexed: false, name: 'amount', type: 'uint256' },
+                  ],
+                },
+                args: { user: address },
+                fromBlock,
+                toBlock,
+              })
+            ),
           () => {
             completed++
             setProgress(Math.round((completed / ranges.length) * 100))
@@ -238,6 +297,7 @@ export default function MyBets() {
         cachedRecordsRef.current = merged
         setBets(merged)
         setCachedBets(address, merged.map(recordToCachedBet))
+        setLastFetchedAt(address, Date.now())
       } catch (e) {
         console.error('Failed to fetch bets:', e)
         setError(e instanceof Error ? e.message : 'Failed to load betting history')
