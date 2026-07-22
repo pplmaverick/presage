@@ -134,8 +134,16 @@ function BetRow({ bet }: { bet: BetRecord }) {
   )
 }
 
-const LOG_BATCH_SIZE = 9_000n
-const MAX_CONCURRENT_REQUESTS = 20
+// Arc Testnet's RPC rejects any eth_getLogs call spanning >10,000 blocks
+// (error -32614 "eth_getLogs is limited to a 10,000 range") — 10,000 is the max.
+const LOG_BATCH_SIZE = 10_000n
+
+// Measured empirically against https://rpc.testnet.arc.network: sequential requests never
+// got rate-limited, but bursts of 5+ concurrent requests started failing with 429 "request
+// limit reached" (confirmed via direct probing). 20 concurrent was drastically over budget —
+// that's what caused a full retry storm even with per-request retry logic on top of it.
+// Keep this well under the observed ~4-5 safe ceiling to leave headroom for other users/tabs.
+const MAX_CONCURRENT_REQUESTS = 3
 
 // Once we've scanned an address at least once, later loads only need to cover blocks since
 // then plus this trailing window (cheap insurance against reorgs/clock skew) — the rest of
@@ -158,8 +166,9 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-// Retries only on rate-limit errors, with exponential backoff (2s, 4s), up to MAX_LOG_FETCH_ATTEMPTS
-// total attempts. Any other error (or exhausted retries) propagates to the caller immediately.
+// Retries only on rate-limit errors, with exponential backoff (2s, 4s) up to MAX_LOG_FETCH_ATTEMPTS
+// total attempts. Jitter keeps concurrent workers that fail together from retrying in lockstep
+// and re-triggering the same limit. Any other error (or exhausted retries) propagates immediately.
 async function withRateLimitRetry<T>(fn: () => Promise<T>): Promise<T> {
   let attempt = 0
   for (;;) {
@@ -168,7 +177,9 @@ async function withRateLimitRetry<T>(fn: () => Promise<T>): Promise<T> {
     } catch (err) {
       attempt++
       if (attempt >= MAX_LOG_FETCH_ATTEMPTS || !isRateLimitError(err)) throw err
-      await sleep(2000 * 2 ** (attempt - 1))
+      const baseDelay = 2000 * 2 ** (attempt - 1)
+      const jitter = baseDelay * 0.2 * Math.random()
+      await sleep(baseDelay + jitter)
     }
   }
 }
@@ -253,50 +264,52 @@ export default function MyBets() {
         const ranges = buildBlockRanges(fromBlock, latestBlock, LOG_BATCH_SIZE)
         let completed = 0
 
-        const batches = await mapWithConcurrency(
-          ranges,
-          MAX_CONCURRENT_REQUESTS,
-          ({ fromBlock, toBlock }) =>
-            withRateLimitRetry(() =>
-              publicClient.getLogs({
-                address: CONTRACT_ADDRESS,
-                event: {
-                  type: 'event',
-                  name: 'BetPlaced',
-                  inputs: [
-                    { indexed: true, name: 'marketId', type: 'uint256' },
-                    { indexed: true, name: 'user', type: 'address' },
-                    { indexed: false, name: 'bucket', type: 'uint8' },
-                    { indexed: false, name: 'amount', type: 'uint256' },
-                  ],
-                },
-                args: { user: address },
-                fromBlock,
-                toBlock,
-              })
-            ),
-          () => {
-            completed++
-            setProgress(Math.round((completed / ranges.length) * 100))
-          }
-        )
-        const logs = batches.flat()
+        // A full first-time scan can take minutes on this rate-limited RPC (see
+        // MAX_CONCURRENT_REQUESTS comment above), so each range's bets are merged and shown
+        // as soon as that range resolves instead of waiting for every range to finish.
+        const fetchRange = async ({ fromBlock, toBlock }: { fromBlock: bigint; toBlock: bigint }) => {
+          const logs = await withRateLimitRetry(() =>
+            publicClient.getLogs({
+              address: CONTRACT_ADDRESS,
+              event: {
+                type: 'event',
+                name: 'BetPlaced',
+                inputs: [
+                  { indexed: true, name: 'marketId', type: 'uint256' },
+                  { indexed: true, name: 'user', type: 'address' },
+                  { indexed: false, name: 'bucket', type: 'uint8' },
+                  { indexed: false, name: 'amount', type: 'uint256' },
+                ],
+              },
+              args: { user: address },
+              fromBlock,
+              toBlock,
+            })
+          )
 
-        const records: BetRecord[] = logs.map((log) => {
-          const args = log.args as { marketId: bigint; user: string; bucket: number; amount: bigint }
-          return {
-            marketId: args.marketId,
-            bucket: args.bucket,
-            amount: args.amount,
-            blockNumber: log.blockNumber ?? 0n,
-            txHash: log.transactionHash ?? '',
+          if (logs.length > 0) {
+            const records: BetRecord[] = logs.map((log) => {
+              const args = log.args as { marketId: bigint; user: string; bucket: number; amount: bigint }
+              return {
+                marketId: args.marketId,
+                bucket: args.bucket,
+                amount: args.amount,
+                blockNumber: log.blockNumber ?? 0n,
+                txHash: log.transactionHash ?? '',
+              }
+            })
+            const merged = mergeBetsByTxHash(records, cachedRecordsRef.current)
+            cachedRecordsRef.current = merged
+            setBets(merged)
           }
+        }
+
+        await mapWithConcurrency(ranges, MAX_CONCURRENT_REQUESTS, fetchRange, () => {
+          completed++
+          setProgress(Math.round((completed / ranges.length) * 100))
         })
 
-        const merged = mergeBetsByTxHash(records, cachedRecordsRef.current)
-        cachedRecordsRef.current = merged
-        setBets(merged)
-        setCachedBets(address, merged.map(recordToCachedBet))
+        setCachedBets(address, cachedRecordsRef.current.map(recordToCachedBet))
         setLastFetchedAt(address, Date.now())
       } catch (e) {
         console.error('Failed to fetch bets:', e)

@@ -19,8 +19,13 @@ export const wagmiConfig = createConfig({
   chains: [arcTestnet],
   connectors: [injected()],
   transports: {
+    // retryCount: 0 — retries are handled entirely by our own rate-limit-aware backoff
+    // (see withRateLimitRetry in MyBets.tsx). Leaving viem's default retryCount: 3 here
+    // meant every failed request was silently retried 3x by the transport *underneath*
+    // our own retry loop, multiplying the number of requests hitting an already-limited RPC.
     [arcTestnet.id]: http(
-      import.meta.env.VITE_RPC_URL ?? 'https://rpc.testnet.arc.network'
+      import.meta.env.VITE_RPC_URL ?? 'https://rpc.testnet.arc.network',
+      { retryCount: 0 }
     ),
   },
 })
