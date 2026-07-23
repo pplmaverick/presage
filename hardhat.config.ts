@@ -33,7 +33,7 @@ export default defineConfig({
   networks: {
     arc: {
       type: "http",
-      url: "https://rpc.testnet.arc.network",
+      url: process.env.ARC_RPC_URL ?? "https://rpc.testnet.arc.network",
       accounts: [deployerKey],
       chainId: 5042002,
     },

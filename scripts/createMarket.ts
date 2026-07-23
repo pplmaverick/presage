@@ -20,7 +20,7 @@ const arc = defineChain({
   id: 5042002,
   name: "Arc Testnet",
   nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
-  rpcUrls: { default: { http: ["https://rpc.testnet.arc.network"] } },
+  rpcUrls: { default: { http: [process.env.ARC_RPC_URL ?? "https://rpc.testnet.arc.network"] } },
 });
 
 const GAS_OPTS = {
