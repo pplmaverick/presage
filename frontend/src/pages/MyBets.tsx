@@ -138,12 +138,19 @@ function BetRow({ bet }: { bet: BetRecord }) {
 // (error -32614 "eth_getLogs is limited to a 10,000 range") — 10,000 is the max.
 const LOG_BATCH_SIZE = 10_000n
 
-// Measured empirically against https://rpc.testnet.arc.network: sequential requests never
-// got rate-limited, but bursts of 5+ concurrent requests started failing with 429 "request
-// limit reached" (confirmed via direct probing). 20 concurrent was drastically over budget —
-// that's what caused a full retry storm even with per-request retry logic on top of it.
-// Keep this well under the observed ~4-5 safe ceiling to leave headroom for other users/tabs.
-const MAX_CONCURRENT_REQUESTS = 3
+// Re-measured directly against https://rpc.testnet.arc.network (2026-07-23): 3 concurrent
+// eth_getLogs calls already 429 2 out of 3 times, and even fully sequential back-to-back calls
+// (no concurrency at all) occasionally 429 too — this RPC's real limit is stricter than the
+// earlier "~4-5 safe ceiling" measurement assumed (likely shared budget with other users of this
+// public testnet endpoint, not something under our control). Concurrency 3 -> 1: process one
+// range at a time, and pace even successful requests (see REQUEST_PACING_MS) instead of relying
+// only on reactive backoff after a failure.
+const MAX_CONCURRENT_REQUESTS = 1
+
+// Fixed gap before starting the next range, even after a success — proactive pacing on top of
+// withRateLimitRetry's reactive backoff, since sequential requests alone still occasionally hit
+// the RPC's rate limit (see MAX_CONCURRENT_REQUESTS comment above).
+const REQUEST_PACING_MS = 400
 
 // Once we've scanned an address at least once, later loads only need to cover blocks since
 // then plus this trailing window (cheap insurance against reorgs/clock skew) — the rest of
@@ -211,6 +218,7 @@ async function mapWithConcurrency<T, R>(
       const current = nextIndex++
       results[current] = await fn(items[current])
       onItemDone()
+      if (nextIndex < items.length) await sleep(REQUEST_PACING_MS)
     }
   }
 
