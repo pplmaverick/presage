@@ -7,7 +7,13 @@ import { wagmiConfig } from './lib/wagmi'
 import App from './App'
 import './index.css'
 
-const queryClient = new QueryClient()
+// retry: false — RPC reads (getMarket, bucketTotals, claimed, allowance, balance, ...) rely on
+// this being the only retry layer alongside viem's transport retryCount: 0 (see wagmi.ts) and
+// MyBets.tsx's own withRateLimitRetry. TanStack Query's default retry: 3 was a second, independent
+// retry mechanism that kept re-triggering the same RPC rate limit underneath those.
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false } },
+})
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

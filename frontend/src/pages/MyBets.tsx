@@ -264,43 +264,54 @@ export default function MyBets() {
         const ranges = buildBlockRanges(fromBlock, latestBlock, LOG_BATCH_SIZE)
         let completed = 0
 
+        console.log(
+          `[MyBets] scanning ${ranges.length} block range(s) from ${fromBlock} to ${latestBlock}, MAX_CONCURRENT_REQUESTS=${MAX_CONCURRENT_REQUESTS}`
+        )
+
         // A full first-time scan can take minutes on this rate-limited RPC (see
         // MAX_CONCURRENT_REQUESTS comment above), so each range's bets are merged and shown
         // as soon as that range resolves instead of waiting for every range to finish.
         const fetchRange = async ({ fromBlock, toBlock }: { fromBlock: bigint; toBlock: bigint }) => {
-          const logs = await withRateLimitRetry(() =>
-            publicClient.getLogs({
-              address: CONTRACT_ADDRESS,
-              event: {
-                type: 'event',
-                name: 'BetPlaced',
-                inputs: [
-                  { indexed: true, name: 'marketId', type: 'uint256' },
-                  { indexed: true, name: 'user', type: 'address' },
-                  { indexed: false, name: 'bucket', type: 'uint8' },
-                  { indexed: false, name: 'amount', type: 'uint256' },
-                ],
-              },
-              args: { user: address },
-              fromBlock,
-              toBlock,
-            })
-          )
+          try {
+            const logs = await withRateLimitRetry(() =>
+              publicClient.getLogs({
+                address: CONTRACT_ADDRESS,
+                event: {
+                  type: 'event',
+                  name: 'BetPlaced',
+                  inputs: [
+                    { indexed: true, name: 'marketId', type: 'uint256' },
+                    { indexed: true, name: 'user', type: 'address' },
+                    { indexed: false, name: 'bucket', type: 'uint8' },
+                    { indexed: false, name: 'amount', type: 'uint256' },
+                  ],
+                },
+                args: { user: address },
+                fromBlock,
+                toBlock,
+              })
+            )
 
-          if (logs.length > 0) {
-            const records: BetRecord[] = logs.map((log) => {
-              const args = log.args as { marketId: bigint; user: string; bucket: number; amount: bigint }
-              return {
-                marketId: args.marketId,
-                bucket: args.bucket,
-                amount: args.amount,
-                blockNumber: log.blockNumber ?? 0n,
-                txHash: log.transactionHash ?? '',
-              }
-            })
-            const merged = mergeBetsByTxHash(records, cachedRecordsRef.current)
-            cachedRecordsRef.current = merged
-            setBets(merged)
+            if (logs.length > 0) {
+              const records: BetRecord[] = logs.map((log) => {
+                const args = log.args as { marketId: bigint; user: string; bucket: number; amount: bigint }
+                return {
+                  marketId: args.marketId,
+                  bucket: args.bucket,
+                  amount: args.amount,
+                  blockNumber: log.blockNumber ?? 0n,
+                  txHash: log.transactionHash ?? '',
+                }
+              })
+              const merged = mergeBetsByTxHash(records, cachedRecordsRef.current)
+              cachedRecordsRef.current = merged
+              setBets(merged)
+            }
+          } catch (err) {
+            // Retries exhausted (or a non-rate-limit error) for this one range only — skip it
+            // instead of throwing, so the rest of the scan still completes. A dropped range means
+            // some bets in that block window won't show up until the next scan retries it.
+            console.error(`Skipping block range ${fromBlock}-${toBlock} after retries exhausted:`, err)
           }
         }
 
