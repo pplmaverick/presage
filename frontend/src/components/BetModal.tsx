@@ -200,7 +200,7 @@ export default function BetModal({ marketId, bucketIndex, buckets, onClose, onSu
                 ) : (
                   <>
                     <span className="material-symbols-outlined text-base">swap_horiz</span>
-                    Switch to Arc Testnet
+                    Switch to {activeChain.name}
                   </>
                 )}
               </button>

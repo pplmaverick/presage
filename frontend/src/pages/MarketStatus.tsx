@@ -1,5 +1,5 @@
 import { formatUnits } from 'viem'
-import { CITY_NAMES, CONTRACT_ADDRESS, getBucketLabel, BUCKET_COUNT, type CityName } from '../lib/wagmi'
+import { CITY_NAMES, CONTRACT_ADDRESS, IS_TESTNET, activeChain, getBucketLabel, BUCKET_COUNT, type CityName } from '../lib/wagmi'
 import { useMarket, useLatestMarketIds } from '../hooks/useMarket'
 
 const STATUS_LABELS = ['OPEN', 'LOCKED', 'SETTLED']
@@ -200,7 +200,7 @@ export default function MarketStatus() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-[rgba(255,255,255,0.4)]">Network</span>
-                  <span className="font-mono text-xs text-white">Arc Testnet #5042002</span>
+                  <span className="font-mono text-xs text-white">{activeChain.name} #{activeChain.id}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-[rgba(255,255,255,0.4)]">Settlement Fee</span>
@@ -217,7 +217,7 @@ export default function MarketStatus() {
                   USDC Settlement
                 </span>
                 <span className="bg-[rgba(255,255,255,0.05)] text-[rgba(255,255,255,0.5)] text-[10px] px-2 py-1 rounded-full font-bold border border-[rgba(255,255,255,0.1)]">
-                  Testnet
+                  {IS_TESTNET ? 'Testnet' : 'Mainnet'}
                 </span>
               </div>
 

@@ -90,7 +90,11 @@ export const arcTestnet: Chain = {
 
 export const arcMainnet: Chain = {
   id: 5042,
-  name: 'Arc',
+  // Arc's own docs call mainnet simply "Arc", but this name is what the UI renders in
+  // the network label. Spelling it out keeps it symmetric with "Arc Testnet" so a user
+  // can never misread which chain they are spending real USDC on. chainId is what every
+  // code path actually keys on; this field is display only.
+  name: 'Arc Mainnet',
   // Arc's native gas token is USDC itself. Native balances are accounted in 18
   // decimals while the ERC-20 interface uses 6 — do not conflate the two.
   nativeCurrency: { name: 'USDC', symbol: 'USDC', decimals: 18 },
