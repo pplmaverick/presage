@@ -121,7 +121,7 @@ function WeatherCard({ city, slug }: WeatherCardProps) {
       <div className="flex flex-col">
         <h1 className="font-display text-5xl font-bold text-white tracking-tight">{city}</h1>
         <p className="font-mono text-xs text-[rgba(255,255,255,0.5)] mt-1">
-          OpenWeather + n8n Oracle
+          OpenWeather
         </p>
       </div>
 

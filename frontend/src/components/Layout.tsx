@@ -163,7 +163,7 @@ export default function Layout({ children }: LayoutProps) {
 
         <footer className="p-4 border-t border-[rgba(255,255,255,0.10)] space-y-1">
           <div className="text-[10px] font-mono text-[rgba(255,255,255,0.3)] uppercase tracking-widest px-4 py-2">
-            Data Source: OpenWeather + n8n Oracle
+            Data Source: OpenWeather
           </div>
         </footer>
       </aside>

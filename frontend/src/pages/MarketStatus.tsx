@@ -196,7 +196,7 @@ export default function MarketStatus() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-[rgba(255,255,255,0.4)]">Data Source</span>
-                  <span className="font-mono text-xs text-white">OpenWeather + n8n Oracle</span>
+                  <span className="font-mono text-xs text-white">OpenWeather</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-[rgba(255,255,255,0.4)]">Network</span>
@@ -224,7 +224,10 @@ export default function MarketStatus() {
               {/* Description */}
               <div className="p-4 bg-[rgba(255,255,255,0.03)] rounded-xl border border-[rgba(255,255,255,0.06)]">
                 <p className="text-xs text-[rgba(255,255,255,0.4)] leading-relaxed">
-                  Weather data is sourced from OpenWeather API via n8n automation, submitted on-chain by the oracle wallet. Markets settle at the designated lockTime.
+                  Weather data comes from the OpenWeather API and is submitted on-chain by the
+                  contract owner once a market locks. Betting closes at the designated lockTime;
+                  if no result is submitted before the settlement deadline, bettors can reclaim
+                  their principal in full.
                 </p>
               </div>
             </div>
