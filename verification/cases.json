@@ -1,0 +1,1738 @@
+{
+  "model": "presage-weather-market-irm",
+  "feeBps": 200,
+  "defaultLockedTimeout": 259200,
+  "minLockedTimeout": 86400,
+  "maxLockedTimeout": 2592000,
+  "caseCount": 32,
+  "cases": [
+    {
+      "name": "settle_single_winner",
+      "mode": "settle",
+      "at": "timeout_minus_3600",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          2,
+          "100000000"
+        ],
+        [
+          1,
+          3,
+          "50000000"
+        ]
+      ],
+      "finalTemp": "30",
+      "revertReason": null,
+      "expected": {
+        "case": "settle_single_winner",
+        "outcome": "settle",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": "30",
+        "winningBucket": 2,
+        "noWinner": false,
+        "totalPool": "150000000",
+        "fee": "3000000",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "147000000"
+          ],
+          [
+            1,
+            "revert",
+            "0"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "c012aa37e35d9c02bfa55f8847d3a18eaa9776b4abf6396b65377aede7fb1489"
+    },
+    {
+      "name": "settle_two_winners_even_split",
+      "mode": "settle",
+      "at": "timeout_minus_3600",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          2,
+          "100000000"
+        ],
+        [
+          1,
+          2,
+          "100000000"
+        ]
+      ],
+      "finalTemp": "30",
+      "revertReason": null,
+      "expected": {
+        "case": "settle_two_winners_even_split",
+        "outcome": "settle",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": "30",
+        "winningBucket": 2,
+        "noWinner": false,
+        "totalPool": "200000000",
+        "fee": "4000000",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "98000000"
+          ],
+          [
+            1,
+            "claimable",
+            "98000000"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "77405e81f0966b9dd7e43347af6ee1f31ddff93d24099f63c4a81cae8d711da9"
+    },
+    {
+      "name": "settle_three_winners_uneven",
+      "mode": "settle",
+      "at": "timeout_minus_3600",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          1,
+          "30000000"
+        ],
+        [
+          1,
+          1,
+          "20000000"
+        ],
+        [
+          2,
+          1,
+          "50000000"
+        ],
+        [
+          0,
+          4,
+          "17000000"
+        ]
+      ],
+      "finalTemp": "27",
+      "revertReason": null,
+      "expected": {
+        "case": "settle_three_winners_uneven",
+        "outcome": "settle",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": "27",
+        "winningBucket": 1,
+        "noWinner": false,
+        "totalPool": "117000000",
+        "fee": "2340000",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "34398000"
+          ],
+          [
+            1,
+            "claimable",
+            "22932000"
+          ],
+          [
+            2,
+            "claimable",
+            "57330000"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "671d56ee1ee4f2bcf0c0fdf6fc01e7416e05a0b540a9a53c7c2f887d2f1ddc5a"
+    },
+    {
+      "name": "settle_temp_exactly_on_upper_bound",
+      "mode": "settle",
+      "at": "timeout_minus_3600",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          1,
+          "40000000"
+        ],
+        [
+          1,
+          2,
+          "60000000"
+        ]
+      ],
+      "finalTemp": "28",
+      "revertReason": null,
+      "expected": {
+        "case": "settle_temp_exactly_on_upper_bound",
+        "outcome": "settle",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": "28",
+        "winningBucket": 1,
+        "noWinner": false,
+        "totalPool": "100000000",
+        "fee": "2000000",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "98000000"
+          ],
+          [
+            1,
+            "revert",
+            "0"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "f2dbc4be1169ed7dbb1dcf7163ff701444165dee52f40fd63a714567dcb9dd49"
+    },
+    {
+      "name": "settle_temp_one_above_upper_bound",
+      "mode": "settle",
+      "at": "timeout_minus_3600",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          1,
+          "40000000"
+        ],
+        [
+          1,
+          2,
+          "60000000"
+        ]
+      ],
+      "finalTemp": "29",
+      "revertReason": null,
+      "expected": {
+        "case": "settle_temp_one_above_upper_bound",
+        "outcome": "settle",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": "29",
+        "winningBucket": 2,
+        "noWinner": false,
+        "totalPool": "100000000",
+        "fee": "2000000",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "revert",
+            "0"
+          ],
+          [
+            1,
+            "claimable",
+            "98000000"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "6381c60cd0b0b376a1b49edc9dc1a5f9cec5ea20195795b41c160a65fb60105d"
+    },
+    {
+      "name": "no_winner_fee_waived",
+      "mode": "settle",
+      "at": "timeout_minus_3600",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          0,
+          "100000000"
+        ],
+        [
+          1,
+          1,
+          "50000000"
+        ]
+      ],
+      "finalTemp": "33",
+      "revertReason": null,
+      "expected": {
+        "case": "no_winner_fee_waived",
+        "outcome": "settle",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": "33",
+        "winningBucket": 3,
+        "noWinner": true,
+        "totalPool": "150000000",
+        "fee": "0",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "100000000"
+          ],
+          [
+            1,
+            "claimable",
+            "50000000"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "2f4056b14fd310d381d88bb74f7a490748f95cc3111ea1dda982555e3ae58517"
+    },
+    {
+      "name": "no_winner_single_bettor",
+      "mode": "settle",
+      "at": "timeout_minus_3600",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          4,
+          "7000000"
+        ]
+      ],
+      "finalTemp": "20",
+      "revertReason": null,
+      "expected": {
+        "case": "no_winner_single_bettor",
+        "outcome": "settle",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": "20",
+        "winningBucket": 0,
+        "noWinner": true,
+        "totalPool": "7000000",
+        "fee": "0",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "7000000"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "403b65c0dab7a78ba9b3898da5908546aabca5597ad50d64ff9c73bd1797da74"
+    },
+    {
+      "name": "extreme_temp_negative_hits_bucket0",
+      "mode": "settle",
+      "at": "timeout_minus_3600",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          0,
+          "80000000"
+        ],
+        [
+          1,
+          3,
+          "20000000"
+        ]
+      ],
+      "finalTemp": "-40",
+      "revertReason": null,
+      "expected": {
+        "case": "extreme_temp_negative_hits_bucket0",
+        "outcome": "settle",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": "-40",
+        "winningBucket": 0,
+        "noWinner": false,
+        "totalPool": "100000000",
+        "fee": "2000000",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "98000000"
+          ],
+          [
+            1,
+            "revert",
+            "0"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "da9d34e7d127f5f9acfb25232ce04b6e65927ea313acc6e4478b6c6761c763c3"
+    },
+    {
+      "name": "extreme_temp_very_negative",
+      "mode": "settle",
+      "at": "timeout_minus_3600",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          0,
+          "11000000"
+        ],
+        [
+          1,
+          2,
+          "13000000"
+        ]
+      ],
+      "finalTemp": "-1606938044258990275541962092341162602522202993782792835301376",
+      "revertReason": null,
+      "expected": {
+        "case": "extreme_temp_very_negative",
+        "outcome": "settle",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": "-1606938044258990275541962092341162602522202993782792835301376",
+        "winningBucket": 0,
+        "noWinner": false,
+        "totalPool": "24000000",
+        "fee": "480000",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "23520000"
+          ],
+          [
+            1,
+            "revert",
+            "0"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "f671f4417689e82def3f161f93d2b3283390d4ebaeb70cbd4d37eba33c89c7dc"
+    },
+    {
+      "name": "extreme_temp_very_large_top_bucket",
+      "mode": "settle",
+      "at": "timeout_minus_3600",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          4,
+          "90000000"
+        ],
+        [
+          1,
+          0,
+          "10000000"
+        ]
+      ],
+      "finalTemp": "1606938044258990275541962092341162602522202993782792835301376",
+      "revertReason": null,
+      "expected": {
+        "case": "extreme_temp_very_large_top_bucket",
+        "outcome": "settle",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": "1606938044258990275541962092341162602522202993782792835301376",
+        "winningBucket": 4,
+        "noWinner": false,
+        "totalPool": "100000000",
+        "fee": "2000000",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "98000000"
+          ],
+          [
+            1,
+            "revert",
+            "0"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "997a9ed3eafd9afa98575bd9c68e4faea9aa63573d1bb3e8dfd9f742fe429162"
+    },
+    {
+      "name": "extreme_temp_negative_no_winner",
+      "mode": "settle",
+      "at": "timeout_minus_3600",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          4,
+          "5000000"
+        ]
+      ],
+      "finalTemp": "-100",
+      "revertReason": null,
+      "expected": {
+        "case": "extreme_temp_negative_no_winner",
+        "outcome": "settle",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": "-100",
+        "winningBucket": 0,
+        "noWinner": true,
+        "totalPool": "5000000",
+        "fee": "0",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "5000000"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "646f5a7f67892664c59963ba6aca8f13cb6eaa6236f3125111e93128e23eddbb"
+    },
+    {
+      "name": "single_user_spans_all_buckets",
+      "mode": "settle",
+      "at": "timeout_minus_3600",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          0,
+          "10000000"
+        ],
+        [
+          0,
+          1,
+          "20000000"
+        ],
+        [
+          0,
+          2,
+          "30000000"
+        ],
+        [
+          0,
+          3,
+          "40000000"
+        ],
+        [
+          0,
+          4,
+          "50000000"
+        ]
+      ],
+      "finalTemp": "30",
+      "revertReason": null,
+      "expected": {
+        "case": "single_user_spans_all_buckets",
+        "outcome": "settle",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": "30",
+        "winningBucket": 2,
+        "noWinner": false,
+        "totalPool": "150000000",
+        "fee": "3000000",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "147000000"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "18818363cd34164ab9e6653e986ce6e2b476f9dc85bb0a9a79dd8754951c2d79"
+    },
+    {
+      "name": "multi_bucket_user_vs_single_bucket_user",
+      "mode": "settle",
+      "at": "timeout_minus_3600",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          1,
+          "25000000"
+        ],
+        [
+          0,
+          2,
+          "75000000"
+        ],
+        [
+          1,
+          2,
+          "25000000"
+        ]
+      ],
+      "finalTemp": "31",
+      "revertReason": null,
+      "expected": {
+        "case": "multi_bucket_user_vs_single_bucket_user",
+        "outcome": "settle",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": "31",
+        "winningBucket": 2,
+        "noWinner": false,
+        "totalPool": "125000000",
+        "fee": "2500000",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "91875000"
+          ],
+          [
+            1,
+            "claimable",
+            "30625000"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "4ad67f6eeaa768f835384a0e5387387b2c37b60fbea12a8df23e1cb21d15c5f0"
+    },
+    {
+      "name": "rounding_dust_thirds",
+      "mode": "settle",
+      "at": "timeout_minus_3600",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          2,
+          "1"
+        ],
+        [
+          1,
+          2,
+          "1"
+        ],
+        [
+          2,
+          2,
+          "1"
+        ]
+      ],
+      "finalTemp": "30",
+      "revertReason": null,
+      "expected": {
+        "case": "rounding_dust_thirds",
+        "outcome": "settle",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": "30",
+        "winningBucket": 2,
+        "noWinner": false,
+        "totalPool": "3",
+        "fee": "0",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "1"
+          ],
+          [
+            1,
+            "claimable",
+            "1"
+          ],
+          [
+            2,
+            "claimable",
+            "1"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "91e9fc1111203383c2d02bf5befb2c1a9bafea3a93178654e2691f46f42b54d3"
+    },
+    {
+      "name": "rounding_dust_primes",
+      "mode": "settle",
+      "at": "timeout_minus_3600",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          2,
+          "999983"
+        ],
+        [
+          1,
+          2,
+          "7"
+        ],
+        [
+          2,
+          3,
+          "1000003"
+        ]
+      ],
+      "finalTemp": "29",
+      "revertReason": null,
+      "expected": {
+        "case": "rounding_dust_primes",
+        "outcome": "settle",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": "29",
+        "winningBucket": 2,
+        "noWinner": false,
+        "totalPool": "1999993",
+        "fee": "39999",
+        "dust": "1",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "1959980"
+          ],
+          [
+            1,
+            "claimable",
+            "13"
+          ],
+          [
+            2,
+            "revert",
+            "0"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "82dc3070f3a6345a4a68ddf2077377107030e9fa727bbef8a890b332219d49da"
+    },
+    {
+      "name": "rounding_fee_floors_to_zero",
+      "mode": "settle",
+      "at": "timeout_minus_3600",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          2,
+          "49"
+        ],
+        [
+          1,
+          3,
+          "1"
+        ]
+      ],
+      "finalTemp": "30",
+      "revertReason": null,
+      "expected": {
+        "case": "rounding_fee_floors_to_zero",
+        "outcome": "settle",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": "30",
+        "winningBucket": 2,
+        "noWinner": false,
+        "totalPool": "50",
+        "fee": "1",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "49"
+          ],
+          [
+            1,
+            "revert",
+            "0"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "64f9dab573e7b0ee647ee40ab5ec8c0dc576e76f598dad867fab7c456ba78fa3"
+    },
+    {
+      "name": "single_boundary_market_low",
+      "mode": "settle",
+      "at": "timeout_minus_3600",
+      "lockedTimeout": null,
+      "buckets": [
+        "25"
+      ],
+      "bets": [
+        [
+          0,
+          0,
+          "60000000"
+        ],
+        [
+          1,
+          1,
+          "40000000"
+        ]
+      ],
+      "finalTemp": "24",
+      "revertReason": null,
+      "expected": {
+        "case": "single_boundary_market_low",
+        "outcome": "settle",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25"
+        ],
+        "finalTemp": "24",
+        "winningBucket": 0,
+        "noWinner": false,
+        "totalPool": "100000000",
+        "fee": "2000000",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "98000000"
+          ],
+          [
+            1,
+            "revert",
+            "0"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "2cd77965ed9bd7facbd3a51f54a5762edd54422765e5b7888bf0d2578bd4bb83"
+    },
+    {
+      "name": "single_boundary_market_high",
+      "mode": "settle",
+      "at": "timeout_minus_3600",
+      "lockedTimeout": null,
+      "buckets": [
+        "25"
+      ],
+      "bets": [
+        [
+          0,
+          0,
+          "60000000"
+        ],
+        [
+          1,
+          1,
+          "40000000"
+        ]
+      ],
+      "finalTemp": "26",
+      "revertReason": null,
+      "expected": {
+        "case": "single_boundary_market_high",
+        "outcome": "settle",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25"
+        ],
+        "finalTemp": "26",
+        "winningBucket": 1,
+        "noWinner": false,
+        "totalPool": "100000000",
+        "fee": "2000000",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "revert",
+            "0"
+          ],
+          [
+            1,
+            "claimable",
+            "98000000"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "1f58e0f6ab69279029083478cabfde2addfe2a5a9bf069e31fb642eba8312064"
+    },
+    {
+      "name": "settle_at_deadline_minus_1s",
+      "mode": "settle",
+      "at": "timeout_minus_1",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          2,
+          "100000000"
+        ],
+        [
+          1,
+          3,
+          "100000000"
+        ]
+      ],
+      "finalTemp": "30",
+      "revertReason": null,
+      "expected": {
+        "case": "settle_at_deadline_minus_1s",
+        "outcome": "settle",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": "30",
+        "winningBucket": 2,
+        "noWinner": false,
+        "totalPool": "200000000",
+        "fee": "4000000",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "196000000"
+          ],
+          [
+            1,
+            "revert",
+            "0"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "d8ceeebf3e3a5b3ba551c0aa932982d22e5f26e00c5ee3dd6d1cfc1c36c06e79"
+    },
+    {
+      "name": "settle_at_deadline_exact_reverts",
+      "mode": "settle_revert",
+      "at": "timeout_exact",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          2,
+          "100000000"
+        ]
+      ],
+      "finalTemp": "30",
+      "revertReason": "settlement window closed",
+      "expected": {
+        "case": "settle_at_deadline_exact_reverts",
+        "outcome": "revert",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": "30",
+        "winningBucket": null,
+        "noWinner": null,
+        "totalPool": "100000000",
+        "fee": "0",
+        "dust": "0",
+        "payouts": [],
+        "revertReason": "settlement window closed"
+      },
+      "sha256": "16bc53156352b146fd1145ab3bd6417b65ae7d70ee5118ab6110e0bc259bad3b"
+    },
+    {
+      "name": "settle_at_deadline_plus_1s_reverts",
+      "mode": "settle_revert",
+      "at": "timeout_plus_1",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          2,
+          "100000000"
+        ]
+      ],
+      "finalTemp": "30",
+      "revertReason": "settlement window closed",
+      "expected": {
+        "case": "settle_at_deadline_plus_1s_reverts",
+        "outcome": "revert",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": "30",
+        "winningBucket": null,
+        "noWinner": null,
+        "totalPool": "100000000",
+        "fee": "0",
+        "dust": "0",
+        "payouts": [],
+        "revertReason": "settlement window closed"
+      },
+      "sha256": "00031fe844a44aadb1f24038af0b90ad735ab0d5195e7367456792a1c3497040"
+    },
+    {
+      "name": "refund_at_deadline_minus_1s_reverts",
+      "mode": "refund_revert",
+      "at": "timeout_minus_1",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          2,
+          "100000000"
+        ],
+        [
+          1,
+          3,
+          "50000000"
+        ]
+      ],
+      "finalTemp": null,
+      "revertReason": "refund window not open",
+      "expected": {
+        "case": "refund_at_deadline_minus_1s_reverts",
+        "outcome": "revert",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": null,
+        "winningBucket": null,
+        "noWinner": null,
+        "totalPool": "150000000",
+        "fee": "0",
+        "dust": "0",
+        "payouts": [],
+        "revertReason": "refund window not open"
+      },
+      "sha256": "1f9f36f94bb4ae75694f327a84689ded07755a41bec5533a8dc94ea39b78342c"
+    },
+    {
+      "name": "refund_at_deadline_exact_succeeds",
+      "mode": "refund",
+      "at": "timeout_exact",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          2,
+          "100000000"
+        ],
+        [
+          1,
+          3,
+          "50000000"
+        ]
+      ],
+      "finalTemp": null,
+      "revertReason": null,
+      "expected": {
+        "case": "refund_at_deadline_exact_succeeds",
+        "outcome": "refund",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": null,
+        "winningBucket": null,
+        "noWinner": null,
+        "totalPool": "150000000",
+        "fee": "0",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "100000000"
+          ],
+          [
+            1,
+            "claimable",
+            "50000000"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "18667db6558195c43595466da174dd1ce46ed650c7d341c7388c1a72e403c4ef"
+    },
+    {
+      "name": "refund_at_deadline_plus_1s_succeeds",
+      "mode": "refund",
+      "at": "timeout_plus_1",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          2,
+          "100000000"
+        ],
+        [
+          1,
+          3,
+          "50000000"
+        ],
+        [
+          2,
+          0,
+          "1"
+        ]
+      ],
+      "finalTemp": null,
+      "revertReason": null,
+      "expected": {
+        "case": "refund_at_deadline_plus_1s_succeeds",
+        "outcome": "refund",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": null,
+        "winningBucket": null,
+        "noWinner": null,
+        "totalPool": "150000001",
+        "fee": "0",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "100000000"
+          ],
+          [
+            1,
+            "claimable",
+            "50000000"
+          ],
+          [
+            2,
+            "claimable",
+            "1"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "354efc5ddd6682bf67aa00bfd24eb25bdbedaa2ee604b6ecb3cd64a74c4d8ed8"
+    },
+    {
+      "name": "refund_multi_bucket_user_gets_full_stake",
+      "mode": "refund",
+      "at": "timeout_plus_1",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          0,
+          "11000000"
+        ],
+        [
+          0,
+          2,
+          "22000000"
+        ],
+        [
+          1,
+          4,
+          "33000000"
+        ]
+      ],
+      "finalTemp": null,
+      "revertReason": null,
+      "expected": {
+        "case": "refund_multi_bucket_user_gets_full_stake",
+        "outcome": "refund",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": null,
+        "winningBucket": null,
+        "noWinner": null,
+        "totalPool": "66000000",
+        "fee": "0",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "33000000"
+          ],
+          [
+            1,
+            "claimable",
+            "33000000"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "91c791ea7b8c7f99ff270f38c15f3e9c1a2ad277ea21c9328fa3b04137ecb5b6"
+    },
+    {
+      "name": "lock_nonexistent_market_reverts",
+      "mode": "lock_revert",
+      "at": "lock_time_plus_1",
+      "lockedTimeout": null,
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [],
+      "finalTemp": null,
+      "revertReason": "market not exist",
+      "expected": {
+        "case": "lock_nonexistent_market_reverts",
+        "outcome": "revert",
+        "lockedTimeout": "259200",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": null,
+        "winningBucket": null,
+        "noWinner": null,
+        "totalPool": "0",
+        "fee": "0",
+        "dust": "0",
+        "payouts": [],
+        "revertReason": "market not exist"
+      },
+      "sha256": "90a2d4ff1da53ad6ed998b8a48f6108958e527a38d62559ada6a5e49675cbd45"
+    },
+    {
+      "name": "custom_timeout_7d_settle_before_deadline",
+      "mode": "settle",
+      "at": "timeout_minus_1",
+      "lockedTimeout": "604800",
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          2,
+          "100000000"
+        ],
+        [
+          1,
+          3,
+          "40000000"
+        ]
+      ],
+      "finalTemp": "30",
+      "revertReason": null,
+      "expected": {
+        "case": "custom_timeout_7d_settle_before_deadline",
+        "outcome": "settle",
+        "lockedTimeout": "604800",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": "30",
+        "winningBucket": 2,
+        "noWinner": false,
+        "totalPool": "140000000",
+        "fee": "2800000",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "137200000"
+          ],
+          [
+            1,
+            "revert",
+            "0"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "387bf76041f9f519341eb246519d94eef79249feb3172f7ecf6c109f37f05b88"
+    },
+    {
+      "name": "custom_timeout_7d_refund_at_deadline",
+      "mode": "refund",
+      "at": "timeout_exact",
+      "lockedTimeout": "604800",
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          2,
+          "100000000"
+        ],
+        [
+          1,
+          3,
+          "40000000"
+        ]
+      ],
+      "finalTemp": null,
+      "revertReason": null,
+      "expected": {
+        "case": "custom_timeout_7d_refund_at_deadline",
+        "outcome": "refund",
+        "lockedTimeout": "604800",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": null,
+        "winningBucket": null,
+        "noWinner": null,
+        "totalPool": "140000000",
+        "fee": "0",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "100000000"
+          ],
+          [
+            1,
+            "claimable",
+            "40000000"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "6bf1f87b95e36c794ae6a86a888843d98bd0be689b3a87e8b2281af97b49edf7"
+    },
+    {
+      "name": "custom_timeout_1d_min_boundary",
+      "mode": "refund",
+      "at": "timeout_plus_1",
+      "lockedTimeout": "86400",
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          1,
+          "15000000"
+        ]
+      ],
+      "finalTemp": null,
+      "revertReason": null,
+      "expected": {
+        "case": "custom_timeout_1d_min_boundary",
+        "outcome": "refund",
+        "lockedTimeout": "86400",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": null,
+        "winningBucket": null,
+        "noWinner": null,
+        "totalPool": "15000000",
+        "fee": "0",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "15000000"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "cd9fa8c25e4f9f07b6cac4756da4384c605c6eb9ae3b1ccb6f38d11367ae6c1d"
+    },
+    {
+      "name": "custom_timeout_30d_max_boundary",
+      "mode": "settle",
+      "at": "timeout_minus_1",
+      "lockedTimeout": "2592000",
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [
+        [
+          0,
+          2,
+          "21000000"
+        ]
+      ],
+      "finalTemp": "29",
+      "revertReason": null,
+      "expected": {
+        "case": "custom_timeout_30d_max_boundary",
+        "outcome": "settle",
+        "lockedTimeout": "2592000",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": "29",
+        "winningBucket": 2,
+        "noWinner": false,
+        "totalPool": "21000000",
+        "fee": "420000",
+        "dust": "0",
+        "payouts": [
+          [
+            0,
+            "claimable",
+            "20580000"
+          ]
+        ],
+        "revertReason": null
+      },
+      "sha256": "192c16bb9576b798fc1e781fb11aec6320f96f830d49da2ad17e6eedf3b103fc"
+    },
+    {
+      "name": "create_timeout_below_min_reverts",
+      "mode": "create_revert",
+      "at": "lock_time_plus_1",
+      "lockedTimeout": "86399",
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [],
+      "finalTemp": null,
+      "revertReason": "timeout out of range",
+      "expected": {
+        "case": "create_timeout_below_min_reverts",
+        "outcome": "revert",
+        "lockedTimeout": "86399",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": null,
+        "winningBucket": null,
+        "noWinner": null,
+        "totalPool": "0",
+        "fee": "0",
+        "dust": "0",
+        "payouts": [],
+        "revertReason": "timeout out of range"
+      },
+      "sha256": "b412f5e0c2b1feb6ae0caf322254e3de7efff27bcde015ad4a398472fff50c87"
+    },
+    {
+      "name": "create_timeout_above_max_reverts",
+      "mode": "create_revert",
+      "at": "lock_time_plus_1",
+      "lockedTimeout": "2592001",
+      "buckets": [
+        "25",
+        "28",
+        "31",
+        "34"
+      ],
+      "bets": [],
+      "finalTemp": null,
+      "revertReason": "timeout out of range",
+      "expected": {
+        "case": "create_timeout_above_max_reverts",
+        "outcome": "revert",
+        "lockedTimeout": "2592001",
+        "buckets": [
+          "25",
+          "28",
+          "31",
+          "34"
+        ],
+        "finalTemp": null,
+        "winningBucket": null,
+        "noWinner": null,
+        "totalPool": "0",
+        "fee": "0",
+        "dust": "0",
+        "payouts": [],
+        "revertReason": "timeout out of range"
+      },
+      "sha256": "686884375e96ddf8f55dede66922284fd35c623f9523651b1e3146e09aa9e13b"
+    }
+  ]
+}
