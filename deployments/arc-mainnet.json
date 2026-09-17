@@ -1,0 +1,28 @@
+{
+  "network": "Arc Mainnet",
+  "chainId": 5042,
+  "deployedAt": "2026-09-17T13:06:08.513Z",
+  "deployer": "0xed2B5717c9b936ecC76d75401026A99143e278F5",
+  "contracts": {
+    "WeatherMarket": "0xcac5b9d2817325e78090e3ce4b9c299c819cf953",
+    "AdminOracle": "0xbdc53e50b1167ce1199bfad54a034f7ab1741051",
+    "MarketFactory": "0x914c40a644493b47336de847b0404e729e06c68d",
+    "USDC": "0x3600000000000000000000000000000000000000"
+  },
+  "deployBlocks": {
+    "WeatherMarket": 21332196,
+    "AdminOracle": 21332205,
+    "MarketFactory": 21332215
+  },
+  "deployTxs": {
+    "WeatherMarket": "0x51f1d1922f3e14017d429a4e19ad60a1445d4745e3c7b7d4dddf2eea331e087b",
+    "AdminOracle": "0x5e75e3cac034bb22030345a1274146a03b850cc281bd90465ab86ae7e7a5a4d4",
+    "setOracle": "0xa8640bb337354aa82aad1b0a6352b012f65df51f0636456b8257331cd4118e27",
+    "MarketFactory": "0x3b3d799232ede86ed6a7ee7252ab0d87914efdcd9fc43c8725e40f1a503f4886"
+  },
+  "params": {
+    "defaultLockedTimeout": 259200,
+    "minLockedTimeout": 86400,
+    "maxLockedTimeout": 2592000
+  }
+}

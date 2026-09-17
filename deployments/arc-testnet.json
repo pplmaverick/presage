@@ -1,12 +1,12 @@
 {
   "network": "Arc Testnet",
   "chainId": 5042002,
-  "deployedAt": "2026-05-13T04:45:22.435Z",
+  "deployedAt": "2026-09-16T11:05:36.759Z",
   "deployer": "0xed2B5717c9b936ecC76d75401026A99143e278F5",
   "contracts": {
-    "WeatherMarket": "0xcac5b9d2817325e78090e3ce4b9c299c819cf953",
-    "AdminOracle": "0xbdc53e50b1167ce1199bfad54a034f7ab1741051",
-    "MarketFactory": "0x1321b1782838b193df74118fc134eac278a33eef",
+    "WeatherMarket": "0x0bfb97a06521f4be7407891530ab22468d3e698c",
+    "AdminOracle": "0xf7280ca7e04a8bbdc65edcac80ec49e98c305b2f",
+    "MarketFactory": "0xe8fc501b1d7f79b3f4dc11178cda779a09db2920",
     "USDC": "0x3600000000000000000000000000000000000000"
   },
   "agent": {
@@ -16,5 +16,30 @@
     "ownerAddress": "0xed2B5717c9b936ecC76d75401026A99143e278F5",
     "validatorAddress": "0xAcCC48919cA90Bd3643031517CD1eFDF9E2C9Dd0",
     "registeredAt": "2026-05-13T06:21:04.845Z"
+  },
+  "deployBlocks": {
+    "WeatherMarket": 62392295,
+    "AdminOracle": 62392304,
+    "MarketFactory": 62392321
+  },
+  "deployTxs": {
+    "WeatherMarket": "0x2c9c9e54ab8ddd2fc3dfdb495d30686d985f631a1336a0dda337efb008caa671",
+    "AdminOracle": "0x3d8609833d80d92823969c6d489b26740a76459c7348142f8625e95d04f66686",
+    "setOracle": "0x959387790eeee2a0417d9a152c19e75d52ce6e0bdf2faad91a6d0590f61e1c84",
+    "MarketFactory": "0xa1f934e64fca7e259563c86c87cbf544c5c91b8b424964f903f9cc027e123c4c"
+  },
+  "params": {
+    "defaultLockedTimeout": 259200,
+    "minLockedTimeout": 86400,
+    "maxLockedTimeout": 2592000
+  },
+  "previousDeployment": {
+    "contracts": {
+      "WeatherMarket": "0xcac5b9d2817325e78090e3ce4b9c299c819cf953",
+      "AdminOracle": "0xbdc53e50b1167ce1199bfad54a034f7ab1741051",
+      "MarketFactory": "0x1321b1782838b193df74118fc134eac278a33eef",
+      "USDC": "0x3600000000000000000000000000000000000000"
+    },
+    "deployedAt": "2026-05-13T04:45:22.435Z"
   }
 }
