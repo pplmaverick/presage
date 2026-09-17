@@ -172,6 +172,20 @@ export function useUserBet(marketId: bigint, bucket: number, address: `0x${strin
   })
 }
 
+/**
+ * 該市場的結算截止時間（= lockTime + 建立當下寫入的 lockedTimeout）。
+ * 過了這個時間點 submitResult 就永久關閉，下注者可自行 claimRefund 取回本金。
+ */
+export function useSettlementDeadline(marketId: bigint | undefined) {
+  return useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: WEATHER_MARKET_ABI,
+    functionName: 'settlementDeadline',
+    args: marketId !== undefined ? [marketId] : undefined,
+    query: { enabled: marketId !== undefined },
+  })
+}
+
 export function useClaimed(marketId: bigint, address: `0x${string}` | undefined) {
   return useReadContract({
     address: CONTRACT_ADDRESS,

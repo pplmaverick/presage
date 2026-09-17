@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { formatUnits } from 'viem'
 import { CONTRACT_ADDRESS, DEPLOY_BLOCK, getBucketLabel } from '../lib/wagmi'
 import { WEATHER_MARKET_ABI } from '../abi'
-import { useMarket, useClaimed } from '../hooks/useMarket'
+import { useMarket, useClaimed, useSettlementDeadline } from '../hooks/useMarket'
 import {
   getCachedBets,
   setCachedBets,
@@ -55,6 +55,7 @@ function BetRow({ bet }: { bet: BetRecord }) {
   const { market } = useMarket(bet.marketId)
   const { address } = useAccount()
   const { data: isClaimed, refetch: refetchClaimed } = useClaimed(bet.marketId, address)
+  const { data: settlementDeadline } = useSettlementDeadline(bet.marketId)
 
   const { writeContract, data: claimHash, isPending } = useWriteContract()
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
@@ -77,6 +78,16 @@ function BetRow({ bet }: { bet: BetRecord }) {
   const isRefund = status === 2 && market.noWinner
   const canClaim = (isWinner || isRefund) && !isClaimed
 
+  // Oracle 逾時未結算的逃生口：市場停在 LOCKED 且已過 settlementDeadline 之後，
+  // 下注者可以自行取回本金全額（不扣手續費）。條件不成立時整顆按鈕不出現。
+  const nowSec = BigInt(Math.floor(Date.now() / 1000))
+  const canRefund =
+    status === 1 &&
+    settlementDeadline !== undefined &&
+    (settlementDeadline as bigint) > 0n &&
+    nowSec >= (settlementDeadline as bigint) &&
+    !isClaimed
+
   const statusLabel = status === 0 ? 'Open' : status === 1 ? 'Locked' : 'Settled'
   const statusClass = status === 0 ? 'status-open' : status === 1 ? 'status-locked' : 'status-settled'
 
@@ -85,6 +96,15 @@ function BetRow({ bet }: { bet: BetRecord }) {
       address: CONTRACT_ADDRESS,
       abi: WEATHER_MARKET_ABI,
       functionName: 'claimWinnings',
+      args: [bet.marketId],
+    })
+  }
+
+  function handleRefund() {
+    writeContract({
+      address: CONTRACT_ADDRESS,
+      abi: WEATHER_MARKET_ABI,
+      functionName: 'claimRefund',
       args: [bet.marketId],
     })
   }
@@ -122,6 +142,24 @@ function BetRow({ bet }: { bet: BetRecord }) {
               isRefund ? 'Claim Refund' : 'Claim Winnings'
             )}
           </button>
+        ) : canRefund ? (
+          <div className="flex flex-col items-end gap-0.5">
+            <button
+              onClick={handleRefund}
+              disabled={isPending || isConfirming}
+              className="btn-primary text-xs px-4 py-2 disabled:opacity-50 flex items-center gap-1.5"
+              style={{ animation: 'claimPulse 2s infinite ease-in-out' }}
+            >
+              {isPending || isConfirming ? (
+                <><span className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" /> Refunding...</>
+              ) : (
+                '申請退款'
+              )}
+            </button>
+            <span className="text-[10px] font-mono text-amber-400">
+              Oracle 逾時未結算
+            </span>
+          </div>
         ) : isClaimed ? (
           <span className="text-[10px] font-mono text-tertiary">✓ Claimed</span>
         ) : status === 2 && !isWinner && !isRefund ? (

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useChainId, useSwitchChain } from 'wagmi'
 import { parseUnits, formatUnits } from 'viem'
-import { CONTRACT_ADDRESS, USDC_ADDRESS, getBucketLabel, arcTestnet } from '../lib/wagmi'
+import { CONTRACT_ADDRESS, USDC_ADDRESS, getBucketLabel, activeChain } from '../lib/wagmi'
 import { WEATHER_MARKET_ABI, ERC20_ABI } from '../abi'
 import { addCachedBet } from '../lib/betCache'
 
@@ -19,7 +19,7 @@ export default function BetModal({ marketId, bucketIndex, buckets, onClose, onSu
   const { address } = useAccount()
   const chainId = useChainId()
   const { switchChain, isPending: isSwitching } = useSwitchChain()
-  const isWrongChain = chainId !== arcTestnet.id
+  const isWrongChain = chainId !== activeChain.id
 
   const [amount, setAmount] = useState('')
   const [step, setStep] = useState<Step>('input')
@@ -191,7 +191,7 @@ export default function BetModal({ marketId, bucketIndex, buckets, onClose, onSu
 
             {isWrongChain ? (
               <button
-                onClick={() => switchChain({ chainId: arcTestnet.id })}
+                onClick={() => switchChain({ chainId: activeChain.id })}
                 disabled={isSwitching}
                 className="w-full btn-outline flex items-center justify-center gap-2 disabled:opacity-50"
               >
