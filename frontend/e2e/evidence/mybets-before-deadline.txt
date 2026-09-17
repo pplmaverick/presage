@@ -1,0 +1,47 @@
+Presage
+ON-CHAIN PREDICTION MARKETS, BUILT ON ARC
+Betting
+My Bets
+Market Status
+0x1183...86E7
+ARC TESTNET
+account_balance_wallet
+0x1183...86E7
+
+ARC NETWORK
+
+Arc Testnet
+
+show_chart
+Betting
+receipt_long
+My Bets
+analytics
+Market Status
+DATA SOURCE: OPENWEATHER + N8N ORACLE
+My Bets
+
+Your active and historical positions on Presage
+
+data_usage
+Positions
+0x1183bb...4886E7
+MARKET	RANGE	STAKE	STATUS	ACTION
+
+Tokyo
+Market #3
+	25–28°C	0.50 USDC	LOCKED	–
+
+Taipei
+Market #2
+	25–28°C	0.50 USDC	SETTLED	✓ Claimed
+
+Tokyo
+Market #1
+	25–28°C	0.50 USDC	LOCKED	–
+
+Taipei
+Market #0
+	28–31°C	0.50 USDC	SETTLED	✓ Claimed
+// CHAIN_SYNC_OK
+// ORACLE_ACTIVE

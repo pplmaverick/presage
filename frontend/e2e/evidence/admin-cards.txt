@@ -1,0 +1,96 @@
+add_circle
+建立市場
+CITY
+Taipei
+Tokyo
+Bangkok
+Seoul
+限既有支援城市（taipei / tokyo / bangkok / seoul）—— 結算時要靠 /api/weather/<slug> 取溫度，清單外的城市取不到資料。
+BUCKETS（溫度區間上界，逗號分隔，必須嚴格遞增）
+5 個區間：< 25°C · 25–28°C · 28–31°C · 31–34°C · > 34°C
+下注期長度
+24 小時
+2 天
+3 天
+7 天
+14 天
+lockTime ≈ 2026-09-17 11:24Z
+結算期長度（該市場 LOCKEDTIMEOUT）
+3 天
+7 天
+14 天
+30 天
+settlementDeadline ≈ 2026-09-20 11:24Z · 合約預設 3 天
+
+targetDate 自動設為 lockTime + 1 小時（合約僅要求 targetDate > lockTime， 不參與結算判定）。
+
+expand_more
+進階 GAS 設定
+① 預飛 (simulateContract)
+② 送出交易
+---
+savings
+手續費
+
+0.000000
+
+USDC COLLECTEDFEES
+
+提領手續費
+
+只會轉出 collectedFees，動不到使用者本金。
+
+expand_more
+進階 GAS 設定
+---
+timer
+預設結算期
+3 天
+
+DEFAULTLOCKEDTIMEOUT
+
+允許範圍 1 天 ～ 30 天
+
+3 天
+7 天
+14 天
+30 天
+更新
+
+⚠ 僅影響之後新建立的市場。已建立的市場沿用當時寫入的值，結算截止時間不會改變。
+---
+table_rows
+市場列表（4）
+MARKET	STATUS	LOCK TIME	SETTLEMENT DEADLINE	POOL (USDC)	
+
+Tokyo
+#3
+	LOCKED	2026-09-16 11:18Z	
+2026-09-17 11:18Z
+剩 23h53m
+	0.50	
+取得溫度
+
+
+Taipei
+#2
+	SETTLED	2026-09-16 11:16Z	
+2026-09-17 11:16Z
+1 天
+	0.50	finalTemp 26°C · bucket 1
+
+Tokyo
+#1
+	LOCKED	2026-09-16 11:13Z	
+2026-09-17 11:13Z
+剩 23h48m
+	0.50	
+取得溫度
+
+
+Taipei
+#0
+	SETTLED	2026-09-16 11:11Z	
+2026-09-17 11:11Z
+1 天
+	0.50	finalTemp 26°C · noWinner
