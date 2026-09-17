@@ -40,6 +40,8 @@ Both networks run the same contract version and are maintained in parallel — t
 
 > ⚠️ **The mainnet WeatherMarket and AdminOracle addresses are byte-identical to the *retired* testnet deployment.** Contract addresses are `keccak(deployer, nonce)`, and the deployer's nonce on each chain happened to line up. Always check the chain ID — the address alone will not tell you which network you are looking at. The retired testnet addresses are recorded under `previousDeployment` in `deployments/arc-testnet.json`.
 
+Legacy testnet deployment history (pre-mainnet) is archived in [`docs/legacy-testnet-history.md`](docs/legacy-testnet-history.md).
+
 ## Overview
 
 Each market defines a city, a target date, and a set of temperature buckets (e.g. ≤25 / 26–28 / 29–31 / 32–34 / >34°C). Users deposit USDC into a bucket before the lock time. Once the result is submitted, winners split the net pool proportionally to their stake.
