@@ -1,9 +1,13 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 // Server-side only — never VITE_-prefixed, so it's never bundled into client JS.
-// Falls back to the public Arc testnet RPC when unset, mirroring hardhat.config.ts's
-// own ARC_RPC_URL fallback, so preview/local deploys work (rate-limited) without the secret.
-const UPSTREAM_RPC_URL = process.env.ALCHEMY_RPC_URL ?? 'https://rpc.testnet.arc.network'
+//
+// There is deliberately no fallback URL here. This used to default to the public Arc
+// testnet RPC when ALCHEMY_RPC_URL was unset, which meant a deleted or misspelled
+// variable would silently serve testnet data to a mainnet frontend — no error, nothing
+// in the console, and no way for a user to tell that the balances and markets they were
+// looking at came from the wrong chain. Failing loudly is the only safe behaviour.
+const UPSTREAM_RPC_URL = process.env.ALCHEMY_RPC_URL
 
 // Read-only methods only. Nothing that moves funds or touches wallet/node state can reach
 // Alchemy through this proxy — write transactions go through the user's injected wallet
@@ -48,6 +52,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
+  if (!UPSTREAM_RPC_URL || UPSTREAM_RPC_URL.trim() === '') {
+    return res.status(500).json({
+      error:
+        'Server misconfigured: the ALCHEMY_RPC_URL environment variable is not set. ' +
+        'Set it on this Vercel project (Production and Preview are configured separately) ' +
+        'to the upstream Arc RPC endpoint for the chain this deployment targets, then ' +
+        'redeploy. There is no fallback: serving a different chain silently would be worse ' +
+        'than serving nothing.',
+    })
+  }
+
   const body = req.body as JsonRpcRequest | JsonRpcRequest[]
   const requests = Array.isArray(body) ? body : [body]
 
@@ -63,11 +78,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json(Array.isArray(body) ? errors : errors[0])
   }
 
-  const upstream = await fetch(UPSTREAM_RPC_URL, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(body),
-  })
+  let upstream: Response
+  try {
+    upstream = await fetch(UPSTREAM_RPC_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+  } catch (err) {
+    // Most often a malformed ALCHEMY_RPC_URL. Without this the function just crashes with
+    // an opaque FUNCTION_INVOCATION_FAILED and nothing points at the variable.
+    return res.status(502).json({
+      error:
+        `Upstream RPC request failed: ${err instanceof Error ? err.message : String(err)}. ` +
+        'Check that ALCHEMY_RPC_URL is a reachable RPC endpoint.',
+    })
+  }
 
   const data = await upstream.json()
   res.status(upstream.status).json(data)
