@@ -84,11 +84,11 @@ async function main() {
     transport: http(),
   });
 
-  // 1. MockUSDC（測試用，6 decimals）
+  // 1. MockUSDC (for testing, 6 decimals)
   console.log("\n[1/5] Deploying MockUSDC...");
   const mockUsdcAddress = await deployContract(walletClient, publicClient, "MockUSDC");
 
-  // 2. WeatherMarket（MockUSDC + owner 當初始 oracle）
+  // 2. WeatherMarket (MockUSDC + owner as the initial oracle)
   console.log("\n[2/5] Deploying WeatherMarket...");
   const weatherMarketAddress = await deployContract(
     walletClient,
@@ -97,7 +97,7 @@ async function main() {
     [mockUsdcAddress, account.address],
   );
 
-  // 3. AdminOracle（指向 WeatherMarket）
+  // 3. AdminOracle (points at WeatherMarket)
   console.log("\n[3/5] Deploying AdminOracle...");
   const adminOracleAddress = await deployContract(
     walletClient,
@@ -106,7 +106,7 @@ async function main() {
     [weatherMarketAddress],
   );
 
-  // 4. 把 WeatherMarket 的 oracle 換成 AdminOracle
+  // 4. Repoint WeatherMarket's oracle at AdminOracle
   console.log("\n[4/5] Setting oracle on WeatherMarket → AdminOracle...");
   const wmArtifact = await hre.artifacts.readArtifact("WeatherMarket");
   await sendTx(
@@ -121,7 +121,7 @@ async function main() {
     }),
   );
 
-  // 5. Mint 1000 USDC（1000 * 10^6）給部署錢包
+  // 5. Mint 1000 USDC (1000 * 10^6) to the deployer wallet
   console.log("\n[5/5] Minting 1000 USDC to deployer...");
   const mockUsdcArtifact = await hre.artifacts.readArtifact("MockUSDC");
   await sendTx(
@@ -136,7 +136,7 @@ async function main() {
     }),
   );
 
-  // 6. 寫入 deployments/pharos-testnet-mock.json
+  // 6. Write deployments/pharos-testnet-mock.json
   const __dirname = dirname(fileURLToPath(import.meta.url));
   const deploymentsDir = resolve(__dirname, "../deployments");
   mkdirSync(deploymentsDir, { recursive: true });

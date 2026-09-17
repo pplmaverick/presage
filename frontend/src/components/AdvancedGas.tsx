@@ -7,10 +7,11 @@ export interface GasOverride {
 }
 
 /**
- * 可收合的進階 gas 設定。
- * 預設完全不傳任何 gas 參數 —— 交由連接的錢包用它自己的 EIP-1559 建議值，
- * 這在一般情況下是最準的。只有在錢包估太低卡住時才需要手動覆寫。
- * scripts/lib/ops.ts 那套 eth_feeHistory 動態計算刻意沒有搬過來。
+ * Collapsible advanced gas settings.
+ * By default no gas parameters are passed at all — the connected wallet uses its own
+ * EIP-1559 suggestion, which is usually the most accurate. A manual override is only
+ * needed when the wallet underestimates and the transaction stalls.
+ * The eth_feeHistory calculation from scripts/lib/ops.ts is deliberately not ported here.
  */
 export function useGasOverride() {
   const [maxFee, setMaxFee] = useState('')
@@ -22,7 +23,7 @@ export function useGasOverride() {
       if (maxFee.trim()) o.maxFeePerGas = parseGwei(maxFee.trim())
       if (priority.trim()) o.maxPriorityFeePerGas = parseGwei(priority.trim())
     } catch {
-      // 輸入不是合法數字就當作沒設定
+      // Treat unparseable input as if nothing was set
       return {}
     }
     return o
@@ -50,17 +51,17 @@ export default function AdvancedGas({ state }: Props) {
         <span className="material-symbols-outlined text-[14px]">
           {open ? 'expand_less' : 'expand_more'}
         </span>
-        進階 gas 設定
+        Advanced gas settings
         {active && !open && (
-          <span className="text-tertiary normal-case">（已覆寫）</span>
+          <span className="text-tertiary normal-case">(overridden)</span>
         )}
       </button>
 
       {open && (
         <div className="mt-3 space-y-2">
           <p className="text-[10px] text-[rgba(255,255,255,0.35)] leading-relaxed">
-            留空 = 使用錢包的 EIP-1559 建議值（建議做法）。只有交易長時間卡在
-            pending 時才需要手動調高。單位 gwei。
+            Leave blank to use the wallet's EIP-1559 suggestion (recommended). Raise
+            these only if a transaction stays pending for a long time. Units: gwei.
           </p>
           <div className="grid grid-cols-2 gap-2">
             <label className="flex flex-col gap-1">

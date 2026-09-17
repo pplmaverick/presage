@@ -49,10 +49,10 @@ async function main() {
   const publicClient = createPublicClient({ chain: arc, transport: http() });
 
   const now = Math.floor(Date.now() / 1000);
-  const targetDate = now + 3 * 24 * 3_600; // 今天 + 3 天
-  const lockTime = now + 2 * 24 * 3_600;   // 今天 + 2 天
+  const targetDate = now + 3 * 24 * 3_600; // today + 3 days
+  const lockTime = now + 2 * 24 * 3_600;   // today + 2 days
 
-  // 5 個區間：≤28 | 29-31 | 32-34 | 35-37 | >37°C
+  // 5  ranges: <=28 | 29-31 | 32-34 | 35-37 | >37°C
   const buckets = [28n, 31n, 34n, 37n];
   const city = "Bangkok";
 
@@ -60,7 +60,7 @@ async function main() {
   console.log("  city      :", city);
   console.log("  targetDate:", new Date(targetDate * 1000).toISOString());
   console.log("  lockTime  :", new Date(lockTime * 1000).toISOString());
-  console.log("  buckets   :", `[${buckets.join(",")}] → ${buckets.length + 1} 個區間`);
+  console.log("  buckets   :", `[${buckets.join(",")}] -> ${buckets.length + 1} ranges`);
 
   const hash = await walletClient.writeContract({
     address: weatherMarketAddr,
@@ -71,7 +71,7 @@ async function main() {
   });
 
   console.log("\ntx hash:", hash);
-  console.log("等待確認...");
+  console.log("waiting for confirmation...");
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
@@ -87,16 +87,16 @@ async function main() {
       marketId = (decoded.args as { marketId: bigint }).marketId;
       break;
     } catch {
-      // 跳過不相關的 log
+      // Skip unrelated logs
     }
   }
 
   if (marketId !== null) {
-    console.log("\n✓ 市場建立成功");
+    console.log("\n✓ market created");
     console.log("  marketId  :", marketId.toString());
     console.log("  tx hash   :", hash);
   } else {
-    console.warn("\n警告：無法從 logs 解析 marketId，請從 tx receipt 查詢");
+    console.warn("\nWarning: could not parse marketId from the logs; check the tx receipt");
     console.log("  tx hash   :", hash);
   }
 }

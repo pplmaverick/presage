@@ -24,26 +24,27 @@ import AdvancedGas, { useGasOverride, type GasOverride } from '../components/Adv
 const HOUR = 3600
 const DAY = 24 * HOUR
 
-// 下注期長度 —— 固定選項，不開放自訂輸入
+// Betting window length — fixed options, no free-form input
 const LOCK_OPTIONS = [
-  { label: '24 小時', seconds: 24 * HOUR },
-  { label: '2 天', seconds: 2 * DAY },
-  { label: '3 天', seconds: 3 * DAY },
-  { label: '7 天', seconds: 7 * DAY },
-  { label: '14 天', seconds: 14 * DAY },
+  { label: '24 hours', seconds: 24 * HOUR },
+  { label: '2 days', seconds: 2 * DAY },
+  { label: '3 days', seconds: 3 * DAY },
+  { label: '7 days', seconds: 7 * DAY },
+  { label: '14 days', seconds: 14 * DAY },
 ] as const
 
-// 結算期長度（該市場的 lockedTimeout）—— 固定選項
+// Settlement window length (the market's lockedTimeout) — fixed options
 const TIMEOUT_OPTIONS = [
-  { label: '3 天', seconds: 3 * DAY },
-  { label: '7 天', seconds: 7 * DAY },
-  { label: '14 天', seconds: 14 * DAY },
-  { label: '30 天', seconds: 30 * DAY },
+  { label: '3 days', seconds: 3 * DAY },
+  { label: '7 days', seconds: 7 * DAY },
+  { label: '14 days', seconds: 14 * DAY },
+  { label: '30 days', seconds: 30 * DAY },
 ] as const
 
-// 建立市場時 targetDate 固定設為 lockTime + 1 小時，與既有市場的慣例一致
-// （例：市場 #29 lockTime 07:00 / targetDate 08:00）。合約只要求
-// targetDate > lockTime 且 <= lockTime + 90 天，本身不參與任何結算邏輯。
+// targetDate is always set to lockTime + 1 hour, matching the convention used by the
+// existing markets (e.g. market #29 had lockTime 07:00 / targetDate 08:00). The contract
+// only requires targetDate > lockTime and <= lockTime + 90 days; it plays no part in
+// settlement logic.
 const TARGET_DATE_OFFSET = HOUR
 
 function fmtTime(ts: bigint | number): string {
@@ -54,9 +55,9 @@ function fmtTime(ts: bigint | number): string {
 
 function fmtDuration(seconds: bigint | number): string {
   const n = Number(seconds)
-  if (n % DAY === 0) return `${n / DAY} 天`
-  if (n % HOUR === 0) return `${n / HOUR} 小時`
-  return `${n} 秒`
+  if (n % DAY === 0) return `${n / DAY}d`
+  if (n % HOUR === 0) return `${n / HOUR}h`
+  return `${n}s`
 }
 
 function errText(err: unknown): string {
@@ -64,7 +65,7 @@ function errText(err: unknown): string {
   return e?.shortMessage ?? e?.message ?? String(err)
 }
 
-// ── 共用交易 hook ────────────────────────────────────────────────────────────
+// ── Shared transaction hook ─────────────────────────────────────────────────
 
 function useAdminTx() {
   const { writeContractAsync } = useWriteContract()
@@ -107,14 +108,14 @@ function TxStatus({ tx }: { tx: ReturnType<typeof useAdminTx> }) {
   if (tx.confirmed && tx.hash) {
     return (
       <p className="mt-2 text-xs font-mono text-tertiary break-all">
-        ✓ 已確認 {tx.hash.slice(0, 10)}…{tx.hash.slice(-8)}
+        ✓ Confirmed {tx.hash.slice(0, 10)}…{tx.hash.slice(-8)}
       </p>
     )
   }
   if (tx.hash) {
     return (
       <p className="mt-2 text-xs font-mono text-[rgba(255,255,255,0.4)] break-all">
-        等待確認 {tx.hash.slice(0, 10)}…{tx.hash.slice(-8)}
+        Waiting for confirmation {tx.hash.slice(0, 10)}…{tx.hash.slice(-8)}
       </p>
     )
   }
@@ -133,7 +134,7 @@ function Card({ title, icon, children }: { title: string; icon: string; children
   )
 }
 
-// ── 建立市場 ────────────────────────────────────────────────────────────────
+// ── Create market ───────────────────────────────────────────────────────────
 
 function CreateMarketPanel({ onDone }: { onDone: () => void }) {
   const { address } = useAccount()
@@ -154,7 +155,7 @@ function CreateMarketPanel({ onDone }: { onDone: () => void }) {
   const [preflight, setPreflight] = useState<'idle' | 'running' | 'ok'>('idle')
   const [preflightError, setPreflightError] = useState<string | null>(null)
 
-  // 預設值取合約 defaultLockedTimeout 對應到最接近的固定選項
+  // Default to whichever fixed option is closest to the contract's defaultLockedTimeout
   useEffect(() => {
     if (defaultTimeout === undefined || timeoutSeconds !== null) return
     const target = Number(defaultTimeout)
@@ -164,7 +165,7 @@ function CreateMarketPanel({ onDone }: { onDone: () => void }) {
     setTimeoutSeconds(closest.seconds)
   }, [defaultTimeout, timeoutSeconds])
 
-  // 任何欄位變動都讓預飛結果失效
+  // Any field change invalidates the preflight result
   useEffect(() => {
     setPreflight('idle')
     setPreflightError(null)
@@ -172,16 +173,16 @@ function CreateMarketPanel({ onDone }: { onDone: () => void }) {
 
   const parsed = useMemo(() => {
     const raw = bucketsText.split(',').map((s) => s.trim()).filter(Boolean)
-    if (raw.length === 0) return { error: 'buckets 不可為空', values: [] as bigint[] }
+    if (raw.length === 0) return { error: 'buckets must not be empty', values: [] as bigint[] }
     const values: bigint[] = []
     for (const r of raw) {
-      if (!/^-?\d+$/.test(r)) return { error: `"${r}" 不是整數`, values: [] as bigint[] }
+      if (!/^-?\d+$/.test(r)) return { error: `"${r}" is not an integer`, values: [] as bigint[] }
       values.push(BigInt(r))
     }
-    if (values.length > 253) return { error: 'buckets 最多 253 個', values: [] as bigint[] }
+    if (values.length > 253) return { error: 'at most 253 buckets', values: [] as bigint[] }
     for (let i = 1; i < values.length; i++) {
       if (values[i] <= values[i - 1]) {
-        return { error: `必須嚴格遞增：${values[i - 1]} → ${values[i]}`, values: [] as bigint[] }
+        return { error: `must be strictly increasing: ${values[i - 1]} → ${values[i]}`, values: [] as bigint[] }
       }
     }
     return { error: null as string | null, values }
@@ -233,7 +234,7 @@ function CreateMarketPanel({ onDone }: { onDone: () => void }) {
   const canPreflight = !parsed.error && timeoutSeconds !== null && !!address
 
   return (
-    <Card title="建立市場" icon="add_circle">
+    <Card title="Create market" icon="add_circle">
       <div className="space-y-4">
         <label className="flex flex-col gap-1.5">
           <span className="text-[11px] font-mono uppercase tracking-wider text-[rgba(255,255,255,0.4)]">
@@ -251,14 +252,15 @@ function CreateMarketPanel({ onDone }: { onDone: () => void }) {
             ))}
           </select>
           <span className="text-[10px] text-[rgba(255,255,255,0.35)]">
-            限既有支援城市（{CITY_NAMES.map((c) => CITIES[c].slug).join(' / ')}）——
-            結算時要靠 /api/weather/&lt;slug&gt; 取溫度，清單外的城市取不到資料。
+            Limited to the supported cities ({CITY_NAMES.map((c) => CITIES[c].slug).join(' / ')}) —
+            settlement reads the temperature from /api/weather/&lt;slug&gt;, and anything
+            outside this list has no data source.
           </span>
         </label>
 
         <label className="flex flex-col gap-1.5">
           <span className="text-[11px] font-mono uppercase tracking-wider text-[rgba(255,255,255,0.4)]">
-            Buckets（溫度區間上界，逗號分隔，必須嚴格遞增）
+            Buckets (upper bounds in °C, comma separated, strictly increasing)
           </span>
           <input
             value={bucketsText}
@@ -269,7 +271,7 @@ function CreateMarketPanel({ onDone }: { onDone: () => void }) {
             <span className="text-[11px] font-mono text-red-400">✗ {parsed.error}</span>
           ) : (
             <span className="text-[10px] text-[rgba(255,255,255,0.35)]">
-              {parsed.values.length + 1} 個區間：
+              {parsed.values.length + 1} ranges:
               {Array.from({ length: parsed.values.length + 1 }, (_, i) =>
                 getBucketLabel(parsed.values, i),
               ).join(' · ')}
@@ -280,7 +282,7 @@ function CreateMarketPanel({ onDone }: { onDone: () => void }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <label className="flex flex-col gap-1.5">
             <span className="text-[11px] font-mono uppercase tracking-wider text-[rgba(255,255,255,0.4)]">
-              下注期長度
+              Betting window
             </span>
             <select
               value={lockSeconds}
@@ -300,7 +302,7 @@ function CreateMarketPanel({ onDone }: { onDone: () => void }) {
 
           <label className="flex flex-col gap-1.5">
             <span className="text-[11px] font-mono uppercase tracking-wider text-[rgba(255,255,255,0.4)]">
-              結算期長度（該市場 lockedTimeout）
+              Settlement window (this market's lockedTimeout)
             </span>
             <select
               value={timeoutSeconds ?? ''}
@@ -316,22 +318,22 @@ function CreateMarketPanel({ onDone }: { onDone: () => void }) {
             <span className="text-[10px] font-mono text-[rgba(255,255,255,0.35)]">
               settlementDeadline ≈ {fmtTime(nowPreview + lockSeconds + (timeoutSeconds ?? 0))}
               {defaultTimeout !== undefined && (
-                <> · 合約預設 {fmtDuration(defaultTimeout as bigint)}</>
+                <> · contract default {fmtDuration(defaultTimeout as bigint)}</>
               )}
             </span>
           </label>
         </div>
 
         <p className="text-[10px] text-[rgba(255,255,255,0.3)]">
-          targetDate 自動設為 lockTime + 1 小時（合約僅要求 targetDate &gt; lockTime，
-          不參與結算判定）。
+          targetDate is set automatically to lockTime + 1 hour (the contract only requires
+          targetDate &gt; lockTime and does not use it for settlement).
         </p>
 
         <AdvancedGas state={gas} />
 
         {preflightError && (
           <p className="text-xs font-mono text-red-400 break-words">
-            預飛失敗：{preflightError}
+            Preflight failed: {preflightError}
           </p>
         )}
 
@@ -341,18 +343,18 @@ function CreateMarketPanel({ onDone }: { onDone: () => void }) {
             disabled={!canPreflight || preflight === 'running'}
             className="btn-outline text-xs px-4 py-2 disabled:opacity-40"
           >
-            {preflight === 'running' ? '預飛中…' : '① 預飛 (simulateContract)'}
+            {preflight === 'running' ? 'Simulating…' : '① Preflight (simulateContract)'}
           </button>
           <button
             onClick={submit}
             disabled={preflight !== 'ok' || tx.busy}
             className="btn-primary text-xs px-4 py-2 disabled:opacity-40"
           >
-            {tx.busy ? '送出中…' : '② 送出交易'}
+            {tx.busy ? 'Sending…' : '② Send transaction'}
           </button>
           {preflight === 'ok' && (
             <span className="self-center text-[11px] font-mono text-tertiary">
-              ✓ 預飛通過
+              ✓ Preflight passed
             </span>
           )}
         </div>
@@ -362,7 +364,7 @@ function CreateMarketPanel({ onDone }: { onDone: () => void }) {
   )
 }
 
-// ── 手續費 + defaultLockedTimeout ───────────────────────────────────────────
+// ── Fees + defaultLockedTimeout ─────────────────────────────────────────────
 
 function SettingsPanel() {
   const tx = useAdminTx()
@@ -403,7 +405,7 @@ function SettingsPanel() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-      <Card title="手續費" icon="savings">
+      <Card title="Fees" icon="savings">
         <p className="font-mono text-3xl text-primary mb-1">{feeAmount}</p>
         <p className="text-[11px] font-mono uppercase tracking-wider text-[rgba(255,255,255,0.35)] mb-4">
           USDC collectedFees
@@ -421,16 +423,16 @@ function SettingsPanel() {
           disabled={tx.busy || !fees || (fees as bigint) === 0n}
           className="btn-primary text-xs px-4 py-2 disabled:opacity-40"
         >
-          {tx.busy ? '提領中…' : '提領手續費'}
+          {tx.busy ? 'Withdrawing…' : 'Withdraw fees'}
         </button>
         <p className="mt-2 text-[10px] text-[rgba(255,255,255,0.3)]">
-          只會轉出 collectedFees，動不到使用者本金。
+          Transfers collectedFees only; user principal is untouchable through this path.
         </p>
         <AdvancedGas state={gas} />
         <TxStatus tx={tx} />
       </Card>
 
-      <Card title="預設結算期" icon="timer">
+      <Card title="Default settlement window" icon="timer">
         <div className="flex items-baseline gap-2 mb-1">
           <span className="font-mono text-3xl text-primary">
             {defaultTimeout !== undefined ? fmtDuration(defaultTimeout as bigint) : '—'}
@@ -440,7 +442,7 @@ function SettingsPanel() {
           defaultLockedTimeout
         </p>
         <p className="text-[10px] font-mono text-[rgba(255,255,255,0.3)] mb-4">
-          允許範圍 {minTimeout !== undefined ? fmtDuration(minTimeout as bigint) : '?'} ～{' '}
+          Allowed range {minTimeout !== undefined ? fmtDuration(minTimeout as bigint) : '?'} –{' '}
           {maxTimeout !== undefined ? fmtDuration(maxTimeout as bigint) : '?'}
         </p>
 
@@ -468,11 +470,11 @@ function SettingsPanel() {
             disabled={timeoutTx.busy}
             className="btn-outline text-xs px-4 py-2 disabled:opacity-40"
           >
-            {timeoutTx.busy ? '送出中…' : '更新'}
+            {timeoutTx.busy ? 'Sending…' : 'Update'}
           </button>
         </div>
         <p className="mt-2 text-[10px] text-amber-400/80">
-          ⚠ 僅影響之後新建立的市場。已建立的市場沿用當時寫入的值，結算截止時間不會改變。
+          ⚠ Affects newly created markets only. Existing markets keep the value stored at creation; their settlement deadline does not change.
         </p>
         <TxStatus tx={timeoutTx} />
       </Card>
@@ -480,7 +482,7 @@ function SettingsPanel() {
   )
 }
 
-// ── 提交結果流程 ────────────────────────────────────────────────────────────
+// ── Submit-result flow ──────────────────────────────────────────────────────
 
 function SubmitResultRow({ market, onDone }: { market: AdminMarket; onDone: () => void }) {
   const { address } = useAccount()
@@ -504,9 +506,9 @@ function SubmitResultRow({ market, onDone }: { market: AdminMarket; onDone: () =
     setTemp(null)
     try {
       const res = await fetch(`/api/weather/${slug}`, { signal: AbortSignal.timeout(8000) })
-      if (!res.ok) throw new Error(`/api/weather/${slug} 回傳 ${res.status}`)
+      if (!res.ok) throw new Error(`/api/weather/${slug} returned ${res.status}`)
       const json = (await res.json()) as { temp?: number }
-      if (typeof json.temp !== 'number') throw new Error('回應缺少 temp 欄位')
+      if (typeof json.temp !== 'number') throw new Error('response has no temp field')
       setTemp({ raw: json.temp, rounded: Math.round(json.temp) })
     } catch (err) {
       setFetchError(errText(err))
@@ -518,7 +520,7 @@ function SubmitResultRow({ market, onDone }: { market: AdminMarket; onDone: () =
   async function confirmSubmit() {
     if (!temp || !ADMIN_ORACLE_ADDRESS || !publicClient || !address) return
     setPreflightError(null)
-    // city 一律用鏈上讀回的 market.city，不經任何輸入欄位
+    // city always comes from market.city read back on-chain, never from an input field
     const args = [market.city, BigInt(temp.rounded), market.id] as const
     try {
       await publicClient.simulateContract({
@@ -543,7 +545,7 @@ function SubmitResultRow({ market, onDone }: { market: AdminMarket; onDone: () =
   if (!ADMIN_ORACLE_ADDRESS) {
     return (
       <span className="text-[10px] font-mono text-amber-400">
-        未設定 {ENV_VAR_NAMES.adminOracle}
+        {ENV_VAR_NAMES.adminOracle} not set
       </span>
     )
   }
@@ -557,7 +559,7 @@ function SubmitResultRow({ market, onDone }: { market: AdminMarket; onDone: () =
             disabled={fetching}
             className="btn-outline text-[11px] px-3 py-1.5 disabled:opacity-40"
           >
-            {fetching ? '查詢中…' : '取得溫度'}
+            {fetching ? 'Fetching…' : 'Fetch temperature'}
           </button>
           {fetchError && (
             <span className="text-[10px] font-mono text-red-400 max-w-[220px] text-right break-words">
@@ -569,10 +571,10 @@ function SubmitResultRow({ market, onDone }: { market: AdminMarket; onDone: () =
         <>
           <div className="text-right">
             <p className="font-mono text-sm text-white">
-              {temp.raw.toFixed(2)}°C → 送出 <span className="text-primary">{temp.rounded}</span>
+              {temp.raw.toFixed(2)}°C → submitting <span className="text-primary">{temp.rounded}</span>
             </p>
             <p className="text-[10px] font-mono text-[rgba(255,255,255,0.35)]">
-              city="{market.city}"（鏈上讀回）
+              city="{market.city}" (read on-chain)
             </p>
           </div>
           <div className="flex gap-2">
@@ -580,19 +582,19 @@ function SubmitResultRow({ market, onDone }: { market: AdminMarket; onDone: () =
               onClick={() => setTemp(null)}
               className="text-[11px] font-mono text-[rgba(255,255,255,0.4)] hover:text-white px-2 py-1.5"
             >
-              取消
+              Cancel
             </button>
             <button
               onClick={() => void confirmSubmit()}
               disabled={tx.busy}
               className="btn-primary text-[11px] px-3 py-1.5 disabled:opacity-40"
             >
-              {tx.busy ? '送出中…' : '確認提交'}
+              {tx.busy ? 'Sending…' : 'Confirm & submit'}
             </button>
           </div>
           {preflightError && (
             <span className="text-[10px] font-mono text-red-400 max-w-[240px] text-right break-words">
-              預飛失敗：{preflightError}
+              Preflight failed: {preflightError}
             </span>
           )}
         </>
@@ -602,7 +604,7 @@ function SubmitResultRow({ market, onDone }: { market: AdminMarket; onDone: () =
   )
 }
 
-// ── 市場列表 ────────────────────────────────────────────────────────────────
+// ── Market list ─────────────────────────────────────────────────────────────
 
 function MarketRow({ market, now, onDone }: { market: AdminMarket; now: number; onDone: () => void }) {
   const tx = useAdminTx()
@@ -651,10 +653,10 @@ function MarketRow({ market, now, onDone }: { market: AdminMarket; now: number; 
             {fmtTime(market.settlementDeadline)}
           </span>
           {expired ? (
-            <span className="text-[10px] font-mono text-red-400">結算窗口已關閉 · 退款模式</span>
+            <span className="text-[10px] font-mono text-red-400">Settlement window closed · refund mode</span>
           ) : urgent ? (
             <span className="text-[10px] font-mono text-amber-400">
-              剩 {Math.floor(secondsLeft / HOUR)}h{Math.floor((secondsLeft % HOUR) / 60)}m
+              {Math.floor(secondsLeft / HOUR)}h{Math.floor((secondsLeft % HOUR) / 60)}m left
             </span>
           ) : (
             <span className="text-[10px] font-mono text-[rgba(255,255,255,0.25)]">
@@ -681,7 +683,7 @@ function MarketRow({ market, now, onDone }: { market: AdminMarket; now: number; 
               disabled={tx.busy}
               className="btn-primary text-[11px] px-3 py-1.5 disabled:opacity-40"
             >
-              {tx.busy ? '鎖盤中…' : '鎖盤'}
+              {tx.busy ? 'Locking…' : 'Lock market'}
             </button>
             <TxStatus tx={tx} />
           </div>
@@ -689,11 +691,11 @@ function MarketRow({ market, now, onDone }: { market: AdminMarket; now: number; 
           <SubmitResultRow market={market} onDone={onDone} />
         ) : status === 1 && expired ? (
           <span className="text-[10px] font-mono text-red-400">
-            已逾時，使用者可自行 claimRefund
+            Past deadline — bettors can call claimRefund
           </span>
         ) : status === 0 ? (
           <span className="text-[10px] font-mono text-[rgba(255,255,255,0.3)]">
-            未到 lockTime
+            lockTime not reached
           </span>
         ) : (
           <span className="text-[10px] font-mono text-[rgba(255,255,255,0.3)]">
@@ -706,7 +708,7 @@ function MarketRow({ market, now, onDone }: { market: AdminMarket; now: number; 
   )
 }
 
-// ── 主頁面 ──────────────────────────────────────────────────────────────────
+// ── Page ────────────────────────────────────────────────────────────────────
 
 export default function Admin() {
   const { address } = useAccount()
@@ -751,12 +753,13 @@ export default function Admin() {
             </span>
           </h1>
           <p className="text-[11px] font-mono text-[rgba(255,255,255,0.35)] mt-1">
-            交易一律由連接的錢包簽署，前端不持有任何私鑰。
-            CLI 腳本（scripts/lock-markets.ts、submit-results.ts）維持可用，作為備援路徑。
+            Every transaction is signed by the connected wallet; the frontend holds no
+            private key. The CLI scripts (scripts/lock-markets.ts, submit-results.ts)
+            remain available as a fallback path.
           </p>
         </div>
         <button onClick={() => void refetch()} className="btn-outline text-xs px-4 py-2">
-          重新整理
+          Refresh
         </button>
       </header>
 
@@ -764,19 +767,19 @@ export default function Admin() {
         <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 space-y-1">
           {!ADMIN_ORACLE_ADDRESS && (
             <p className="text-xs font-mono text-amber-300">
-              ⚠ {ENV_VAR_NAMES.adminOracle} 未設定 —— 「提交結果」功能停用，其餘功能不受影響。
+              ⚠ {ENV_VAR_NAMES.adminOracle} is not set — submit-result is disabled; everything else works.
             </p>
           )}
           {oracleMismatch && (
             <p className="text-xs font-mono text-amber-300">
-              ⚠ WeatherMarket.oracle = {String(oracleOnMarket)}，與 {ENV_VAR_NAMES.adminOracle}
-              （{ADMIN_ORACLE_ADDRESS}）不符。submitResult 會被 onlyOracle 擋下。
+              ⚠ WeatherMarket.oracle = {String(oracleOnMarket)} does not match {ENV_VAR_NAMES.adminOracle}
+              ({ADMIN_ORACLE_ADDRESS}). submitResult will be rejected by onlyOracle.
             </p>
           )}
           {oracleOwnerMismatch && (
             <p className="text-xs font-mono text-amber-300">
-              ⚠ AdminOracle.owner = {String(adminOracleOwner)}，不是目前連接的地址。
-              提交結果會 revert（WeatherMarket 與 AdminOracle 的 owner 是分開的）。
+              ⚠ AdminOracle.owner = {String(adminOracleOwner)} is not the connected address.
+              Submitting a result will revert (WeatherMarket and AdminOracle have separate owners).
             </p>
           )}
         </div>
@@ -786,11 +789,11 @@ export default function Admin() {
 
       <SettingsPanel />
 
-      <Card title={`市場列表（${count}）`} icon="table_rows">
+      <Card title={`Markets (${count})`} icon="table_rows">
         {isLoading && markets.length === 0 ? (
-          <p className="text-sm text-[rgba(255,255,255,0.4)] py-6 text-center">載入中…</p>
+          <p className="text-sm text-[rgba(255,255,255,0.4)] py-6 text-center">Loading…</p>
         ) : markets.length === 0 ? (
-          <p className="text-sm text-[rgba(255,255,255,0.4)] py-6 text-center">尚無市場</p>
+          <p className="text-sm text-[rgba(255,255,255,0.4)] py-6 text-center">No markets yet</p>
         ) : (
           <div className="overflow-x-auto -mx-5">
             <table className="w-full min-w-[720px]">

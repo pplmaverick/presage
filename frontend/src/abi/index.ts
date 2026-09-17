@@ -222,9 +222,10 @@ export const WEATHER_MARKET_ABI = [
     outputs: [],
     stateMutability: 'nonpayable',
   },
-  // 只收錄 5 參數版 overload：admin 面板一律顯式指定該市場的 lockedTimeout，
-  // 不收 4 參數版可以完全避免 viem 的 overload 解析歧義。
-  // CLI 腳本走的 4 參數版不受影響（那邊用 hardhat artifact 的完整 ABI）。
+  // Only the 5-argument overload is listed: the admin panel always specifies the
+  // market's lockedTimeout explicitly, and omitting the 4-argument version removes
+  // any chance of viem resolving the overload ambiguously. The CLI scripts still use
+  // the 4-argument version via the full ABI from the Hardhat artifact.
   {
     type: 'function',
     name: 'createMarket',
@@ -294,8 +295,9 @@ export const ADMIN_ORACLE_ABI = [
     outputs: [{ type: 'address' }],
     stateMutability: 'view',
   },
-  // 結果提交唯一入口。city 由呼叫端從 WeatherMarket.getMarket 讀回後原樣帶入，
-  // 合約不會比對 city 是否與該市場相符，所以絕不能讓它變成可手動輸入的欄位。
+  // The only entry point for submitting results. The caller must read `city` back
+  // from WeatherMarket.getMarket and pass it through unchanged: the contract does not
+  // check that `city` matches the market, so it must never become a typed-in field.
   {
     type: 'function',
     name: 'submitResult',

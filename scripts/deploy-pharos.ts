@@ -73,7 +73,7 @@ async function main() {
     transport: http(),
   });
 
-  // 1. WeatherMarket（deployer 同時是 owner 和初始 oracle）
+  // 1. WeatherMarket (the deployer is both owner and initial oracle)
   console.log("\n[1/3] Deploying WeatherMarket...");
   const weatherMarketAddress = await deployContract(
     walletClient,
@@ -82,7 +82,7 @@ async function main() {
     [usdcAddress, account.address],
   );
 
-  // 2. AdminOracle（指向 WeatherMarket）
+  // 2. AdminOracle (points at WeatherMarket)
   console.log("\n[2/3] Deploying AdminOracle...");
   const adminOracleAddress = await deployContract(
     walletClient,
@@ -91,7 +91,7 @@ async function main() {
     [weatherMarketAddress],
   );
 
-  // 3. 把 WeatherMarket 的 oracle 更新為 AdminOracle
+  // 3. Repoint WeatherMarket's oracle at AdminOracle
   console.log("\n[3/3] Setting oracle on WeatherMarket...");
   const wmArtifact = await hre.artifacts.readArtifact("WeatherMarket");
   const setOracleTx = await walletClient.writeContract({
@@ -104,7 +104,7 @@ async function main() {
   await publicClient.waitForTransactionReceipt({ hash: setOracleTx });
   console.log("  oracle updated:", setOracleTx);
 
-  // 4. 寫入 deployments/pharos-testnet.json
+  // 4. Write deployments/pharos-testnet.json
   const __dirname = dirname(fileURLToPath(import.meta.url));
   const deploymentsDir = resolve(__dirname, "../deployments");
   mkdirSync(deploymentsDir, { recursive: true });

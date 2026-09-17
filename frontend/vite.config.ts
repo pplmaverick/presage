@@ -1,21 +1,21 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// 本地開發用的 /api 實作。
+// Local development implementation of /api.
 //
-// 正式環境 /api/rpc 與 /api/weather/[city] 是 Vercel Functions（frontend/api/），
-// 但 `vite dev` 不會執行它們。原本這裡的 proxy 把整個 /api 轉去
-// http://46.62.246.244:3001 —— 那是另一個專案（Tempo）的 oracle server，
-// 不是 Arc RPC，所以自從 /api/rpc 這層代理加進來之後，本地開發的 RPC 一直是壞的。
+// In production /api/rpc and /api/weather/[city] are Vercel Functions (frontend/api/),
+// but `vite dev` does not run them. The proxy that used to live here forwarded all of
+// /api to another project's (Tempo) oracle server rather than an Arc RPC, so local
+// development had a broken RPC path from the moment the /api/rpc proxy was introduced.
 //
-// 這個 plugin 只在 dev server 生效，build 產物完全不受影響。
+// This plugin only applies to the dev server; build output is unaffected.
 function devApiPlugin(env: Record<string, string>): Plugin {
   const RPC_BY_NETWORK: Record<string, string> = {
     testnet: 'https://rpc.testnet.arc.io',
     mainnet: 'https://rpc.mainnet.arc.io',
   }
 
-  // 與 frontend/api/rpc.ts 的白名單保持一致
+  // Kept in sync with the allow-list in frontend/api/rpc.ts
   const ALLOWED_METHODS = new Set([
     'eth_chainId', 'eth_blockNumber', 'eth_call', 'eth_estimateGas',
     'eth_gasPrice', 'eth_maxPriorityFeePerGas', 'eth_feeHistory',
@@ -36,9 +36,10 @@ function devApiPlugin(env: Record<string, string>): Plugin {
     name: 'dev-api',
     apply: 'serve',
     configureServer(server) {
-      // 一定要用 loadEnv 讀出來的 env —— vite.config 裡的 process.env
-      // 不會自動含有 .env / .env.<mode>.local 的內容，直接讀會拿到 undefined，
-      // 結果就是 client 連 testnet、dev proxy 卻轉去 mainnet。
+      // Must use the env resolved by loadEnv: process.env inside vite.config does not
+      // automatically contain .env / .env.<mode>.local, so reading it directly yields
+      // undefined — which had the client on testnet while the dev proxy forwarded to
+      // mainnet.
       const network = (env.VITE_NETWORK ?? 'mainnet').trim().toLowerCase()
       const upstream =
         env.DEV_RPC_URL ?? RPC_BY_NETWORK[network] ?? RPC_BY_NETWORK.mainnet
@@ -91,7 +92,7 @@ function devApiPlugin(env: Record<string, string>): Plugin {
         const apiKey = env.OPENWEATHER_API_KEY ?? env.VITE_OPENWEATHER_API_KEY
         if (!apiKey) {
           res.statusCode = 500
-          return res.end(JSON.stringify({ error: 'OPENWEATHER_API_KEY 未設定（dev）' }))
+          return res.end(JSON.stringify({ error: 'OPENWEATHER_API_KEY is not set (dev)' }))
         }
         try {
           const url = `https://api.openweathermap.org/data/2.5/weather?lat=${coords.lat}&lon=${coords.lon}&appid=${apiKey}&units=metric`

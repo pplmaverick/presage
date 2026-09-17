@@ -2,22 +2,22 @@ const REQUIRED_VARS = [
   {
     name: 'VITE_CONTRACT_MAINNET',
     scope: 'client (bundled)',
-    what: 'Arc 主網 WeatherMarket 合約位址',
+    what: 'WeatherMarket contract address on Arc mainnet',
   },
   {
     name: 'VITE_DEPLOY_BLOCK_MAINNET',
     scope: 'client (bundled)',
-    what: 'WeatherMarket 的部署區塊高度，MyBets 的 log 掃描起點',
+    what: 'WeatherMarket deployment block — where MyBets starts its log scan',
   },
   {
     name: 'ALCHEMY_RPC_URL',
     scope: 'server only',
-    what: '/api/rpc 代理的上游 RPC（Arc 主網）',
+    what: 'Upstream RPC for the /api/rpc proxy (Arc mainnet)',
   },
   {
     name: 'OPENWEATHER_API_KEY',
     scope: 'server only',
-    what: '/api/weather/[city] 用的 OpenWeather key',
+    what: 'OpenWeather key used by /api/weather/[city]',
   },
 ]
 
@@ -25,7 +25,7 @@ const OPTIONAL_VARS = [
   {
     name: 'VITE_ADMIN_ORACLE_MAINNET',
     scope: 'client (bundled)',
-    what: 'AdminOracle 位址，只有 /admin 的提交結果需要',
+    what: 'AdminOracle address — only needed by submit-result on /admin',
   },
 ]
 
@@ -40,12 +40,13 @@ export default function ConfigErrorScreen({ message }: { message: string }) {
           >
             !
           </span>
-          <h1 className="font-display text-2xl text-white">部署設定錯誤</h1>
+          <h1 className="font-display text-2xl text-white">Deployment configuration error</h1>
         </div>
 
         <p className="text-sm text-white/70 mb-5 leading-relaxed">
-          這個版本缺少必要的環境變數，因此無法確定要連到哪一份合約。
-          為了避免把交易送到錯誤的合約，前端已停止載入。
+          This build is missing required environment variables, so it cannot determine
+          which contract to connect to. To avoid sending transactions to the wrong
+          contract, the frontend has stopped loading.
         </p>
 
         <pre className="text-sm bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-6 whitespace-pre-wrap break-words text-red-200">
@@ -53,7 +54,7 @@ export default function ConfigErrorScreen({ message }: { message: string }) {
         </pre>
 
         <h2 className="font-display text-sm uppercase tracking-wider text-white/50 mb-3">
-          需要設定的環境變數
+          Required environment variables
         </h2>
         <div className="space-y-2 mb-6">
           {REQUIRED_VARS.map((v) => (
@@ -69,7 +70,7 @@ export default function ConfigErrorScreen({ message }: { message: string }) {
         </div>
 
         <h2 className="font-display text-sm uppercase tracking-wider text-white/50 mb-3">
-          選填
+          Optional
         </h2>
         <div className="space-y-2 mb-6">
           {OPTIONAL_VARS.map((v) => (
@@ -85,10 +86,10 @@ export default function ConfigErrorScreen({ message }: { message: string }) {
         </div>
 
         <p className="text-xs text-white/40 leading-relaxed">
-          在 Vercel 專案設定 → Environment Variables 補齊後，需要重新 deploy
-          才會生效（<code className="font-mono">VITE_</code> 開頭的變數是在 build
-          期打進 bundle 的，改完不重 build 不會變）。Production 與 Preview
-          兩個環境各自獨立，兩邊都要設。
+          Fill these in under Vercel project settings → Environment Variables, then
+          redeploy — variables prefixed with <code className="font-mono">VITE_</code> are
+          baked into the bundle at build time, so changing them without rebuilding has no
+          effect. Production and Preview are separate environments; set both.
         </p>
       </div>
     </div>

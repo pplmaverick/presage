@@ -31,7 +31,7 @@ const GAS_OPTS = {
 
 // 2026-05-24 00:00:00 UTC
 const TARGET_DATE = 1779580800n;
-// 2026-05-23 00:00:00 UTC（targetDate 前 1 天）
+// 2026-05-23 00:00:00 UTC (1 day before targetDate)
 const LOCK_TIME = 1779494400n;
 
 const CITIES = [
@@ -60,8 +60,8 @@ async function main() {
   const results: { city: string; marketId: string; txHash: string }[] = [];
 
   for (const { name, buckets } of CITIES) {
-    console.log(`\n>>> 建立 ${name} 市場`);
-    console.log(`    buckets: [${buckets.join(",")}] → ${buckets.length + 1} 個區間`);
+    console.log(`\n>>> creating the ${name} market`);
+    console.log(`    buckets: [${buckets.join(",")}] -> ${buckets.length + 1} ranges`);
 
     const hash = await walletClient.writeContract({
       address: weatherMarketAddr,
@@ -72,7 +72,7 @@ async function main() {
     });
 
     console.log(`    tx hash : ${hash}`);
-    console.log(`    等待確認...`);
+    console.log(`    waiting for confirmation...`);
 
     const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
@@ -88,12 +88,12 @@ async function main() {
         marketId = (decoded.args as { marketId: bigint }).marketId;
         break;
       } catch {
-        // 跳過不相關的 log
+        // Skip unrelated logs
       }
     }
 
     if (marketId === null) {
-      console.error(`    ❌ 無法從 logs 解析 marketId`);
+      console.error(`    ❌ could not parse marketId from the logs`);
       continue;
     }
 
@@ -102,7 +102,7 @@ async function main() {
   }
 
   console.log("\n" + "═".repeat(60));
-  console.log("全部完成，請更新 config.ts 的 CITY_MARKETS：");
+  console.log("All done — update CITY_MARKETS in config.ts:");
   console.log("─".repeat(60));
   for (const r of results) {
     console.log(`  ${r.city.padEnd(8)}: marketId = ${r.marketId}  (tx: ${r.txHash.slice(0, 14)}...)`);

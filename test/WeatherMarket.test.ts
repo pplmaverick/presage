@@ -7,17 +7,17 @@ import hre from "hardhat";
 const UNIT = 10n ** 6n; // USDC 6 decimals
 const toUSDC = (n: number) => BigInt(n) * UNIT;
 
-// buckets [25,28,31,34] → 5 區間
+// buckets [25,28,31,34] -> 5 ranges
 // 0: ≤25 | 1: 25~28 | 2: 28~31 | 3: 31~34 | 4: >34
 const BUCKETS = [25n, 28n, 31n, 34n];
 
 describe("WeatherMarket", async function () {
-  // 建立一個共用的 network 連線（Hardhat v3 EDR）
+  // One shared network connection (Hardhat v3 EDR)
   const conn = await network.create();
   const { networkHelpers } = conn;
   const provider = new ethers.BrowserProvider(conn.provider as any);
 
-  // ── fixture：部署合約、mint USDC、建立市場 ──────────────────────────────
+  // ── fixture: deploy contracts, mint USDC, create a market ─────────────────
   async function deployContracts(_conn: unknown) {
     const accounts = await provider.listAccounts() as JsonRpcSigner[];
     const [owner, alice, bob, oracleSigner] = accounts;
@@ -50,8 +50,8 @@ describe("WeatherMarket", async function () {
 
     const latestBlock = (await provider.getBlock("latest"))!;
     const now = Number(latestBlock.timestamp);
-    const lockTime = now + 3600;   // +1 小時後鎖盤
-    const targetDate = now + 7200; // +2 小時後公布結果
+    const lockTime = now + 3600;   // locks in 1 hour
+    const targetDate = now + 7200; // result published in 2 hours
 
     await (weatherMarket.connect(owner) as any).createMarket(
       "Taipei",
@@ -86,28 +86,28 @@ describe("WeatherMarket", async function () {
       lockTime,
     } = await networkHelpers.loadFixture(deployContracts);
 
-    // Alice 押 bucket 2 (28~31°C)，Bob 押 bucket 3 (31~34°C)
+    // Alice bets bucket 2 (28-31°C), Bob bets bucket 3 (31-34°C)
     await (weatherMarket.connect(alice) as any).placeBet(marketId, 2, toUSDC(100));
     await (weatherMarket.connect(bob) as any).placeBet(marketId, 3, toUSDC(50));
 
-    // 推進時間超過 lockTime
+    // Advance past lockTime
     await networkHelpers.time.increaseTo(lockTime + 1);
     await (weatherMarket.connect(alice) as any).lockMarket(marketId);
 
-    // oracle 提交 30°C → bucket 2 wins
+    // oracle submits 30°C -> bucket 2 wins
     await (weatherMarket.connect(oracleSigner) as any).submitResult(marketId, 30n);
 
     const aliceBefore = await (mockUSDC as any).balanceOf(alice.address);
     await (weatherMarket.connect(alice) as any).claimWinnings(marketId);
     const alicePayout = (await (mockUSDC as any).balanceOf(alice.address)) - aliceBefore;
 
-    // totalPool=150, fee 2%=3, netPool=147 → Alice 拿走 147 USDC
+    // totalPool=150, fee 2%=3, netPool=147 -> Alice takes 147 USDC
     assert.equal(alicePayout, toUSDC(147));
 
     const fees = await (weatherMarket as any).collectedFees();
     assert.equal(fees, toUSDC(3));
 
-    // owner 提領手續費
+    // owner withdraws the fee
     const ownerBefore = await (mockUSDC as any).balanceOf(owner.address);
     await (weatherMarket.connect(owner) as any).withdrawFees();
     const ownerGot = (await (mockUSDC as any).balanceOf(owner.address)) - ownerBefore;
@@ -118,7 +118,7 @@ describe("WeatherMarket", async function () {
     const { alice, bob, oracleSigner, mockUSDC, weatherMarket, marketId, lockTime } =
       await networkHelpers.loadFixture(deployContracts);
 
-    // 兩人都押 bucket 2，100 + 100 = 200 USDC
+    // Both bet bucket 2: 100 + 100 = 200 USDC
     await (weatherMarket.connect(alice) as any).placeBet(marketId, 2, toUSDC(100));
     await (weatherMarket.connect(bob) as any).placeBet(marketId, 2, toUSDC(100));
 
@@ -134,18 +134,18 @@ describe("WeatherMarket", async function () {
     const alicePayout = (await (mockUSDC as any).balanceOf(alice.address)) - aliceBefore;
     const bobPayout = (await (mockUSDC as any).balanceOf(bob.address)) - bobBefore;
 
-    // netPool = 196，各拿 98 USDC
+    // netPool = 196, 98 USDC each
     assert.equal(alicePayout, toUSDC(98));
     assert.equal(bobPayout, toUSDC(98));
   });
 
-  // ── No-winner 退款 ─────────────────────────────────────────────────────────
+  // ── No-winner refund ──────────────────────────────────────────────────────
 
   it("no winner: refunds all bets in full", async () => {
     const { alice, bob, oracleSigner, mockUSDC, weatherMarket, marketId, lockTime } =
       await networkHelpers.loadFixture(deployContracts);
 
-    // 兩人都押 bucket 0，但溫度 >34 → bucket 4 wins（無人押注）
+    // Both bet bucket 0, but the temperature is >34 -> bucket 4 wins (nobody bet it)
     await (weatherMarket.connect(alice) as any).placeBet(marketId, 0, toUSDC(100));
     await (weatherMarket.connect(bob) as any).placeBet(marketId, 0, toUSDC(50));
 
@@ -161,7 +161,7 @@ describe("WeatherMarket", async function () {
     const alicePayout = (await (mockUSDC as any).balanceOf(alice.address)) - aliceBefore;
     const bobPayout = (await (mockUSDC as any).balanceOf(bob.address)) - bobBefore;
 
-    // 無手續費，全額退款
+    // No fee, full refund
     assert.equal(alicePayout, toUSDC(100));
     assert.equal(bobPayout, toUSDC(50));
   });
@@ -244,7 +244,7 @@ describe("WeatherMarket", async function () {
     );
   });
 
-  // ── AdminOracle 整合 ───────────────────────────────────────────────────────
+  // ── AdminOracle integration ───────────────────────────────────────────────
 
   it("AdminOracle: owner submits result, WeatherMarket settles correctly", async () => {
     const {
@@ -258,7 +258,7 @@ describe("WeatherMarket", async function () {
       lockTime,
     } = await networkHelpers.loadFixture(deployContracts);
 
-    // 部署 AdminOracle，指向 WeatherMarket
+    // Deploy AdminOracle pointing at WeatherMarket
     const aoArt = await hre.artifacts.readArtifact("AdminOracle");
     const adminOracle = await new ethers.ContractFactory(
       aoArt.abi,
@@ -267,7 +267,7 @@ describe("WeatherMarket", async function () {
     ).deploy(await weatherMarket.getAddress());
     await adminOracle.waitForDeployment();
 
-    // 把 WeatherMarket oracle 換成 AdminOracle
+    // Repoint WeatherMarket's oracle at AdminOracle
     await (weatherMarket.connect(owner) as any).setOracle(
       await adminOracle.getAddress(),
     );
@@ -277,7 +277,7 @@ describe("WeatherMarket", async function () {
     await networkHelpers.time.increaseTo(lockTime + 1);
     await (weatherMarket.connect(alice) as any).lockMarket(marketId);
 
-    // 透過 AdminOracle (onlyOwner) 提交結果
+    // Submit the result through AdminOracle (onlyOwner)
     await (adminOracle.connect(owner) as any).submitResult("Taipei", 30n, marketId);
 
     const aliceBefore = await (mockUSDC as any).balanceOf(alice.address);

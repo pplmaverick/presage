@@ -30,7 +30,7 @@ const GAS_OPTS = {
 } as const;
 
 async function main() {
-  // ── 讀取部署地址 ────────────────────────────────────────────────────────────
+  // ── Load deployed addresses ────────────────────────────────────────────────────────────
   const __dirname = dirname(fileURLToPath(import.meta.url));
   const deployments = JSON.parse(
     readFileSync(
@@ -41,7 +41,7 @@ async function main() {
   const weatherMarketAddr = deployments.contracts.WeatherMarket as Hex;
   const artifact = await hre.artifacts.readArtifact("WeatherMarket");
 
-  // ── 設定 viem clients ───────────────────────────────────────────────────────
+  // ── Set up viem clients ───────────────────────────────────────────────────────
   const account = privateKeyToAccount(`0x${process.env.PRIVATE_KEY}` as Hex);
   const walletClient = createWalletClient({
     account,
@@ -57,20 +57,20 @@ async function main() {
     }),
   });
 
-  // ── 時間參數（固定值：2026-08-10 09:00 / 08:00 UTC）──────────────────────────────
+  // ── Time parameters (fixed: 2026-08-10 09:00 / 08:00 UTC)──────────────────────────────
   const targetDate = 1786352400n; // 2026-08-10T09:00:00Z
   const lockTime = 1786348800n;   // 2026-08-10T08:00:00Z
 
-  // 5 個區間：≤25 | 25~28 | 28~31 | 31~34 | >34
+  // 5  ranges: <=25 | 25-28 | 28-31 | 31-34 | >34
   const buckets = [25n, 28n, 31n, 34n];
 
   console.log("Creating market on WeatherMarket:", weatherMarketAddr);
   console.log("  city      :", "Tokyo");
   console.log("  targetDate:", new Date(Number(targetDate) * 1000).toISOString());
   console.log("  lockTime  :", new Date(Number(lockTime) * 1000).toISOString());
-  console.log("  buckets   :", `[${buckets.join(",")}] → ${buckets.length + 1} 個區間`);
+  console.log("  buckets   :", `[${buckets.join(",")}] -> ${buckets.length + 1} ranges`);
 
-  // ── 送出交易 ─────────────────────────────────────────────────────────────────
+  // ── Send the transaction ─────────────────────────────────────────────────────────────────
   const hash = await walletClient.writeContract({
     address: weatherMarketAddr,
     abi: artifact.abi,
@@ -80,11 +80,11 @@ async function main() {
   });
 
   console.log("\ntx hash:", hash);
-  console.log("等待確認...");
+  console.log("waiting for confirmation...");
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
-  // ── 解析 MarketCreated 事件取得 marketId ──────────────────────────────────────
+  // ── Parse the MarketCreated event for the marketId ──────────────────────────────────────
   let marketId: bigint | null = null;
   for (const log of receipt.logs) {
     try {
@@ -97,16 +97,16 @@ async function main() {
       marketId = (decoded.args as { marketId: bigint }).marketId;
       break;
     } catch {
-      // 跳過不相關的 log
+      // Skip unrelated logs
     }
   }
 
   if (marketId !== null) {
-    console.log("\n✓ 市場建立成功");
+    console.log("\n✓ market created");
     console.log("  marketId  :", marketId.toString());
     console.log("  tx hash   :", hash);
   } else {
-    console.warn("\n警告：無法從 logs 解析 marketId，請從 tx receipt 查詢");
+    console.warn("\nWarning: could not parse marketId from the logs; check the tx receipt");
     console.log("  tx hash   :", hash);
   }
 }

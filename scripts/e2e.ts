@@ -1,9 +1,9 @@
 /**
- * Arc Testnet 完整 e2e 測試腳本
+ * Full end-to-end test script for Arc Testnet
  *
- * 流程：建市場 → 下注 → 等候鎖倉 → lockMarket → AdminOracle.submitResult → claimWinnings
+ * Flow: create market -> bet -> wait for lock -> lockMarket -> AdminOracle.submitResult -> claimWinnings
  *
- * 執行方式：
+ * Usage:
  *   npx hardhat run scripts/e2e.ts --network arc
  */
 import {
@@ -25,7 +25,7 @@ import { fileURLToPath } from "node:url";
 
 dotenv.config();
 
-// ─── 鏈設定 ────────────────────────────────────────────────────────────────────
+// ─── Chain configuration ────────────────────────────────────────────────────────────────────
 const arc = defineChain({
   id: 5042002,
   name: "Arc Testnet",
@@ -43,7 +43,7 @@ const STATUS_LABEL = ["OPEN", "LOCKED", "SETTLED"] as const;
 const USDC_DECIMALS = 6n;
 const e6 = (n: number) => BigInt(n) * 10n ** USDC_DECIMALS;
 
-// ─── 等待工具 ──────────────────────────────────────────────────────────────────
+// ─── Wait helpers ──────────────────────────────────────────────────────────────────
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
@@ -52,17 +52,17 @@ async function waitUntil(targetTs: number, label: string) {
   const now = Math.floor(Date.now() / 1000);
   const remaining = targetTs - now;
   if (remaining <= 0) return;
-  console.log(`  ⏳ 等待 ${remaining} 秒 (${label})...`);
+  console.log(`  ⏳ waiting ${remaining}s (${label})...`);
   for (let i = remaining; i > 0; i -= 5) {
-    process.stdout.write(`\r  剩餘 ${i} 秒  `);
+    process.stdout.write(`\r  ${i}s remaining  `);
     await sleep(Math.min(5000, i * 1000));
   }
-  console.log("\r  ✓ 時間到！       ");
+  console.log("\r  ✓ time reached  ");
 }
 
-// ─── 主流程 ────────────────────────────────────────────────────────────────────
+// ─── Main flow ────────────────────────────────────────────────────────────────────
 async function main() {
-  // ── 讀取合約地址和 ABI ──────────────────────────────────────────────────────
+  // ── Load contract addresses and ABI ──────────────────────────────────────────────────────
   const __dirname = dirname(fileURLToPath(import.meta.url));
   const deployments = JSON.parse(
     readFileSync(resolve(__dirname, "../deployments/arc-testnet.json"), "utf-8"),
@@ -74,7 +74,7 @@ async function main() {
   const wmArtifact = await hre.artifacts.readArtifact("WeatherMarket");
   const aoArtifact = await hre.artifacts.readArtifact("AdminOracle");
 
-  // 最小 ERC-20 ABI（approve + balanceOf）
+  // Minimal ERC-20 ABI (approve + balanceOf)
   const erc20Abi = [
     {
       name: "approve",
@@ -95,20 +95,20 @@ async function main() {
     },
   ] as const;
 
-  // ── 設定 viem clients ──────────────────────────────────────────────────────
+  // ── Set up viem clients ──────────────────────────────────────────────────────
   const account = privateKeyToAccount(`0x${process.env.PRIVATE_KEY}` as Hex);
   const walletClient = createWalletClient({ account, chain: arc, transport: http() });
   const publicClient = createPublicClient({ chain: arc, transport: http() });
 
   console.log("=".repeat(60));
-  console.log("  Tempo WeatherMarket Arc Testnet e2e 測試");
+  console.log("  Tempo WeatherMarket Arc Testnet e2e test");
   console.log("=".repeat(60));
-  console.log(`  錢包   : ${account.address}`);
-  console.log(`  合約   : ${weatherMarketAddr}`);
+  console.log(`  wallet   : ${account.address}`);
+  console.log(`  contract : ${weatherMarketAddr}`);
   console.log(`  Oracle : ${adminOracleAddr}`);
   console.log(`  USDC   : ${usdcAddr}`);
 
-  // ── 查詢餘額 ────────────────────────────────────────────────────────────────
+  // ── Query balances ────────────────────────────────────────────────────────────────
   const ethBal = await publicClient.getBalance({ address: account.address });
   const usdcBal = (await publicClient.readContract({
     address: usdcAddr,
@@ -117,35 +117,35 @@ async function main() {
     args: [account.address],
   })) as bigint;
 
-  console.log(`\n  ETH 餘額  : ${(Number(ethBal) / 1e18).toFixed(4)} ETH`);
-  console.log(`  USDC 餘額 : ${(Number(usdcBal) / 1e6).toFixed(2)} USDC`);
+  console.log(`\n  ETH balance : ${(Number(ethBal) / 1e18).toFixed(4)} ETH`);
+  console.log(`  USDC balance : ${(Number(usdcBal) / 1e6).toFixed(2)} USDC`);
 
   if (usdcBal < e6(10)) {
-    throw new Error(`USDC 不足，需要至少 10 USDC，目前 ${Number(usdcBal) / 1e6} USDC`);
+    throw new Error(`Insufficient USDC: need at least 10 USDC, have ${Number(usdcBal) / 1e6} USDC`);
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // STEP 1：建立市場
+  // STEP 1: create the market
   // ─────────────────────────────────────────────────────────────────────────────
   console.log("\n" + "─".repeat(60));
-  console.log("STEP 1：建立市場");
+  console.log("STEP 1: create market");
   console.log("─".repeat(60));
 
   const now = Math.floor(Date.now() / 1000);
-  const LOCK_DELAY = 90;   // 90 秒後可鎖倉
-  const TARGET_DELAY = 180; // 180 秒後是目標日期
+  const LOCK_DELAY = 90;   // lockable after 90 seconds
+  const TARGET_DELAY = 180; // targetDate is 180 seconds out
 
   const lockTime = now + LOCK_DELAY;
   const targetDate = now + TARGET_DELAY;
 
-  // 5 個區間：≤25 | 26-28 | 29-31 | 32-34 | ≥35
+  // 5  ranges: <=25 | 26-28 | 29-31 | 32-34 | >=35
   const buckets: bigint[] = [25n, 28n, 31n, 34n];
   const city = "Taipei";
 
   console.log(`  city      : ${city}`);
-  console.log(`  buckets   : [${buckets.join(", ")}] → 5 個區間`);
-  console.log(`  lockTime  : ${new Date(lockTime * 1000).toISOString()} (${LOCK_DELAY}s 後)`);
-  console.log(`  targetDate: ${new Date(targetDate * 1000).toISOString()} (${TARGET_DELAY}s 後)`);
+  console.log(`  buckets   : [${buckets.join(", ")}] -> 5 ranges`);
+  console.log(`  lockTime  : ${new Date(lockTime * 1000).toISOString()} (in ${LOCK_DELAY}s)`);
+  console.log(`  targetDate: ${new Date(targetDate * 1000).toISOString()} (in ${TARGET_DELAY}s)`);
 
   const createHash = await walletClient.writeContract({
     address: weatherMarketAddr,
@@ -155,11 +155,11 @@ async function main() {
     ...GAS_OPTS,
   });
   console.log(`\n  tx hash: ${createHash}`);
-  console.log("  等待確認...");
+  console.log("  waiting for confirmation...");
 
   const createReceipt = await publicClient.waitForTransactionReceipt({ hash: createHash });
 
-  // 從 log 解析 marketId
+  // Parse the marketId from the logs
   let marketId: bigint | null = null;
   for (const log of createReceipt.logs) {
     try {
@@ -172,23 +172,23 @@ async function main() {
       marketId = (decoded.args as { marketId: bigint }).marketId;
       break;
     } catch {
-      // 跳過非相關 log
+      // Skip unrelated logs
     }
   }
   if (marketId === null) {
-    throw new Error("無法從 tx log 解析 marketId");
+    throw new Error("could not parse marketId from the tx logs");
   }
 
-  console.log(`\n  ✓ 市場建立成功！marketId = ${marketId}`);
+  console.log(`\n  ✓ market created, marketId = ${marketId}`);
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // STEP 2：Approve USDC + 下注
+  // STEP 2: approve USDC + place bets
   // ─────────────────────────────────────────────────────────────────────────────
   console.log("\n" + "─".repeat(60));
-  console.log("STEP 2：Approve USDC + 下注");
+  console.log("STEP 2: approve USDC + place bets");
   console.log("─".repeat(60));
 
-  // Approve 最大金額（只需做一次）
+  // Approve the maximum amount (only needed once)
   console.log("  Approve USDC...");
   const approveHash = await walletClient.writeContract({
     address: usdcAddr,
@@ -198,13 +198,13 @@ async function main() {
     ...GAS_OPTS,
   });
   await publicClient.waitForTransactionReceipt({ hash: approveHash });
-  console.log(`  ✓ Approve 完成 (tx: ${approveHash})`);
+  console.log(`  ✓ approve done (tx: ${approveHash})`);
 
-  // 下注在 bucket 2（29-31°C），預期溫度 30°C → 應得獎
+  // Bet on bucket 2 (29-31°C); the expected temperature of 30°C should win
   const betBucket = 2; // bucket index（0-based）
   const betAmount = e6(5); // 5 USDC
 
-  console.log(`\n  下注 5 USDC 在 bucket ${betBucket} (29-31°C)...`);
+  console.log(`\n  betting 5 USDC on bucket ${betBucket} (29-31°C)...`);
   const betHash = await walletClient.writeContract({
     address: weatherMarketAddr,
     abi: wmArtifact.abi,
@@ -213,9 +213,9 @@ async function main() {
     ...GAS_OPTS,
   });
   await publicClient.waitForTransactionReceipt({ hash: betHash });
-  console.log(`  ✓ 下注成功 (tx: ${betHash})`);
+  console.log(`  ✓ bet placed (tx: ${betHash})`);
 
-  // 查詢市場目前狀態
+  // Query the market's current status
   const marketAfterBet = (await publicClient.readContract({
     address: weatherMarketAddr,
     abi: wmArtifact.abi,
@@ -227,15 +227,15 @@ async function main() {
   console.log(`  status    : ${STATUS_LABEL[marketAfterBet[3]] ?? marketAfterBet[3]}`);
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // STEP 3：等待 lockTime → lockMarket
+  // STEP 3: wait for lockTime -> lockMarket
   // ─────────────────────────────────────────────────────────────────────────────
   console.log("\n" + "─".repeat(60));
-  console.log("STEP 3：等待鎖倉時間 → lockMarket");
+  console.log("STEP 3: wait for lock time -> lockMarket");
   console.log("─".repeat(60));
 
   await waitUntil(lockTime + 2, "lockTime");
 
-  console.log("  呼叫 lockMarket...");
+  console.log("  calling lockMarket...");
   const lockHash = await walletClient.writeContract({
     address: weatherMarketAddr,
     abi: wmArtifact.abi,
@@ -246,18 +246,18 @@ async function main() {
     maxFeePerGas: parseGwei("100"),
   });
   await publicClient.waitForTransactionReceipt({ hash: lockHash });
-  console.log(`  ✓ 市場已鎖盤 (tx: ${lockHash})`);
+  console.log(`  ✓ market locked (tx: ${lockHash})`);
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // STEP 4：AdminOracle.submitResult → 結算
+  // STEP 4: AdminOracle.submitResult -> settle
   // ─────────────────────────────────────────────────────────────────────────────
   console.log("\n" + "─".repeat(60));
-  console.log("STEP 4：AdminOracle.submitResult → 結算");
+  console.log("STEP 4: AdminOracle.submitResult -> settle");
   console.log("─".repeat(60));
 
-  const finalTemp = 30n; // 30°C → bucket 2（29-31），下注方得獎
+  const finalTemp = 30n; // 30°C -> bucket 2 (29-31), the bettor wins
 
-  console.log(`  提交溫度 ${finalTemp}°C → 預期 bucket 2 得獎`);
+  console.log(`  submitting ${finalTemp}°C -> bucket 2 expected to win`);
   const settleHash = await walletClient.writeContract({
     address: adminOracleAddr,
     abi: aoArtifact.abi,
@@ -268,9 +268,9 @@ async function main() {
     maxFeePerGas: parseGwei("100"),
   });
   await publicClient.waitForTransactionReceipt({ hash: settleHash });
-  console.log(`  ✓ 結算完成 (tx: ${settleHash})`);
+  console.log(`  ✓ settled (tx: ${settleHash})`);
 
-  // 讀取結算後市場狀態
+  // Read the market status after settlement
   const marketSettled = (await publicClient.readContract({
     address: weatherMarketAddr,
     abi: wmArtifact.abi,
@@ -288,11 +288,11 @@ async function main() {
   // STEP 5：claimWinnings
   // ─────────────────────────────────────────────────────────────────────────────
   console.log("\n" + "─".repeat(60));
-  console.log("STEP 5：claimWinnings（領獎）");
+  console.log("STEP 5: claimWinnings");
   console.log("─".repeat(60));
 
   if (statusAfter !== 2 /* SETTLED */) {
-    console.warn("  ⚠️  市場未 SETTLED，跳過領獎");
+    console.warn("  ⚠️  market is not SETTLED, skipping the claim");
   } else {
     const usdcBefore = (await publicClient.readContract({
       address: usdcAddr,
@@ -320,21 +320,21 @@ async function main() {
     })) as bigint;
 
     const earned = usdcAfter - usdcBefore;
-    console.log(`  ✓ 領獎成功 (tx: ${claimHash})`);
-    console.log(`  領到金額 : ${Number(earned) / 1e6} USDC`);
-    console.log(`  USDC 餘額: ${Number(usdcAfter) / 1e6} USDC`);
+    console.log(`  ✓ winnings claimed (tx: ${claimHash})`);
+    console.log(`  amount received : ${Number(earned) / 1e6} USDC`);
+    console.log(`  USDC balance: ${Number(usdcAfter) / 1e6} USDC`);
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 完成
+  // Done
   // ─────────────────────────────────────────────────────────────────────────────
   console.log("\n" + "=".repeat(60));
-  console.log("  ✅  e2e 測試全部完成！");
+  console.log("  ✅  e2e test complete");
   console.log("=".repeat(60));
 }
 
 main().catch((err) => {
-  console.error("\n❌ 錯誤:", err.shortMessage ?? err.message);
-  if (err.details) console.error("詳情:", err.details);
+  console.error("\n❌ Error:", err.shortMessage ?? err.message);
+  if (err.details) console.error("Details:", err.details);
   process.exit(1);
 });

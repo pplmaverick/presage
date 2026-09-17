@@ -5,14 +5,16 @@ export const NON_OWNER = '0x1183bba65Af0D9Eb695Ccc7B0E2a5796Cb4886E7'
 export const CHAIN_ID_HEX = '0x4cef52' // 5042002 Arc Testnet
 
 /**
- * 注入一個「唯讀」的 EIP-1193 provider。
+ * Injects a read-only EIP-1193 provider.
  *
- * 這裡刻意只實作帳號/鏈別查詢，eth_sendTransaction 一律拒絕：
- * 本檔案不持有任何私鑰，也不做任何簽章。需要真的送交易的步驟
- * 全部由 scripts/e2e-testnet.ts 在鏈上完成（有 tx hash 為證）。
+ * It deliberately implements only account and chain queries; eth_sendTransaction is
+ * always rejected. This file holds no private key and performs no signing. Every step
+ * that needs a real transaction is done on-chain by scripts/e2e-testnet.ts, with tx
+ * hashes as evidence.
  *
- * 這樣仍足以驗證 owner 判定、導覽列、路由守門、預飛失效、警告橫幅——
- * 因為這些路徑的鏈上讀取全部走 app 自己的 /api/rpc transport，不經過錢包。
+ * That is still enough to verify the owner check, the nav bar, the route guard, the
+ * preflight invalidation and the warning banner, because all the on-chain reads on
+ * those paths go through the app's own /api/rpc transport rather than the wallet.
  */
 export async function injectWallet(page: Page, address: string) {
   await page.addInitScript(
@@ -35,7 +37,7 @@ export async function injectWallet(page: Page, address: string) {
             case 'eth_sendTransaction':
             case 'personal_sign':
             case 'eth_signTypedData_v4':
-              throw Object.assign(new Error('E2E mock provider: 不做簽章'), { code: 4001 })
+              throw Object.assign(new Error('E2E mock provider: signing is not supported'), { code: 4001 })
             default:
               throw Object.assign(new Error(`unsupported: ${method}`), { code: 4200 })
           }

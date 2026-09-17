@@ -13,10 +13,11 @@ import {
 
 dotenv.config();
 
-// 部署用的 gas 不再寫死。合約長大後（SafeERC20 + claimRefund + per-market
-// lockedTimeout）光 code deposit 就要 ~3.17M gas，原本寫死的 3_000_000
-// 會 out-of-gas 但交易仍然上鏈、只是 status=0，白燒一次 gas。
-// 一律先 estimateGas 再加 30% buffer。
+// Deployment gas is no longer hard-coded. After the contracts grew (SafeERC20 +
+// claimRefund + per-market lockedTimeout) the code deposit alone costs ~3.17M gas, so
+// the old hard-coded 3_000_000 ran out of gas — the transaction still landed on-chain,
+// just with status=0, burning the gas for nothing.
+// Always estimateGas first, then add a 30% buffer.
 const GAS_BUFFER_BPS = 13_000n;
 const CALL_GAS = 200_000n;
 
@@ -34,11 +35,11 @@ async function main() {
 
   const fees = await computeFees(publicClient);
 
-  console.log(`網路      : ${chain.name} (chainId ${chain.id})  [NETWORK=${key}]`);
-  console.log(`部署者    : ${account.address}`);
+  console.log(`Network   : ${chain.name} (chainId ${chain.id})  [NETWORK=${key}]`);
+  console.log(`Deployer  : ${account.address}`);
   console.log(`USDC      : ${usdcAddress}`);
   console.log(`Gas       : ${fees.source} — ${fees.detail}`);
-  console.log(`起始 nonce: ${await publicClient.getTransactionCount({ address: account.address })}`);
+  console.log(`Start nonce: ${await publicClient.getTransactionCount({ address: account.address })}`);
   console.log();
 
   async function deploy(name: string, args: readonly unknown[]) {
@@ -56,13 +57,13 @@ async function main() {
     const gas = (estimated * GAS_BUFFER_BPS) / 10_000n;
     const worstCost = gas * fees.maxFeePerGas;
     const balance = await publicClient.getBalance({ address: account.address });
-    console.log(`  gas est : ${estimated} → 送出 ${gas}（+30% buffer）`);
-    console.log(`  最壞成本: ${formatUnits(worstCost, 18)} USDC（餘額 ${formatUnits(balance, 18)}）`);
+    console.log(`  gas est : ${estimated} -> sending ${gas} (+30% buffer)`);
+    console.log(`  worst cost: ${formatUnits(worstCost, 18)} USDC (balance ${formatUnits(balance, 18)})`);
     if (worstCost > balance) {
       throw new Error(
-        `${name} 的最壞情況成本 ${formatUnits(worstCost, 18)} USDC 超過餘額 ` +
+        `${name}'s worst-case cost of ${formatUnits(worstCost, 18)} USDC exceeds the balance of ` +
         `${formatUnits(balance, 18)} USDC。maxFeePerGas=${fees.maxFeePerGas} wei，` +
-        `請確認 gas 費用讀數是否被離群區塊拉高。`,
+        `Check whether the fee reading was inflated by an outlier block.`,
       );
     }
 
@@ -77,14 +78,14 @@ async function main() {
     console.log(`  tx      : ${hash}`);
     const receipt = await publicClient.waitForTransactionReceipt({ hash });
     if (receipt.status !== "success") {
-      throw new Error(`${name} 部署交易 revert：${hash}`);
+      throw new Error(`${name} deployment transaction reverted: ${hash}`);
     }
     console.log(`  address : ${receipt.contractAddress}`);
     console.log(`  block   : ${receipt.blockNumber}`);
     return { address: receipt.contractAddress as Hex, block: receipt.blockNumber, hash };
   }
 
-  console.log("[1/4] WeatherMarket（先用部署者當暫時 oracle）");
+  console.log("[1/4] WeatherMarket (deployer stands in as a temporary oracle)");
   const wm = await deploy("WeatherMarket", [usdcAddress, account.address]);
 
   console.log("\n[2/4] AdminOracle");
@@ -110,8 +111,9 @@ async function main() {
   console.log("\n[4/4] MarketFactory");
   const mf = await deploy("MarketFactory", [usdcAddress]);
 
-  // ── 部署後回讀驗證：不能只看交易成功，要確認鏈上狀態真的是預期的樣子 ──
-  console.log("\n[驗證] 回讀鏈上狀態");
+  // ── Post-deployment read-back: a successful transaction is not enough; confirm the
+  // on-chain state really is what was intended ──
+  console.log("\n[verify] reading back on-chain state");
   const read = async (fn: string, args: readonly unknown[] = []) =>
     publicClient.readContract({
       address: wm.address,
@@ -133,13 +135,14 @@ async function main() {
     console.log(`  ${k.padEnd(22)}: ${v}`);
   }
   if ((onchain.oracle as string).toLowerCase() !== ao.address.toLowerCase()) {
-    throw new Error("oracle 未正確指向 AdminOracle");
+    throw new Error("oracle does not point at AdminOracle");
   }
   if ((onchain.owner as string).toLowerCase() !== account.address.toLowerCase()) {
-    throw new Error("owner 不是部署者");
+    throw new Error("owner is not the deployer");
   }
 
-  // ── 寫入 deployments/*.json（保留既有的 agent 等欄位，只換 contracts）──
+  // ── Write deployments/*.json, preserving existing fields such as `agent` and
+  // replacing only `contracts` ──
   const deploymentsDir = resolve(__dirname, "../deployments");
   mkdirSync(deploymentsDir, { recursive: true });
   const outPath = resolve(deploymentsDir, deploymentFile);
@@ -176,15 +179,15 @@ async function main() {
       minLockedTimeout: Number(onchain.minLockedTimeout),
       maxLockedTimeout: Number(onchain.maxLockedTimeout),
     },
-    // 舊部署的紀錄留著，方便回查
+    // Keep the previous deployment on record for later reference
     previousDeployment: previous.contracts
       ? { contracts: previous.contracts, deployedAt: previous.deployedAt }
       : undefined,
   };
 
   writeFileSync(outPath, JSON.stringify(data, null, 2) + "\n");
-  console.log(`\n✓ 已寫入 deployments/${deploymentFile}`);
-  console.log(`\n前端環境變數需同步為：`);
+  console.log(`\n✓ written to deployments/${deploymentFile}`);
+  console.log(`\nFrontend environment variables must be synced to:`);
   const suffix = key === "arc-mainnet" ? "MAINNET" : "TESTNET";
   console.log(`  VITE_CONTRACT_${suffix}=${wm.address}`);
   console.log(`  VITE_ADMIN_ORACLE_${suffix}=${ao.address}`);

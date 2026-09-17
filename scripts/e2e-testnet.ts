@@ -1,16 +1,18 @@
 /**
- * Arc Testnet 端對端驗證（真實鏈上交易，不使用任何 mock）。
+ * End-to-end verification on Arc Testnet using real on-chain transactions — no mocks.
  *
- * 兩個錢包：
- *   A = dev 錢包（WeatherMarket / AdminOracle 的 owner）
- *   B = 一般使用者錢包（非 owner），用來下注與領取
+ * Two wallets:
+ *   A = dev wallet (owner of WeatherMarket / AdminOracle)
+ *   B = ordinary user wallet (not the owner), used for betting and claiming
  *
- * 產生兩個市場：
- *   M1 結算路徑：建市 → B 下注 → B 鎖盤（permissionless）→ A 提交真實氣溫 → B 領獎
- *   M2 退款路徑：建市（lockedTimeout = MIN_LOCKED_TIMEOUT = 1 天）→ B 下注 → 鎖盤
- *                → 24 小時後才能 claimRefund，本腳本只負責建到「等待中」狀態
+ * Creates two markets:
+ *   M1 settlement path: create -> B bets -> B locks (permissionless) -> A submits the
+ *                       real temperature -> B claims
+ *   M2 refund path:     create (lockedTimeout = MIN_LOCKED_TIMEOUT = 1 day) -> B bets ->
+ *                       lock. claimRefund only becomes possible 24 hours later, so this
+ *                       script only takes it to the "waiting" state.
  *
- * 用法：
+ * Usage:
  *   NETWORK=arc-testnet ARC_RPC_URL=https://rpc.testnet.arc.io \
  *     npx hardhat run scripts/e2e-testnet.ts --network arc
  */
@@ -53,17 +55,19 @@ function rec(line: string) {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-// M1 用短鎖盤期，讓結算路徑可以在單一 session 內跑完。
-// admin 面板下拉的最小值是 24 小時，這裡刻意走合約層的下限以壓縮驗證時間，
-// 差異已在報告中標明。
-const M1_LOCK_DELAY = 150;        // 秒
+// M1 uses a short betting window so the settlement path completes within one session.
+// The admin panel's smallest dropdown option is 24 hours; this deliberately uses the
+// contract-level floor instead to compress the verification time. The difference is
+// called out in the report.
+const M1_LOCK_DELAY = 150;        // seconds
 const M1_LOCKED_TIMEOUT = 86_400; // MIN_LOCKED_TIMEOUT
 const M2_LOCK_DELAY = 90;
 const M2_LOCKED_TIMEOUT = 86_400;
 
 const BUCKETS = [25n, 28n, 31n, 34n];
 
-// 依規格決定某個溫度落在哪個 bucket（與合約 _determineWinningBucket 同義）
+// Resolve which bucket a temperature falls into, per the spec (same as the contract's
+// _determineWinningBucket)
 function bucketFor(temp: number): number {
   for (let i = 0; i < BUCKETS.length; i++) if (BigInt(temp) <= BUCKETS[i]) return i;
   return BUCKETS.length;
@@ -71,21 +75,21 @@ function bucketFor(temp: number): number {
 
 async function fetchTaipeiTemp(): Promise<number> {
   const apiKey = process.env.OPENWEATHER_API_KEY ?? process.env.VITE_OPENWEATHER_API_KEY;
-  if (!apiKey) throw new Error("OPENWEATHER_API_KEY 未設定，禁止用 mock 溫度");
+  if (!apiKey) throw new Error("OPENWEATHER_API_KEY is not set; mock temperatures are not allowed");
   const r = await fetch(
     `https://api.openweathermap.org/data/2.5/weather?lat=25.033&lon=121.5654&appid=${apiKey}&units=metric`,
   );
   const j = (await r.json()) as any;
   const t = j?.main?.temp;
-  if (typeof t !== "number") throw new Error(`OpenWeather 回應無 temp：${JSON.stringify(j).slice(0,200)}`);
+  if (typeof t !== "number") throw new Error(`OpenWeather response has no temp: ${JSON.stringify(j).slice(0,200)}`);
   return t;
 }
 const BET_AMOUNT = parseUnits("0.5", 6); // 0.5 USDC
-const FUND_B = parseUnits("3", 6);       // 給 B 3 USDC（原生餘額同時就是 gas）
+const FUND_B = parseUnits("3", 6);       // 3 USDC for B (the native balance is also gas)
 
 async function main() {
   const { key, chain, deploymentFile } = resolveNetwork();
-  if (key !== "arc-testnet") throw new Error("這支腳本只在 arc-testnet 上跑");
+  if (key !== "arc-testnet") throw new Error("this script only runs against arc-testnet");
 
   const deployments = JSON.parse(
     readFileSync(resolve(__dirname, `../deployments/${deploymentFile}`), "utf-8"),
@@ -100,12 +104,12 @@ async function main() {
   const { account: A, walletClient: walletA, publicClient } = makeClients(chain);
   await assertChainId(publicClient, chain);
 
-  // 錢包 B：固定用 E2E_WALLET_B_KEY，沒有就產一把並寫回 .env.e2e（不進 git）
+  // Wallet B: reuse E2E_WALLET_B_KEY, or generate one and append it to .env.e2e (gitignored)
   let bKey = process.env.E2E_WALLET_B_KEY as Hex | undefined;
   if (!bKey) {
     bKey = generatePrivateKey();
     appendFileSync(resolve(__dirname, "../.env.e2e"), `E2E_WALLET_B_KEY=${bKey}\n`);
-    rec(`> 產生新的測試錢包 B，私鑰已寫入 .env.e2e（已被 .gitignore 的 .env* 規則涵蓋）`);
+    rec(`> Generated a fresh test wallet B; its key was written to .env.e2e (covered by the .env* rule in .gitignore)`);
   }
   const B = privateKeyToAccount(bKey);
   const walletB = createWalletClient({ account: B, chain, transport: http() });
@@ -114,13 +118,13 @@ async function main() {
 
   rec(`# Arc Testnet E2E — ${new Date().toISOString()}`);
   rec(``);
-  rec(`| 項目 | 值 |`);
+  rec(`| Field | Value |`);
   rec(`|---|---|`);
-  rec(`| 網路 | ${chain.name} (chainId ${chain.id}) |`);
+  rec(`| Network | ${chain.name} (chainId ${chain.id}) |`);
   rec(`| WeatherMarket | \`${WM}\` |`);
   rec(`| AdminOracle | \`${AO}\` |`);
-  rec(`| 錢包 A (owner) | \`${A.address}\` |`);
-  rec(`| 錢包 B (一般使用者) | \`${B.address}\` |`);
+  rec(`| Wallet A (owner) | \`${A.address}\` |`);
+  rec(`| Wallet B (ordinary user) | \`${B.address}\` |`);
   rec(`| Gas | ${fees.source} — ${fees.detail} |`);
   rec(``);
 
@@ -147,38 +151,38 @@ async function main() {
       } as any),
     )) as bigint;
 
-  // ── 0. 確認 owner / 非 owner ────────────────────────────────────────────
-  rec(`## 0. 權限前提確認`);
+  // ── 0. Confirm owner / non-owner ───────────────────────────────────────
+  rec(`## 0. Permission preconditions`);
   const owner = (await publicClient.readContract({
     address: WM, abi: wmArt.abi as any, functionName: "owner",
   } as any)) as Address;
   rec(`- \`WeatherMarket.owner()\` = \`${owner}\``);
-  rec(`- 錢包 A 是 owner：**${owner.toLowerCase() === A.address.toLowerCase()}**`);
-  rec(`- 錢包 B 是 owner：**${owner.toLowerCase() === B.address.toLowerCase()}**`);
+  rec(`- Wallet A is the owner: **${owner.toLowerCase() === A.address.toLowerCase()}**`);
+  rec(`- Wallet B is the owner: **${owner.toLowerCase() === B.address.toLowerCase()}**`);
   rec(``);
 
-  // ── 1. 資金錢包 B ───────────────────────────────────────────────────────
-  rec(`## 1. 資助錢包 B`);
+  // ── 1. Fund wallet B ───────────────────────────────────────────────────
+  rec(`## 1. Funding wallet B`);
   const bBefore = await publicClient.getBalance({ address: B.address });
-  rec(`- B 原生餘額（= USDC，Arc 原生 gas 代幣）: ${formatUnits(bBefore, 18)}`);
+  rec(`- B native balance (= USDC, Arc's native gas token): ${formatUnits(bBefore, 18)}`);
   if (bBefore < parseUnits("1", 18)) {
     const h = await walletA.sendTransaction({
       account: A, chain, to: B.address,
       value: parseUnits(formatUnits(FUND_B, 6), 18),
       ...gasOpts,
     } as never);
-    await confirm(h, `A → B 轉帳 ${formatUnits(FUND_B, 6)} USDC`);
+    await confirm(h, `A -> B transfer of ${formatUnits(FUND_B, 6)} USDC`);
   } else {
-    rec(`- 餘額足夠，跳過轉帳`);
+    rec(`- Balance sufficient, transfer skipped`);
   }
-  rec(`- B 餘額（後）: ${formatUnits(await publicClient.getBalance({ address: B.address }), 18)}`);
+  rec(`- B balance (after): ${formatUnits(await publicClient.getBalance({ address: B.address }), 18)}`);
   rec(``);
 
-  // ── 2. 非 owner 呼叫 onlyOwner 函式必須被擋 ─────────────────────────────
-  rec(`## 2. 非 owner 的權限邊界（鏈上實測）`);
+  // ── 2. onlyOwner functions must reject a non-owner ─────────────────────
+  rec(`## 2. Non-owner permission boundary (measured on-chain)`);
   const nowTs = () => Math.floor(Date.now() / 1000);
   for (const [label, call] of [
-    ["createMarket (5 參數)", { functionName: "createMarket", args: ["Taipei", BigInt(nowTs() + 7200), BUCKETS, BigInt(nowTs() + 3600), BigInt(M1_LOCKED_TIMEOUT)] }],
+    ["createMarket (5-arg)", { functionName: "createMarket", args: ["Taipei", BigInt(nowTs() + 7200), BUCKETS, BigInt(nowTs() + 3600), BigInt(M1_LOCKED_TIMEOUT)] }],
     ["setDefaultLockedTimeout", { functionName: "setDefaultLockedTimeout", args: [BigInt(7 * 86400)] }],
     ["withdrawFees", { functionName: "withdrawFees", args: [] }],
   ] as const) {
@@ -187,16 +191,16 @@ async function main() {
         account: B.address, address: WM, abi: wmArt.abi as any,
         functionName: (call as any).functionName, args: (call as any).args,
       } as any);
-      rec(`- ❌ \`${label}\` 由 B 呼叫竟然模擬成功 —— 權限有問題`);
+      rec(`- ❌ \`${label}\` called by B unexpectedly simulated successfully — permissions are wrong`);
     } catch (err) {
       const m = (err as any).shortMessage ?? (err as any).message ?? String(err);
-      rec(`- ✅ \`${label}\` 由 B 呼叫被擋：\`${String(m).split("\n")[0].slice(0, 90)}\``);
+      rec(`- ✅ \`${label}\` called by B is rejected: \`${String(m).split("\n")[0].slice(0, 90)}\``);
     }
   }
   rec(``);
 
-  // ── 3. M1：結算路徑 ─────────────────────────────────────────────────────
-  rec(`## 3. M1 結算路徑`);
+  // ── 3. M1: settlement path ─────────────────────────────────────────────
+  rec(`## 3. M1 settlement path`);
   const m1Lock = BigInt(nowTs() + M1_LOCK_DELAY);
   const m1Target = m1Lock + 3600n;
   const idBefore = (await publicClient.readContract({
@@ -222,7 +226,7 @@ async function main() {
   rec(`- getMarket(#${M1}): city=\`${m.city}\` lockTime=${m.lockTime} targetDate=${m.targetDate} status=${STATUS_LABEL[m.status]} buckets=[${m.buckets.join(",")}]`);
   rec(`- marketLockedTimeout=${m1Timeout} settlementDeadline=${m1Deadline} (= lockTime + ${m1Timeout})`);
 
-  // B 下注
+  // B places a bet
   const approveAbi = [{ type: "function", name: "approve", inputs: [{ type: "address" }, { type: "uint256" }], outputs: [{ type: "bool" }], stateMutability: "nonpayable" }] as const;
   const ha = await walletB.writeContract({
     account: B, chain, address: USDC, abi: approveAbi,
@@ -230,14 +234,15 @@ async function main() {
   } as never);
   await confirm(ha, `B approve USDC`);
 
-  // M1_BUCKET=auto（預設）→ 先查目前真實氣溫，讓 B 押在「會贏」的 bucket，
-  // 這樣才能真的驗到「有得獎者 + 收 2% 手續費」那條路徑。
-  // M1_BUCKET=<n> 可強制指定，用來驗 noWinner。
+  // M1_BUCKET=auto (the default) reads the current real temperature first so B bets on
+  // the bucket that will win, which is what actually exercises the "has a winner and the
+  // 2% fee is charged" path. M1_BUCKET=<n> forces a specific bucket, used to exercise
+  // noWinner.
   const preTemp = await fetchTaipeiTemp();
   const forced = process.env.M1_BUCKET;
   const betBucket =
     forced && forced !== "auto" ? Number(forced) : bucketFor(Math.round(preTemp));
-  rec(`- 下注前查真實氣溫：**${preTemp}°C** → round ${Math.round(preTemp)} → 對應 bucket **${bucketFor(Math.round(preTemp))}**；B 押 bucket **${betBucket}**`);
+  rec(`- Real temperature fetched before betting: **${preTemp}°C** -> round ${Math.round(preTemp)} -> maps to bucket **${bucketFor(Math.round(preTemp))}**; B bets bucket **${betBucket}**`);
 
   const hb = await walletB.writeContract({
     account: B, chain, address: WM, abi: wmArt.abi as any,
@@ -248,24 +253,24 @@ async function main() {
   m = await readMarket(publicClient, WM, wmArt.abi, M1);
   rec(`- totalPool=${formatUnits(m.totalPool, 6)} USDC，bucketTotals[${betBucket}]=${formatUnits((await publicClient.readContract({ address: WM, abi: wmArt.abi as any, functionName: "bucketTotals", args: [M1, betBucket] } as any)) as bigint, 6)}`);
 
-  // 等 lockTime
+  // Wait for lockTime
   const waitFor = Number(m1Lock) - nowTs() + 5;
-  rec(`- 等待 lockTime（${waitFor}s）…`);
+  rec(`- Waiting for lockTime (${waitFor}s)…`);
   if (waitFor > 0) await sleep(waitFor * 1000);
 
-  // B（非 owner）鎖盤 —— lockMarket 是 permissionless
+  // B (a non-owner) locks the market — lockMarket is permissionless
   const hl = await walletB.writeContract({
     account: B, chain, address: WM, abi: wmArt.abi as any,
     functionName: "lockMarket", args: [M1], gas: 150_000n, ...gasOpts,
   } as never);
-  await confirm(hl, `B lockMarket(#${M1})（permissionless，非 owner 可呼叫）`);
+  await confirm(hl, `B lockMarket(#${M1}) (permissionless — callable by a non-owner)`);
   m = await readMarket(publicClient, WM, wmArt.abi, M1);
   rec(`- status → **${STATUS_LABEL[m.status]}**`);
 
-  // 真實氣溫
+  // Real temperature
   const rawTemp = await fetchTaipeiTemp();
   const rounded = Math.round(rawTemp);
-  rec(`- OpenWeather Taipei 原始溫度 **${rawTemp}°C** → Math.round → 送上鏈 **${rounded}**`);
+  rec(`- OpenWeather Taipei raw temperature **${rawTemp}°C** -> Math.round -> submitted on-chain **${rounded}**`);
 
   const hs = await walletA.writeContract({
     account: A, chain, address: AO, abi: aoArt.abi as any,
@@ -275,14 +280,14 @@ async function main() {
   await confirm(hs, `A AdminOracle.submitResult("${m.city}", ${rounded}, ${M1})`);
 
   m = await readMarket(publicClient, WM, wmArt.abi, M1);
-  rec(`- getMarket(#${M1}) 回讀：status=**${STATUS_LABEL[m.status]}** finalTemp=**${m.finalTemp}** winningBucket=**${m.winningBucket}** noWinner=**${m.noWinner}**`);
-  rec(`- 三者一致檢查：原始 ${rawTemp} → 四捨五入 ${rounded} → 鏈上 finalTemp ${m.finalTemp} → **${BigInt(rounded) === m.finalTemp ? "一致 ✅" : "不一致 ❌"}**`);
+  rec(`- getMarket(#${M1}) read back: status=**${STATUS_LABEL[m.status]}** finalTemp=**${m.finalTemp}** winningBucket=**${m.winningBucket}** noWinner=**${m.noWinner}**`);
+  rec(`- Three-way consistency check: raw ${rawTemp} -> rounded ${rounded} -> on-chain finalTemp ${m.finalTemp} -> **${BigInt(rounded) === m.finalTemp ? "consistent ✅" : "inconsistent ❌"}**`);
 
   const feesAfter = (await publicClient.readContract({
     address: WM, abi: wmArt.abi as any, functionName: "collectedFees",
   } as any)) as bigint;
 
-  // B 領取
+  // B claims
   const bBal0 = await usdcBal(B.address);
   if (!m.noWinner && m.winningBucket === betBucket) {
     const hc = await walletB.writeContract({
@@ -293,17 +298,17 @@ async function main() {
     const bBal1 = await usdcBal(B.address);
     const gasCost = cr.gasUsed * cr.effectiveGasPrice;
     const netDelta = bBal1 - bBal0 + gasCost / 1_000_000_000_000n;
-    rec(`- B USDC 前 ${formatUnits(bBal0, 6)} → 後 ${formatUnits(bBal1, 6)}（扣掉 gas ${formatUnits(gasCost / 1_000_000_000_000n, 6)}）`);
-    rec(`- 扣除 gas 後的實得 ≈ ${formatUnits(netDelta, 6)} USDC；池 ${formatUnits(m.totalPool, 6)} - 2% 手續費 ${formatUnits(feesAfter, 6)} = ${formatUnits(m.totalPool - feesAfter, 6)}`);
+    rec(`- B USDC before ${formatUnits(bBal0, 6)} -> after ${formatUnits(bBal1, 6)} (gas ${formatUnits(gasCost / 1_000_000_000_000n, 6)})`);
+    rec(`- Net received after gas ≈ ${formatUnits(netDelta, 6)} USDC; pool ${formatUnits(m.totalPool, 6)} - 2% fee ${formatUnits(feesAfter, 6)} = ${formatUnits(m.totalPool - feesAfter, 6)}`);
   } else {
-    rec(`- ⚠ 實際氣溫 ${rounded}°C 落在 bucket ${m.winningBucket}（B 押的是 bucket ${betBucket}），noWinner=${m.noWinner}`);
+    rec(`- ⚠ Actual temperature ${rounded}°C falls in bucket ${m.winningBucket} (B bet bucket ${betBucket}), noWinner=${m.noWinner}`);
     if (m.noWinner) {
       const hc = await walletB.writeContract({
         account: B, chain, address: WM, abi: wmArt.abi as any,
         functionName: "claimWinnings", args: [M1], gas: 300_000n, ...gasOpts,
       } as never);
-      await confirm(hc, `B claimWinnings(#${M1})（noWinner → 全額退款）`);
-      rec(`- B USDC 前 ${formatUnits(bBal0, 6)} → 後 ${formatUnits(await usdcBal(B.address), 6)}`);
+      await confirm(hc, `B claimWinnings(#${M1}) (noWinner -> full refund)`);
+      rec(`- B USDC before ${formatUnits(bBal0, 6)} -> after ${formatUnits(await usdcBal(B.address), 6)}`);
     }
   }
   rec(`- collectedFees = **${formatUnits(feesAfter, 6)} USDC**（= totalPool ${formatUnits(m.totalPool, 6)} × 2%）`);
@@ -316,15 +321,15 @@ async function main() {
     } as never);
     await confirm(hw, `A withdrawFees()`);
     const aBal1 = await usdcBal(A.address);
-    rec(`- A USDC 前 ${formatUnits(aBal0, 6)} → 後 ${formatUnits(aBal1, 6)}`);
-    rec(`- collectedFees 歸零檢查：${formatUnits((await publicClient.readContract({ address: WM, abi: wmArt.abi as any, functionName: "collectedFees" } as any)) as bigint, 6)}`);
+    rec(`- A USDC before ${formatUnits(aBal0, 6)} -> after ${formatUnits(aBal1, 6)}`);
+    rec(`- collectedFees zeroed check: ${formatUnits((await publicClient.readContract({ address: WM, abi: wmArt.abi as any, functionName: "collectedFees" } as any)) as bigint, 6)}`);
   } else {
-    rec(`- （noWinner 路徑，手續費豁免，無 withdrawFees 可測）`);
+    rec(`- (noWinner path: fee waived, nothing for withdrawFees to move)`);
   }
   rec(``);
 
-  // ── 4. M2：退款路徑（建到等待中狀態）──────────────────────────────────
-  rec(`## 4. M2 退款路徑（等待 24h 後可 claimRefund）`);
+  // ── 4. M2: refund path, taken to the waiting state ─────────────────────
+  rec(`## 4. M2 refund path (claimRefund becomes available after 24h)`);
   const m2Lock = BigInt(nowTs() + M2_LOCK_DELAY);
   const idB = (await publicClient.readContract({
     address: WM, abi: wmArt.abi as any, functionName: "nextMarketId",
@@ -345,7 +350,7 @@ async function main() {
   await confirm(hb2, `B placeBet(#${M2}, bucket 1, ${formatUnits(BET_AMOUNT, 6)} USDC)`);
 
   const wait2 = Number(m2Lock) - nowTs() + 5;
-  rec(`- 等待 lockTime（${wait2}s）…`);
+  rec(`- Waiting for lockTime (${wait2}s)…`);
   if (wait2 > 0) await sleep(wait2 * 1000);
 
   const hl2 = await walletB.writeContract({
@@ -359,28 +364,28 @@ async function main() {
     address: WM, abi: wmArt.abi as any, functionName: "settlementDeadline", args: [M2],
   } as any)) as bigint;
   rec(`- status=**${STATUS_LABEL[m2.status]}** settlementDeadline=**${m2Deadline}** (${new Date(Number(m2Deadline) * 1000).toISOString()})`);
-  rec(`- 現在 claimRefund 應該要 revert（窗口未開）：`);
+  rec(`- claimRefund should revert right now (window not open):`);
   try {
     await publicClient.simulateContract({
       account: B.address, address: WM, abi: wmArt.abi as any,
       functionName: "claimRefund", args: [M2],
     } as any);
-    rec(`  - ❌ 竟然模擬成功`);
+    rec(`  - ❌ the simulation unexpectedly succeeded`);
   } catch (err) {
     rec(`  - ✅ \`${String((err as any).shortMessage ?? (err as any).message).split("\n")[0].slice(0, 100)}\``);
   }
-  rec(`- 現在 submitResult 應該要成功（窗口內），但刻意**不執行**，留給 24h 後測退款`);
+  rec(`- submitResult would succeed right now (still inside the window) but is deliberately **not executed**, leaving the refund path to be tested after 24h`);
   rec(``);
-  rec(`> **待辦**：${new Date(Number(m2Deadline) * 1000).toISOString()} 之後，用錢包 B 對 #${M2} 呼叫 \`claimRefund\`，`);
-  rec(`> 預期取回本金全額 ${formatUnits(BET_AMOUNT, 6)} USDC（不扣 2% 手續費）。`);
+  rec(`> **TODO**: after ${new Date(Number(m2Deadline) * 1000).toISOString()}, call \`claimRefund\` on #${M2} from wallet B,`);
+  rec(`> expecting the full principal of ${formatUnits(BET_AMOUNT, 6)} USDC back (no 2% fee deducted).`);
 
   writeFileSync(LOG_PATH, log.join("\n") + "\n");
-  console.log(`\n✓ 記錄已寫入 ${LOG_PATH}`);
-  console.log(`\nM1=#${M1}  M2=#${M2}  錢包B=${B.address}`);
+  console.log(`\n✓ log written to ${LOG_PATH}`);
+  console.log(`\nM1=#${M1}  M2=#${M2}  walletB=${B.address}`);
 }
 
 main().catch((err) => {
-  writeFileSync(LOG_PATH, log.join("\n") + `\n\n**中止**：${err.shortMessage ?? err.message}\n`);
+  writeFileSync(LOG_PATH, log.join("\n") + `\n\n**Aborted**: ${err.shortMessage ?? err.message}\n`);
   console.error("E2E failed:", err.shortMessage ?? err.message);
   if (err.details) console.error("Details:", err.details);
   process.exit(1);

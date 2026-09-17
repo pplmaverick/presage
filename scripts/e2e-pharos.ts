@@ -24,7 +24,7 @@ const pharosAtlantic = defineChain({
   },
 });
 
-// gas=1M × gasPrice=10gwei = 0.01 ETH 保證金（帳戶 ETH 充足）
+// gas=1M × gasPrice=10gwei = 0.01 ETH  deposit (the account has plenty of ETH)
 const GAS_OPTS = {
   gas: 1_000_000n,
   gasPrice: parseGwei("10"),
@@ -37,15 +37,15 @@ function sleep(ms: number): Promise<void> {
 async function waitUntil(targetTimestamp: number, label: string): Promise<void> {
   const remaining = targetTimestamp - Math.floor(Date.now() / 1000);
   if (remaining <= 0) {
-    console.log(`  ${label} 已到達，繼續執行`);
+    console.log(`  ${label} reached, continuing`);
     return;
   }
-  console.log(`  等待 ${label}（還有 ${remaining} 秒）...`);
-  await sleep(remaining * 1000 + 3000); // 多等 3 秒讓鏈上時間同步
-  console.log(`  ${label} 已到達`);
+  console.log(`  waiting for ${label} (${remaining}s to go)...`);
+  await sleep(remaining * 1000 + 3000); // 3s extra so on-chain time catches up
+  console.log(`  ${label} reached`);
 }
 
-// 等待收據並檢查是否 reverted
+// Await the receipt and check whether it reverted
 async function checkTx(
   publicClient: ReturnType<typeof createPublicClient>,
   label: string,
@@ -62,7 +62,7 @@ async function main() {
   const privateKey = process.env.PRIVATE_KEY;
   if (!privateKey) throw new Error("PRIVATE_KEY not set in .env");
 
-  // 讀取部署地址
+  // Load deployed addresses
   const __dirname = dirname(fileURLToPath(import.meta.url));
   const deploymentPath = resolve(__dirname, "../deployments/pharos-testnet-mock.json");
   const deployment = JSON.parse(readFileSync(deploymentPath, "utf-8"));
@@ -71,7 +71,7 @@ async function main() {
   const weatherMarketAddress = deployment.contracts.WeatherMarket as Hex;
   const adminOracleAddress = deployment.contracts.AdminOracle as Hex;
 
-  console.log("=== Pharos Atlantic E2E 測試 ===");
+  console.log("=== Pharos Atlantic E2E test ===");
   console.log("MockUSDC:     ", mockUsdcAddress);
   console.log("WeatherMarket:", weatherMarketAddress);
   console.log("AdminOracle:  ", adminOracleAddress);
@@ -93,18 +93,18 @@ async function main() {
   const oracleArtifact = await hre.artifacts.readArtifact("AdminOracle");
   const usdcArtifact = await hre.artifacts.readArtifact("MockUSDC");
 
-  // --- 讀取初始餘額 ---
+  // --- Read the starting balance ---
   const balanceBefore = await publicClient.readContract({
     address: mockUsdcAddress,
     abi: usdcArtifact.abi,
     functionName: "balanceOf",
     args: [account.address],
   }) as bigint;
-  console.log(`\n初始 USDC 餘額: ${Number(balanceBefore) / 1e6} USDC`);
+  console.log(`\nstarting USDC balance: ${Number(balanceBefore) / 1e6} USDC`);
 
-  // --- 若餘額不足，先 mint 1000 USDC ---
+  // --- If the balance is short, mint 1000 USDC first ---
   if (balanceBefore < 100_000_000n) {
-    console.log("餘額不足，先 mint 1000 USDC...");
+    console.log("Balance too low, minting 1000 USDC first...");
     await checkTx(
       publicClient,
       "mint 1000 USDC",
@@ -122,13 +122,13 @@ async function main() {
       functionName: "balanceOf",
       args: [account.address],
     }) as bigint;
-    console.log(`  mint 後餘額: ${Number(newBalance) / 1e6} USDC`);
+    console.log(`  balance after mint: ${Number(newBalance) / 1e6} USDC`);
   }
 
   // --- Step 1: createMarket ---
   // buckets = [20, 25, 30, 35]
   // → bucket 0 (≤20), 1 (20~25], 2 (25~30], 3 (30~35], 4 (>35)
-  // 溫度 28°C → bucket 2
+  // temperature 28°C -> bucket 2
   const nowSec = Math.floor(Date.now() / 1000);
   const lockTime = BigInt(nowSec + 5 * 60);
   const targetDate = BigInt(nowSec + 10 * 60);
@@ -150,19 +150,19 @@ async function main() {
     }),
   );
 
-  // nextMarketId 在 createMarket 後應為 1，第一個市場 = 0
+  // nextMarketId should be 1 after createMarket, so the first market is 0
   const nextMarketId = await publicClient.readContract({
     address: weatherMarketAddress,
     abi: wmArtifact.abi,
     functionName: "nextMarketId",
   }) as bigint;
   console.log(`  nextMarketId after create: ${nextMarketId}`);
-  if (nextMarketId === 0n) throw new Error("createMarket 沒有成功：nextMarketId 仍為 0");
-  const marketId = nextMarketId - 1n; // 剛建的市場 ID
+  if (nextMarketId === 0n) throw new Error("createMarket did not succeed: nextMarketId is still 0");
+  const marketId = nextMarketId - 1n; // the market just created
   console.log(`  marketId: ${marketId}`);
 
   // --- Step 2: approve 100 USDC ---
-  console.log("\n[2/7] approve 100 USDC 給 WeatherMarket...");
+  console.log("\n[2/7] approving 100 USDC for WeatherMarket...");
   await checkTx(
     publicClient,
     "approve",
@@ -189,7 +189,7 @@ async function main() {
     }),
   );
 
-  // 確認 bucket total
+  // Check the bucket total
   const bucketTotal = await publicClient.readContract({
     address: weatherMarketAddress,
     abi: wmArtifact.abi,
@@ -198,8 +198,8 @@ async function main() {
   }) as bigint;
   console.log(`  bucket[2] total: ${Number(bucketTotal) / 1e6} USDC`);
 
-  // --- Step 4: 等待 lockTime ---
-  console.log("\n[4/7] 等待 lockTime...");
+  // --- Step 4: wait for lockTime ---
+  console.log("\n[4/7] waiting for lockTime...");
   await waitUntil(Number(lockTime), "lockTime");
 
   // --- Step 5: lockMarket ---
@@ -230,7 +230,7 @@ async function main() {
     }),
   );
 
-  // --- 確認市場狀態 ---
+  // --- Check market status ---
   const rawMarket = await publicClient.readContract({
     address: weatherMarketAddress,
     abi: wmArtifact.abi,
@@ -238,7 +238,7 @@ async function main() {
     args: [marketId],
   });
 
-  // viem 可能回傳 array 或 object，兩者都支援
+  // viem may return an array or an object; both are handled
   let city: string, status: number, totalPool: bigint, finalTemp: bigint,
       winningBucket: number, noWinner: boolean;
 
@@ -255,17 +255,17 @@ async function main() {
     noWinner = m.noWinner as boolean;
   }
 
-  const statusLabel = ["OPEN", "LOCKED", "SETTLED"][status] ?? `未知(${status})`;
-  console.log("\n--- 市場結果 ---");
-  console.log(`  城市:         ${city}`);
-  console.log(`  狀態:         ${statusLabel}`);
+  const statusLabel = ["OPEN", "LOCKED", "SETTLED"][status] ?? `unknown(${status})`;
+  console.log("\n--- market result ---");
+  console.log(`  city:   ${city}`);
+  console.log(`  status: ${statusLabel}`);
   console.log(`  totalPool:    ${Number(totalPool) / 1e6} USDC`);
   console.log(`  finalTemp:    ${finalTemp}°C`);
-  console.log(`  winningBucket: ${winningBucket}（期望: 2）`);
+  console.log(`  winningBucket: ${winningBucket} (expected: 2)`);
   console.log(`  noWinner:     ${noWinner}`);
 
-  if (status !== 2) throw new Error(`市場狀態不是 SETTLED（是 ${statusLabel}），無法 claim`);
-  if (winningBucket !== 2) throw new Error(`winningBucket 應為 2，實際為 ${winningBucket}`);
+  if (status !== 2) throw new Error(`market status is ${statusLabel}, not SETTLED — cannot claim`);
+  if (winningBucket !== 2) throw new Error(`winningBucket should be 2, got ${winningBucket}`);
 
   // --- Step 7: claimWinnings ---
   console.log("\n[7/7] claimWinnings...");
@@ -281,7 +281,7 @@ async function main() {
     }),
   );
 
-  // --- 最終 USDC 餘額 ---
+  // --- Final USDC balance ---
   const balanceAfter = await publicClient.readContract({
     address: mockUsdcAddress,
     abi: usdcArtifact.abi,
@@ -292,13 +292,13 @@ async function main() {
   const effectiveBefore =
     balanceBefore < 100_000_000n ? balanceBefore + 1_000_000_000n : balanceBefore;
 
-  console.log("\n=== 測試結果 ===");
-  console.log(`  下注前餘額:  ${Number(effectiveBefore) / 1e6} USDC`);
-  console.log(`  最終餘額:    ${Number(balanceAfter) / 1e6} USDC`);
+  console.log("\n=== test result ===");
+  console.log(`  balance before bet: ${Number(effectiveBefore) / 1e6} USDC`);
+  console.log(`  final balance: ${Number(balanceAfter) / 1e6} USDC`);
   const diff = Number(balanceAfter) - Number(effectiveBefore);
-  console.log(`  差額:        ${diff >= 0 ? "+" : ""}${diff / 1e6} USDC（2% 手續費已扣除）`);
-  console.log("  期望差額:    -2 USDC（100 USDC 押注 × 2% 手續費）");
-  console.log("\n✓ E2E 測試通過");
+  console.log(`  delta:  ${diff >= 0 ? "+" : ""}${diff / 1e6} USDC (2% fee already deducted)`);
+  console.log("  expected delta: -2 USDC (100 USDC staked x 2% fee)");
+  console.log("\n✓ E2E test passed");
 }
 
 main().catch((err) => {

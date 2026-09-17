@@ -38,12 +38,12 @@ async function main() {
   const artifact = await hre.artifacts.readArtifact("WeatherMarket");
 
   const account = privateKeyToAccount(`0x${process.env.PRIVATE_KEY}` as Hex);
-  console.log(`Signer 地址: ${account.address}`);
+  console.log(`Signer: ${account.address}`);
   console.log(
-    "（本專案所有腳本目前都共用同一把 PRIVATE_KEY：deploy / lockMarket / submitResult / placeBet 都是這個地址，",
+    "(Every script in this project currently shares one PRIVATE_KEY: deploy / lockMarket / submitResult / placeBet all use this address,",
   );
   console.log(
-    " 所以只有在這個地址自己下注過、且押中該市場的獲勝區間時，claimWinnings 才會成功；否則會 revert。）\n",
+    " so claimWinnings only succeeds when this address itself placed a bet and picked the winning bucket; otherwise it reverts.)\n",
   );
 
   const walletClient = createWalletClient({
@@ -94,8 +94,8 @@ async function main() {
     if (status === 2) console.log(`  winningBucket: ${winningBucket}`);
 
     if (status !== 2 /* SETTLED */) {
-      console.log(`  跳過：狀態不是 SETTLED`);
-      summary.push({ id: marketId, result: `跳過（狀態=${STATUS_LABEL[status] ?? status}）` });
+      console.log(`  skipped: status is not SETTLED`);
+      summary.push({ id: marketId, result: `skipped (status=${STATUS_LABEL[status] ?? status})` });
       continue;
     }
 
@@ -107,12 +107,12 @@ async function main() {
     })) as boolean;
 
     if (alreadyClaimed) {
-      console.log(`  跳過：此地址已 claim 過`);
-      summary.push({ id: marketId, result: "跳過（已 claim 過）" });
+      console.log(`  skipped: this address already claimed`);
+      summary.push({ id: marketId, result: "skipped (already claimed)" });
       continue;
     }
 
-    // ── 事先讀鏈上狀態，預判這個 signer 呼叫會不會 revert ────────────────────────────
+    // ── Read on-chain state up front to predict whether this signer's call would revert ────────────────────────────
     let predictedPayoutBasis = 0n;
     if (noWinner) {
       predictedPayoutBasis = (await publicClient.readContract({
@@ -135,14 +135,14 @@ async function main() {
         ? "WeatherMarket: no bets to refund"
         : "WeatherMarket: no winning bet";
       console.log(
-        `  跳過：此 signer 地址在這個市場沒有可領取的下注（預期 revert: "${reason}"），不送出交易`,
+        `  skipped: this signer has nothing claimable in this market (expected revert: "${reason}"), no transaction sent`,
       );
-      summary.push({ id: marketId, result: `跳過（預期 revert: ${reason}）` });
+      summary.push({ id: marketId, result: `skipped (expected revert: ${reason})` });
       continue;
     }
 
     try {
-      console.log(`  送出 claimWinnings...`);
+      console.log(`  sending claimWinnings...`);
       const hash = await walletClient.writeContract({
         address: weatherMarketAddr,
         abi: artifact.abi,
@@ -154,7 +154,7 @@ async function main() {
       });
 
       console.log(`  tx hash : ${hash}`);
-      console.log(`  等待確認...`);
+      console.log(`  waiting for confirmation...`);
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
       let payout = 0n;
@@ -171,16 +171,16 @@ async function main() {
             payout = (decoded.args as { amount: bigint }).amount;
           }
         } catch {
-          // 非目標 event，跳過
+          // Not the event we want, skip
         }
       }
 
       console.log(
-        `  ✓ success，領回 ${(payout / 10n ** 6n).toString()} USDC`,
+        `  ✓ success, received ${(payout / 10n ** 6n).toString()} USDC`,
       );
       summary.push({
         id: marketId,
-        result: `success，領回 ${(payout / 10n ** 6n).toString()} USDC`,
+        result: `success, received ${(payout / 10n ** 6n).toString()} USDC`,
         hash,
       });
     } catch (e: any) {
@@ -190,7 +190,7 @@ async function main() {
     }
   }
 
-  console.log("\n=== 彙總 ===");
+  console.log("\n=== Summary ===");
   for (const s of summary) {
     console.log(
       `Market #${s.id}: ${s.result}${s.hash ? ` tx=${s.hash}` : ""}`,

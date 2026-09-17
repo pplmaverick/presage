@@ -12,7 +12,7 @@ import { privateKeyToAccount } from "viem/accounts";
 const GWEI = 1_000_000_000n;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 網路
+// Networks
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const arcTestnet = defineChain({
@@ -46,8 +46,8 @@ export const arcMainnet = defineChain({
 
 export type NetworkKey = "arc-testnet" | "arc-mainnet";
 
-// 預設 testnet。主網操作必須顯式 NETWORK=arc-mainnet，避免手滑把主網結算
-// 打到測試網、或反過來。
+// Defaults to testnet. Mainnet operations require an explicit NETWORK=arc-mainnet,
+// so a slip of the hand cannot send a mainnet settlement to testnet or vice versa.
 export function resolveNetwork(): {
   key: NetworkKey;
   chain: Chain;
@@ -69,13 +69,13 @@ export function resolveNetwork(): {
     };
   }
   throw new Error(
-    `未知的 NETWORK="${raw}"，只接受 arc-testnet 或 arc-mainnet`,
+    `Unknown NETWORK="${raw}"; only arc-testnet or arc-mainnet are accepted`,
   );
 }
 
 export function makeClients(chain: Chain) {
   const rawKey = process.env.PRIVATE_KEY;
-  if (!rawKey) throw new Error("PRIVATE_KEY 未設定");
+  if (!rawKey) throw new Error("PRIVATE_KEY is not set");
   const account = privateKeyToAccount(
     (rawKey.startsWith("0x") ? rawKey : `0x${rawKey}`) as Hex,
   );
@@ -84,43 +84,47 @@ export function makeClients(chain: Chain) {
   return { account, walletClient, publicClient };
 }
 
-// 送任何交易之前先確認 RPC 回的 chainId 真的是我們以為的那條鏈。
+// Before sending any transaction, confirm the RPC's chainId really is the chain we think it is.
 export async function assertChainId(publicClient: any, chain: Chain) {
   const actual = await publicClient.getChainId();
   if (actual !== chain.id) {
     throw new Error(
-      `RPC chainId 不符：期望 ${chain.id} (${chain.name})，實際 ${actual}。請檢查 RPC URL。`,
+      `RPC chainId mismatch: expected ${chain.id} (${chain.name}), got ${actual}. Check the RPC URL.`,
     );
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 動態 gas
+// Dynamic gas
 //
-// Arc 主網實測（2026-09-16）：baseFeePerGas 在 20.36–20.88 gwei 之間浮動，
-// tip p90 落在 19.5–27.3 gwei，gasUsedRatio 0.25–0.74（有實際競爭）。
-// 測試網則是 baseFee 完全平坦貼在 20 gwei 地板、tip 幾乎恆為 0。
-// 原本寫死的 maxPriorityFeePerGas = 10 gwei 是在測試網那個零競爭環境下校準的，
-// 拿到主網會低於 p90，交易可能長時間卡在 mempool——而卡住又正好是
-// 「lockMarket / submitResult 沒跑成功但沒人發現」那類故障的來源。
-// 所以這裡一律在送出前現查 eth_feeHistory。
+// Measured on Arc mainnet (2026-09-16): baseFeePerGas floats between 20.36 and
+// 20.88 gwei, the p90 tip sits at 19.5-27.3 gwei, and gasUsedRatio runs 0.25-0.74 —
+// there is real competition. Testnet, by contrast, has a completely flat base fee
+// pinned to the 20 gwei floor and tips that are almost always zero.
+// The old hard-coded maxPriorityFeePerGas = 10 gwei was calibrated in that
+// zero-competition testnet environment. On mainnet it lands below p90 and the
+// transaction can sit in the mempool for a long time — which is exactly the failure
+// mode behind "lockMarket / submitResult never went through and nobody noticed".
+// So the fee is always queried from eth_feeHistory right before sending.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const FEE_HISTORY_BLOCKS = 10;
 export const REWARD_PERCENTILE = 90;
-export const TIP_BUFFER_BPS = 12_000n; // 取中位數後再 +20%
+export const TIP_BUFFER_BPS = 12_000n; // median, then +20%
 export const MIN_PRIORITY_FEE = 1n * GWEI;
-export const MIN_MAX_FEE = 20n * GWEI; // Arc 文件記載的 minFeePerGas
+export const MIN_MAX_FEE = 20n * GWEI; // minFeePerGas per Arc's documentation
 
-// 動態算出來的 priority 上限。Arc 上偶爾會出現單一區塊的 tip 離群值
-// （實測主網最近 20 塊裡有一塊 p90 = 268 gwei、另一塊 p99 = 3839 gwei，
-// 但同期 baseFee 平坦在 20 gwei、gasUsedRatio 只有 8~25%，根本不壅塞）。
-// 沒有這道上限的話，一次離群讀數就會讓 maxFeePerGas 飆到數千 gwei，
-// 大額部署交易會因為 gas * maxFee 超過餘額而直接被拒。
+// Ceiling on the dynamically derived priority fee. Arc occasionally produces a block
+// with an outlier tip — in a sample of the last 20 mainnet blocks one had a p90 of
+// 268 gwei and another a p99 of 3839 gwei, while the base fee stayed flat at 20 gwei
+// and blocks were only 8-25% full, i.e. no congestion at all.
+// Without this ceiling a single outlier reading pushes maxFeePerGas into the thousands
+// of gwei, and a large deployment transaction is rejected outright because
+// gas * maxFee exceeds the account balance.
 export const MAX_PRIORITY_FEE = 200n * GWEI;
 
-// eth_feeHistory 打不通時的保守靜態值（主網有實際競爭下的臨時保守值，
-// 非測試網那組 10/100 gwei）。
+// Conservative static values for when eth_feeHistory is unreachable. These are sized
+// for mainnet, where there is real competition — not the testnet 10/100 gwei pair.
 export const FALLBACK_PRIORITY_FEE = 30n * GWEI;
 export const FALLBACK_MAX_FEE = 150n * GWEI;
 
@@ -145,18 +149,19 @@ export async function computeFees(publicClient: any): Promise<Fees> {
     })) as { baseFeePerGas: Hex[]; reward?: Hex[][] };
 
     const baseFees = (history.baseFeePerGas ?? []).map((v) => BigInt(v));
-    if (baseFees.length === 0) throw new Error("feeHistory 沒有回傳 baseFeePerGas");
-    // baseFeePerGas 陣列比 blockCount 多一項（最後一項是下一塊的預測值）。
-    // 取整段最大值，比只看最新一塊更能吃掉 baseFee 上行的情況。
+    if (baseFees.length === 0) throw new Error("feeHistory returned no baseFeePerGas");
+    // The baseFeePerGas array is one longer than blockCount (the last entry is the
+    // prediction for the next block). Taking the maximum across the window absorbs a
+    // rising base fee better than reading only the most recent block.
     const baseFee = baseFees.reduce((a, b) => (a > b ? a : b), 0n);
 
     const perBlockP90 = (history.reward ?? []).map((row) =>
       BigInt(row?.[0] ?? "0x0"),
     );
 
-    // 取「各塊 p90 的中位數」，不是最大值。
-    // 最大值會被單一離群區塊綁架（見 MAX_PRIORITY_FEE 的說明），
-    // 中位數才反映實際要付多少才會被打包。
+    // Take the median of the per-block p90 tips, not the maximum.
+    // The maximum is hijacked by a single outlier block (see MAX_PRIORITY_FEE); the
+    // median reflects what actually has to be paid to get included.
     const sorted = [...perBlockP90].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
     const p90Median =
       sorted.length === 0
@@ -194,14 +199,14 @@ export async function computeFees(publicClient: any): Promise<Fees> {
       maxPriorityFeePerGas: FALLBACK_PRIORITY_FEE,
       source: "fallback",
       detail:
-        `eth_feeHistory 失敗（${msg}），改用保守靜態值 ` +
+        `eth_feeHistory failed (${msg}), falling back to conservative static values ` +
         `priority=${fmtGwei(FALLBACK_PRIORITY_FEE)} / maxFee=${fmtGwei(FALLBACK_MAX_FEE)}`,
     };
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 市場掃描
+// Market scanning
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const STATUS = { OPEN: 0, LOCKED: 1, SETTLED: 2 } as const;
@@ -248,9 +253,11 @@ export async function readMarket(
   };
 }
 
-// 取代原本寫死的 MARKET_IDS 常數。每輪手動改常數，漏掉一個市場就是一個
-// 永遠不會被鎖/結算的市場（#31/#32 就是這樣卡住的）。
-// 仍保留 MARKET_IDS 環境變數做手動覆寫（例如只想處理特定幾個）。
+// Replaces the old hard-coded MARKET_IDS constant. Editing that constant by hand each
+// round meant any market missed became one that would never be locked or settled —
+// which is exactly how #31/#32 got stuck.
+// The MARKET_IDS environment variable is still honoured as a manual override, e.g. to
+// process only a specific few.
 export async function scanMarkets(
   publicClient: any,
   address: Address,
@@ -260,7 +267,7 @@ export async function scanMarkets(
   const override = process.env.MARKET_IDS?.trim();
   if (override) {
     const ids = override.split(",").map((s) => BigInt(s.trim()));
-    console.log(`MARKET_IDS 覆寫生效，只處理：${ids.join(", ")}`);
+    console.log(`MARKET_IDS override in effect, processing only: ${ids.join(", ")}`);
     const out: MarketInfo[] = [];
     for (const id of ids) out.push(await readMarket(publicClient, address, abi, id));
     return out;
@@ -272,8 +279,8 @@ export async function scanMarkets(
     functionName: "nextMarketId",
   } as any)) as bigint;
 
-  console.log(`掃描市場 0 … ${next - 1n}（nextMarketId=${next}），` +
-    `尋找 status=${STATUS_LABEL[wantStatus]}`);
+  console.log(`Scanning markets 0..${next - 1n} (nextMarketId=${next}), ` +
+    `looking for status=${STATUS_LABEL[wantStatus]}`);
 
   const out: MarketInfo[] = [];
   for (let id = 0n; id < next; id++) {
@@ -284,7 +291,7 @@ export async function scanMarkets(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 送交易：模擬 → 送出 → 等收據 → 驗證 status → 回讀鏈上狀態
+// Send a transaction: simulate -> send -> await receipt -> check status -> read back state
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function sendAndConfirm(
@@ -302,8 +309,8 @@ export async function sendAndConfirm(
 ): Promise<Hex> {
   const { address, abi, functionName, args, gas, fees, label } = params;
 
-  // 先模擬。合約 revert 在這裡就會拋出並帶回 revert reason，
-  // 不會浪費 gas，也不會出現「送出去了但其實 revert」的情況。
+  // Simulate first. A contract revert throws here with its revert reason attached,
+  // wasting no gas and ruling out the "sent it but it actually reverted" case.
   await publicClient.simulateContract({
     account: walletClient.account!,
     address,
@@ -325,22 +332,22 @@ export async function sendAndConfirm(
   } as any);
 
   console.log(`  tx hash   : ${hash}`);
-  console.log(`  等待收據…`);
+  console.log(`  Waiting for receipt…`);
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
-  // viem 的 receipt.status 是 "success" | "reverted"（對應 EVM 的 1 / 0）。
-  // 只確認「拿得到 tx hash」是不夠的——交易可以順利上鏈然後 revert。
+  // viem's receipt.status is "success" | "reverted" (the EVM's 1 / 0).
+  // Getting a tx hash back is not enough — a transaction can land on-chain and revert.
   const ok = receipt.status === "success" || (receipt.status as unknown) === 1;
   if (!ok) {
     throw new Error(
-      `${label} 交易已上鏈但 revert：receipt.status=${String(receipt.status)}, ` +
+      `${label} landed on-chain but reverted: receipt.status=${String(receipt.status)}, ` +
       `hash=${hash}, block=${receipt.blockNumber}`,
     );
   }
 
   console.log(
-    `  ✓ 成功（block ${receipt.blockNumber}, gasUsed ${receipt.gasUsed}）`,
+    `  ✓ success (block ${receipt.blockNumber}, gasUsed ${receipt.gasUsed})`,
   );
   return hash;
 }

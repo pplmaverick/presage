@@ -16,8 +16,9 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: false } },
 })
 
-// 合約位址等必填設定缺失時，整頁換成明確的設定錯誤畫面，而不是讓 app 帶著
-// 一個 placeholder 位址跑起來。see lib/wagmi.ts 的 requireEnv。
+// When required config (contract address etc.) is missing, swap the whole page for
+// an explicit config-error screen rather than letting the app run with a placeholder
+// address. See requireEnv in lib/wagmi.ts.
 const configError = getConfigError()
 
 createRoot(document.getElementById('root')!).render(

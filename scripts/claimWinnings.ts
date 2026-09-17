@@ -26,11 +26,11 @@ const arc = defineChain({
 const STATUS_LABEL = ["OPEN", "LOCKED", "SETTLED"];
 
 async function main() {
-  // 用法：MARKET_ID=0 npx hardhat run scripts/claimWinnings.ts --network arc
-  if (!process.env.MARKET_ID) throw new Error("請設定環境變數 MARKET_ID");
+  // Usage: MARKET_ID=0 npx hardhat run scripts/claimWinnings.ts --network arc
+  if (!process.env.MARKET_ID) throw new Error("set the MARKET_ID environment variable");
   const marketId = BigInt(process.env.MARKET_ID);
 
-  // ── 讀取部署地址 ────────────────────────────────────────────────────────────
+  // ── Load deployed addresses ────────────────────────────────────────────────────────────
   const __dirname = dirname(fileURLToPath(import.meta.url));
   const deployments = JSON.parse(
     readFileSync(resolve(__dirname, "../deployments/arc-testnet.json"), "utf-8"),
@@ -38,12 +38,12 @@ async function main() {
   const weatherMarketAddr = deployments.contracts.WeatherMarket as Hex;
   const artifact = await hre.artifacts.readArtifact("WeatherMarket");
 
-  // ── 設定 viem clients ───────────────────────────────────────────────────────
+  // ── Set up viem clients ───────────────────────────────────────────────────────
   const account = privateKeyToAccount(`0x${process.env.PRIVATE_KEY}` as Hex);
   const walletClient = createWalletClient({ account, chain: arc, transport: http() });
   const publicClient = createPublicClient({ chain: arc, transport: http() });
 
-  // ── 讀取市場資訊 ─────────────────────────────────────────────────────────────
+  // ── Read market info ─────────────────────────────────────────────────────────────
   const marketData = (await publicClient.readContract({
     address: weatherMarketAddr,
     abi: artifact.abi,
@@ -53,7 +53,7 @@ async function main() {
 
   const [city, targetDate, , status, totalPool, , winningBucket] = marketData;
 
-  console.log("Market 資訊");
+  console.log("Market info");
   console.log("  marketId     :", marketId.toString());
   console.log("  city         :", city);
   console.log("  status       :", STATUS_LABEL[status] ?? status);
@@ -62,11 +62,11 @@ async function main() {
   if (status === 2) console.log("  winningBucket:", winningBucket);
 
   if (status !== 2 /* SETTLED */) {
-    console.error(`\n錯誤：市場狀態是 ${STATUS_LABEL[status] ?? status}，只有 SETTLED 狀態可以 claim。`);
+    console.error(`\nError: market status is ${STATUS_LABEL[status] ?? status}; only SETTLED markets can be claimed.`);
     process.exit(1);
   }
 
-  // ── 確認是否已 claimed ────────────────────────────────────────────────────────
+  // ── Check whether it was already claimed ────────────────────────────────────────────────────────
   const alreadyClaimed = (await publicClient.readContract({
     address: weatherMarketAddr,
     abi: artifact.abi,
@@ -75,12 +75,12 @@ async function main() {
   })) as boolean;
 
   if (alreadyClaimed) {
-    console.error("\n錯誤：此地址已對這個市場 claim 過了。");
+    console.error("\nError: this address has already claimed this market.");
     process.exit(1);
   }
 
-  // ── 送出交易 ─────────────────────────────────────────────────────────────────
-  console.log("\n送出 claimWinnings...");
+  // ── Send the transaction ─────────────────────────────────────────────────────────────────
+  console.log("\nsending claimWinnings...");
   const hash = await walletClient.writeContract({
     address: weatherMarketAddr,
     abi: artifact.abi,
@@ -92,10 +92,10 @@ async function main() {
   });
 
   console.log("tx hash:", hash);
-  console.log("等待確認...");
+  console.log("waiting for confirmation...");
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
-  // ── 解析 WinningsClaimed event 取得領回金額 ─────────────────────────────────────
+  // ── Parse the WinningsClaimed event for the payout ─────────────────────────────────────
   let payout = 0n;
   for (const log of receipt.logs) {
     if (log.address.toLowerCase() !== weatherMarketAddr.toLowerCase()) continue;
@@ -105,14 +105,14 @@ async function main() {
         payout = (decoded.args as { amount: bigint }).amount;
       }
     } catch {
-      // 非目標 event，跳過
+      // Not the event we want, skip
     }
   }
 
   if (payout > 0n) {
-    console.log(`\n✓ Claim 成功！領回 ${(payout / 10n ** 6n).toString()} USDC`);
+    console.log(`\n✓ claim succeeded, received ${(payout / 10n ** 6n).toString()} USDC`);
   } else {
-    console.log("\n✓ 交易確認（無法從 log 解析金額，請查 tx hash）");
+    console.log("\n✓ transaction confirmed (amount not parseable from logs — check the tx hash)");
   }
 }
 

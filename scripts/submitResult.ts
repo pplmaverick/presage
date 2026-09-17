@@ -25,13 +25,13 @@ const arc = defineChain({
 const STATUS_LABEL = ["OPEN", "LOCKED", "SETTLED"];
 
 async function main() {
-  // 用法：MARKET_ID=0 TEMP=29 npx hardhat run scripts/submitResult.ts --network arc
-  if (!process.env.MARKET_ID) throw new Error("請設定環境變數 MARKET_ID");
-  if (!process.env.TEMP) throw new Error("請設定環境變數 TEMP（攝氏溫度整數）");
+  // Usage: MARKET_ID=0 TEMP=29 npx hardhat run scripts/submitResult.ts --network arc
+  if (!process.env.MARKET_ID) throw new Error("set the MARKET_ID environment variable");
+  if (!process.env.TEMP) throw new Error("set the TEMP environment variable (whole degrees Celsius)");
   const marketId = BigInt(process.env.MARKET_ID);
   const temp = BigInt(process.env.TEMP);
 
-  // ── 讀取部署地址 ────────────────────────────────────────────────────────────
+  // ── Load deployed addresses ────────────────────────────────────────────────────────────
   const __dirname = dirname(fileURLToPath(import.meta.url));
   const deployments = JSON.parse(
     readFileSync(
@@ -45,7 +45,7 @@ async function main() {
   const aoArt = await hre.artifacts.readArtifact("AdminOracle");
   const wmArt = await hre.artifacts.readArtifact("WeatherMarket");
 
-  // ── 設定 viem clients ───────────────────────────────────────────────────────
+  // ── Set up viem clients ───────────────────────────────────────────────────────
   const account = privateKeyToAccount(`0x${process.env.PRIVATE_KEY}` as Hex);
   const walletClient = createWalletClient({
     account,
@@ -61,7 +61,7 @@ async function main() {
     }),
   });
 
-  // ── 讀取市場資訊 ─────────────────────────────────────────────────────────────
+  // ── Read market info ─────────────────────────────────────────────────────────────
   const marketData = (await publicClient.readContract({
     address: weatherMarketAddr,
     abi: wmArt.abi,
@@ -71,7 +71,7 @@ async function main() {
 
   const [city, targetDate, lockTime, status, totalPool, , , buckets] = marketData;
 
-  console.log("Market 資訊");
+  console.log("Market info");
   console.log("  marketId  :", marketId.toString());
   console.log("  city      :", city);
   console.log("  status    :", STATUS_LABEL[status] ?? status);
@@ -88,13 +88,13 @@ async function main() {
 
   if (status !== 1 /* LOCKED */) {
     console.warn(
-      `\n警告：市場狀態是 ${STATUS_LABEL[status] ?? status}，不是 LOCKED。`,
+      `\nWarning: market status is ${STATUS_LABEL[status] ?? status}, not LOCKED.`,
     );
-    console.warn("  submitResult 需要市場處於 LOCKED 狀態才會成功。");
+    console.warn("  submitResult only succeeds while the market is LOCKED.");
   }
 
-  // ── 計算得獎區間（預覽用，鏈上會再算一次）────────────────────────────────────────
-  let bucketPreview = buckets.length; // 預設 >最大上界
+  // ── Compute the winning bucket (preview only; the chain recomputes it)────────────────────────────────────────
+  let bucketPreview = buckets.length; // default: above the highest upper bound
   for (let i = 0; i < buckets.length; i++) {
     if (temp <= buckets[i]) {
       bucketPreview = i;
@@ -102,10 +102,10 @@ async function main() {
     }
   }
   console.log(
-    `\n提交溫度 ${temp}°C → 預期得獎區間 bucket ${bucketPreview}`,
+    `\nSubmitting ${temp}°C -> expected winning bucket ${bucketPreview}`,
   );
 
-  // ── 送出交易 ─────────────────────────────────────────────────────────────────
+  // ── Send the transaction ─────────────────────────────────────────────────────────────────
   const hash = await walletClient.writeContract({
     address: adminOracleAddr,
     abi: aoArt.abi,
@@ -117,10 +117,10 @@ async function main() {
   });
 
   console.log("\ntx hash:", hash);
-  console.log("等待確認...");
+  console.log("waiting for confirmation...");
 
   await publicClient.waitForTransactionReceipt({ hash });
-  console.log("✓ 結果提交成功");
+  console.log("✓ result submitted");
 }
 
 main().catch((err) => {

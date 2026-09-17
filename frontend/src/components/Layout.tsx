@@ -17,8 +17,8 @@ const navItems = [
 
 const ADMIN_ITEM = { path: '/admin', label: 'ADMIN', icon: 'shield_person' }
 
-// owner 判定還沒有結論前一律回 false —— 寧可晚半秒出現，也不要先閃一下
-// 再消失，那等於對所有人揭露這條路由存在。
+// Returns false until the owner check resolves. Better to appear half a second
+// late than to flash and disappear, which would reveal the route to everyone.
 function useAdminNav(): boolean {
   const { isOwner, isResolved } = useIsOwner()
   return isResolved && isOwner

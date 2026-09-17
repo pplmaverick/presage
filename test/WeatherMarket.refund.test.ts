@@ -7,7 +7,7 @@ import hre from "hardhat";
 const UNIT = 10n ** 6n; // USDC 6 decimals
 const toUSDC = (n: number) => BigInt(n) * UNIT;
 
-// buckets [25,28,31,34] → 5 區間
+// buckets [25,28,31,34] -> 5 ranges
 // 0: ≤25 | 1: 25~28 | 2: 28~31 | 3: 31~34 | 4: >34
 const BUCKETS = [25n, 28n, 31n, 34n];
 
@@ -68,8 +68,8 @@ describe("WeatherMarket — no-winner refund & fee logic", async function () {
   }
 
   // ── Test 1 ────────────────────────────────────────────────────────────────
-  // Alice 押 bucket 0，Bob 押 bucket 1，temp=35 → bucket 4 獲勝（無人押注）
-  // → noWinner=true，各自全額退款，無手續費
+  // Alice bets bucket 0, Bob bets bucket 1, temp=35 -> bucket 4 wins (nobody bet it)
+  // -> noWinner=true, everyone refunded in full, no fee
 
   it("test: refunds all bets when no winner", async () => {
     const { alice, bob, oracleSigner, mockUSDC, weatherMarket, marketId, lockTime } =
@@ -81,7 +81,7 @@ describe("WeatherMarket — no-winner refund & fee logic", async function () {
     await networkHelpers.time.increaseTo(lockTime + 1);
     await (weatherMarket.connect(alice) as any).lockMarket(marketId);
 
-    // temp=35 → _determineWinningBucket([25,28,31,34], 35) = bucket 4（>34），無人押注
+    // temp=35 -> _determineWinningBucket([25,28,31,34], 35) = bucket 4 (>34), nobody bet it
     await (weatherMarket.connect(oracleSigner) as any).submitResult(marketId, 35n);
 
     const aliceBefore = await (mockUSDC as any).balanceOf(alice.address);
@@ -93,13 +93,13 @@ describe("WeatherMarket — no-winner refund & fee logic", async function () {
     const alicePayout = (await (mockUSDC as any).balanceOf(alice.address)) - aliceBefore;
     const bobPayout = (await (mockUSDC as any).balanceOf(bob.address)) - bobBefore;
 
-    // 無手續費，原額退款
+    // No fee, refunded at face value
     assert.equal(alicePayout, toUSDC(1));
     assert.equal(bobPayout, toUSDC(1));
   });
 
   // ── Test 2 ────────────────────────────────────────────────────────────────
-  // 同上流程，驗證合約 USDC 餘額及 collectedFees 在全員 claim 後為 0
+  // Same flow, asserting the contract's USDC balance and collectedFees are 0 once everyone has claimed
 
   it("test: fee is waived when no winner", async () => {
     const { alice, bob, oracleSigner, mockUSDC, weatherMarket, marketId, lockTime } =
@@ -119,21 +119,21 @@ describe("WeatherMarket — no-winner refund & fee logic", async function () {
     const contractBalance = await (mockUSDC as any).balanceOf(wmAddr);
     const collectedFees = await (weatherMarket as any).collectedFees();
 
-    // 無贏家：手續費不收取，合約 USDC 清零
+    // No winner: no fee charged, contract USDC drained to zero
     assert.equal(contractBalance, 0n);
     assert.equal(collectedFees, 0n);
   });
 
   // ── Test 3 ────────────────────────────────────────────────────────────────
-  // Alice 押 bucket 2（28~31°C），Bob 押 bucket 3（31~34°C），temp=30 → bucket 2 獲勝
-  // 贏家（Alice）領回 1.96 USDC（pool 2 USDC - 2% fee）
-  // 輸家（Bob）claimWinnings 應 revert
+  // Alice bets bucket 2 (28-31°C), Bob bets bucket 3 (31-34°C), temp=30 -> bucket 2 wins
+  // The winner (Alice) receives 1.96 USDC (pool 2 USDC - 2% fee)
+  // The loser (Bob) must have claimWinnings revert
 
   it("test: winner takes pool minus fee", async () => {
     const { alice, bob, oracleSigner, mockUSDC, weatherMarket, marketId, lockTime } =
       await networkHelpers.loadFixture(deployContracts);
 
-    // Alice 押 bucket 2，Bob 押 bucket 3，各 1 USDC
+    // Alice bets bucket 2, Bob bets bucket 3, 1 USDC each
     await (weatherMarket.connect(alice) as any).placeBet(marketId, 2, toUSDC(1));
     await (weatherMarket.connect(bob) as any).placeBet(marketId, 3, toUSDC(1));
 
@@ -143,8 +143,9 @@ describe("WeatherMarket — no-winner refund & fee logic", async function () {
     // temp=30 → _determineWinningBucket([25,28,31,34], 30) = bucket 2（28<30≤31）
     await (weatherMarket.connect(oracleSigner) as any).submitResult(marketId, 30n);
 
-    // 驗證 Alice 贏家領回：totalPool=2, fee=2*2%=0.04, netPool=1.96 USDC
-    // 注意：Hardhat EDR 對小額 winner path 的 gas estimation 偏低，用 populateTransaction 繞過
+    // Assert Alice's winnings: totalPool=2, fee=2*2%=0.04, netPool=1.96 USDC
+    // Note: Hardhat EDR underestimates gas on the small-amount winner path, so we bypass
+    // estimation with populateTransaction
     const aliceBefore = await (mockUSDC as any).balanceOf(alice.address);
     const aliceTx = await (weatherMarket.connect(alice) as any).claimWinnings.populateTransaction(marketId);
     aliceTx.gasLimit = 300_000n;
@@ -152,8 +153,8 @@ describe("WeatherMarket — no-winner refund & fee logic", async function () {
     const alicePayout = (await (mockUSDC as any).balanceOf(alice.address)) - aliceBefore;
     assert.equal(alicePayout, 1_960_000n); // 1.96 USDC
 
-    // 驗證 Bob 輸家 claimWinnings revert
-    // staticCall = eth_call，不需 gas estimation，可正確捕捉 revert reason
+    // Assert Bob's claimWinnings reverts
+    // staticCall = eth_call, needs no gas estimation, so the revert reason comes through
     await assert.rejects(
       (weatherMarket.connect(bob) as any).claimWinnings.staticCall(marketId),
       /no winning bet/,

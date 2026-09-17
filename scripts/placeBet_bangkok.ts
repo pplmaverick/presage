@@ -70,21 +70,21 @@ async function main() {
   console.log("USDC          :", usdcAddr);
   console.log("marketId      :", MARKET_ID.toString());
 
-  // 查詢 USDC 餘額
+  // Query the USDC balance
   const usdcBal = (await publicClient.readContract({
     address: usdcAddr,
     abi: erc20Abi,
     functionName: "balanceOf",
     args: [account.address],
   })) as bigint;
-  console.log("USDC 餘額     :", (Number(usdcBal) / 1e6).toFixed(2), "USDC");
+  console.log("USDC balance  :", (Number(usdcBal) / 1e6).toFixed(2), "USDC");
 
   if (usdcBal < e6(2)) {
-    throw new Error(`USDC 不足，需要至少 2 USDC，目前 ${Number(usdcBal) / 1e6} USDC`);
+    throw new Error(`Insufficient USDC: need at least 2 USDC, have ${Number(usdcBal) / 1e6} USDC`);
   }
 
   // ── Approve USDC ──────────────────────────────────────────────────────────────
-  console.log("\n[Approve] 授權 WeatherMarket 使用 USDC...");
+  console.log("\n[Approve] authorising WeatherMarket to spend USDC...");
   const approveHash = await walletClient.writeContract({
     address: usdcAddr,
     abi: erc20Abi,
@@ -94,11 +94,11 @@ async function main() {
   });
   console.log("  tx hash:", approveHash);
   await publicClient.waitForTransactionReceipt({ hash: approveHash });
-  console.log("  ✓ Approve 確認");
+  console.log("  ✓ approve confirmed");
 
   // ── Bet 1：bucket 1，1 USDC ──────────────────────────────────────────────────
-  // bucket 1 = >28°C 且 ≤31°C
-  console.log("\n[Bet 1] bucket 1 (>28°C 且 ≤31°C)，1 USDC...");
+  // bucket 1 = >28°C and <=31°C
+  console.log("\n[Bet 1] bucket 1 (>28°C and <=31°C), 1 USDC...");
   const bet1Hash = await walletClient.writeContract({
     address: weatherMarketAddr,
     abi: artifact.abi,
@@ -108,11 +108,11 @@ async function main() {
   });
   console.log("  tx hash:", bet1Hash);
   await publicClient.waitForTransactionReceipt({ hash: bet1Hash });
-  console.log("  ✓ Bet 1 確認");
+  console.log("  ✓ bet 1 confirmed");
 
   // ── Bet 2：bucket 2，1 USDC ──────────────────────────────────────────────────
-  // bucket 2 = >31°C 且 ≤34°C
-  console.log("\n[Bet 2] bucket 2 (>31°C 且 ≤34°C)，1 USDC...");
+  // bucket 2 = >31°C and <=34°C
+  console.log("\n[Bet 2] bucket 2 (>31°C and <=34°C), 1 USDC...");
   const bet2Hash = await walletClient.writeContract({
     address: weatherMarketAddr,
     abi: artifact.abi,
@@ -122,9 +122,9 @@ async function main() {
   });
   console.log("  tx hash:", bet2Hash);
   await publicClient.waitForTransactionReceipt({ hash: bet2Hash });
-  console.log("  ✓ Bet 2 確認");
+  console.log("  ✓ bet 2 confirmed");
 
-  console.log("\n✅ Step 2 完成");
+  console.log("\n✅ Step 2 complete");
   console.log("  Approve tx :", approveHash);
   console.log("  Bet 1 tx   :", bet1Hash, "(bucket 1 / >28–≤31°C / 1 USDC)");
   console.log("  Bet 2 tx   :", bet2Hash, "(bucket 2 / >31–≤34°C / 1 USDC)");

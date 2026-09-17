@@ -33,8 +33,8 @@ const GAS_OPTS = {
 const CITIES = ["Taipei", "Tokyo", "Seoul", "Bangkok"];
 const BUCKETS: bigint[] = [25n, 28n, 31n, 34n]; // bucket 3 (31–34] wins at 32°C
 const FIXED_TEMP = 32n;                          // temp=32 → bucket 3 wins, noWinner=true (nobody bet bucket 3) → refund
-const LOCK_DELAY  = 90;                          // 秒
-const TARGET_DELAY = 180;                        // 秒
+const LOCK_DELAY  = 90;                          // seconds
+const TARGET_DELAY = 180;                        // seconds
 const USDC_DECIMALS = 6n;
 const e6 = (n: number) => BigInt(n) * 10n ** USDC_DECIMALS;
 
@@ -62,8 +62,8 @@ async function waitUntil(targetSec: number, label: string): Promise<void> {
   const now = Math.floor(Date.now() / 1000);
   const delay = targetSec - now;
   if (delay > 0) {
-    console.log(`  ⏳ 等待 ${delay}s 直到 ${label}...`);
-    await new Promise((r) => setTimeout(r, delay * 1000 + 2_000)); // 多等 2s buffer
+    console.log(`  ⏳ waiting ${delay}s until ${label}...`);
+    await new Promise((r) => setTimeout(r, delay * 1000 + 2_000)); // 2s extra buffer
   }
 }
 
@@ -99,20 +99,20 @@ async function main() {
   const publicClient  = createPublicClient({ chain: arc, transport: http() });
 
   console.log("=".repeat(60));
-  console.log("Presage — 4 城市 E2E 測試");
-  console.log("  帳戶     :", account.address);
+  console.log("Presage — 4-city E2E test");
+  console.log("  account  :", account.address);
   console.log("  lockDelay:", LOCK_DELAY, "s");
-  console.log("  溫度     :", FIXED_TEMP.toString(), "°C");
+  console.log("  temp     :", FIXED_TEMP.toString(), "°C");
   console.log("=".repeat(60));
 
-  // USDC 餘額確認
+  // USDC balance check
   const usdcBal = (await publicClient.readContract({
     address: usdcAddr, abi: erc20Abi,
     functionName: "balanceOf", args: [account.address],
   })) as bigint;
-  console.log(`USDC 餘額 : ${(Number(usdcBal) / 1e6).toFixed(2)} USDC`);
+  console.log(`USDC balance : ${(Number(usdcBal) / 1e6).toFixed(2)} USDC`);
   if (usdcBal < e6(8)) {
-    throw new Error(`USDC 不足，4 個城市共需至少 8 USDC，目前 ${Number(usdcBal) / 1e6} USDC`);
+    throw new Error(`Insufficient USDC: 4 cities need at least 8 USDC, have ${Number(usdcBal) / 1e6} USDC`);
   }
 
   const results: CityResult[] = [];
@@ -122,7 +122,7 @@ async function main() {
     const isFirst = idx === 0;
 
     console.log("\n" + "─".repeat(60));
-    console.log(`【${city}】開始 (${idx + 1}/${CITIES.length})`);
+    console.log(`[${city}] start (${idx + 1}/${CITIES.length})`);
     console.log("─".repeat(60));
 
     const now = Math.floor(Date.now() / 1000);
@@ -152,11 +152,11 @@ async function main() {
         break;
       } catch { /* skip */ }
     }
-    if (marketId === null) throw new Error("無法解析 marketId");
+    if (marketId === null) throw new Error("could not parse marketId");
     console.log("  marketId :", marketId.toString());
-    console.log("  ✓ createMarket 確認");
+    console.log("  ✓ createMarket confirmed");
 
-    // ── Step 2: approve（第一個城市才做）──────────────────────────────────────
+    // ── Step 2: approve (only for the first city)──────────────────────────────────────
     let approveTx: string | undefined;
     if (isFirst) {
       console.log("\n[Step 2] approve USDC (maxUint256)");
@@ -168,9 +168,9 @@ async function main() {
       console.log("  tx hash  :", ah);
       await publicClient.waitForTransactionReceipt({ hash: ah });
       approveTx = ah;
-      console.log("  ✓ Approve 確認");
+      console.log("  ✓ approve confirmed");
     } else {
-      console.log("\n[Step 2] approve USDC — 跳過（已在第一個城市完成）");
+      console.log("\n[Step 2] approve USDC — skipped (done for the first city)");
     }
 
     // ── Step 3: placeBet x2 ─────────────────────────────────────────────────
@@ -184,7 +184,7 @@ async function main() {
     });
     console.log("  tx hash  :", bet1Hash);
     await publicClient.waitForTransactionReceipt({ hash: bet1Hash });
-    console.log("  ✓ Bet 1 確認");
+    console.log("  ✓ bet 1 confirmed");
 
     console.log("  Bet 2: bucket 2 (28<temp≤31), 1 USDC");
     const bet2Hash = await walletClient.writeContract({
@@ -194,9 +194,9 @@ async function main() {
     });
     console.log("  tx hash  :", bet2Hash);
     await publicClient.waitForTransactionReceipt({ hash: bet2Hash });
-    console.log("  ✓ Bet 2 確認");
+    console.log("  ✓ bet 2 confirmed");
 
-    // ── Step 4: 等待 lockTime → lockMarket ─────────────────────────────────
+    // ── Step 4: wait for lockTime -> lockMarket ─────────────────────────────────
     console.log("\n[Step 4] lockMarket");
     await waitUntil(lockTime, "lockTime");
 
@@ -207,11 +207,11 @@ async function main() {
     });
     console.log("  tx hash  :", lockHash);
     await publicClient.waitForTransactionReceipt({ hash: lockHash });
-    console.log("  ✓ 市場已鎖盤");
+    console.log("  ✓ market locked");
 
-    // ── Step 5: submitResult（32°C → bucket 3 wins, noWinner=true → 全額退款）
+    // ── Step 5: submitResult (32°C -> bucket 3 wins, noWinner=true -> full refund)
     console.log(`\n[Step 5] submitResult  temp=${FIXED_TEMP}°C`);
-    console.log("  ℹ️  bucket 3 (31<temp≤34) 獲勝，但我們下注 bucket 1 & 2 → noWinner=true → 全額退款");
+    console.log("  ℹ️  bucket 3 (31<temp<=34) wins, but we bet buckets 1 & 2 -> noWinner=true -> full refund");
 
     const submitHash = await walletClient.writeContract({
       address: adminOracleAddr, abi: aoArt.abi,
@@ -220,7 +220,7 @@ async function main() {
     });
     console.log("  tx hash  :", submitHash);
     await publicClient.waitForTransactionReceipt({ hash: submitHash });
-    console.log("  ✓ 結果提交確認");
+    console.log("  ✓ result submission confirmed");
 
     // ── Step 6: claimWinnings ───────────────────────────────────────────────
     console.log("\n[Step 6] claimWinnings");
@@ -243,8 +243,8 @@ async function main() {
         }
       } catch { /* skip */ }
     }
-    const payoutStr = payout > 0n ? `${(Number(payout) / 1e6).toFixed(6)} USDC` : "(請查 tx)";
-    console.log(`  ✓ Claim 成功 → 領回 ${payoutStr}`);
+    const payoutStr = payout > 0n ? `${(Number(payout) / 1e6).toFixed(6)} USDC` : "(check the tx)";
+    console.log(`  ✓ claim succeeded -> received ${payoutStr}`);
 
     results.push({
       city,
@@ -261,9 +261,9 @@ async function main() {
     });
   } // end for
 
-  // ── 最終報告 ────────────────────────────────────────────────────────────────
+  // ── Final report ────────────────────────────────────────────────────────────────
   console.log("\n" + "=".repeat(60));
-  console.log("E2E 完成報告");
+  console.log("E2E completion report");
   console.log("=".repeat(60));
 
   let totalTx = 0;
@@ -279,7 +279,7 @@ async function main() {
   }
 
   console.log("\n" + "─".repeat(60));
-  console.log(`總 tx 數：${totalTx}`);
+  console.log(`total tx count: ${totalTx}`);
   console.log("─".repeat(60));
 }
 

@@ -68,7 +68,7 @@ async function main() {
   const marketFactoryAddress = receipt.contractAddress!;
   console.log("  MarketFactory deployed:", marketFactoryAddress);
 
-  // 更新 deployments/arc-testnet.json
+  // Update deployments/arc-testnet.json
   const __dirname = dirname(fileURLToPath(import.meta.url));
   const jsonPath = resolve(__dirname, "../deployments/arc-testnet.json");
   const existing = JSON.parse(readFileSync(jsonPath, "utf8"));

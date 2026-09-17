@@ -9,12 +9,13 @@ import { network } from "hardhat";
 import hre from "hardhat";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Independent Reference Model 對照測試
+// Independent Reference Model cross-check.
 //
-// verification/reference_model.py 只依規格計算每個案例的期望值，
-// 並把每筆 trace 的 SHA-256 寫進 verification/commitments.sha256。
-// 這支測試拿真實合約跑同一批案例，用實際鏈上結果重建 trace、重算 SHA-256，
-// 再跟 Python 的承諾比對。兩邊必須逐位元組相同。
+// verification/reference_model.py derives the expected outcome of every case from the
+// specification alone and writes the SHA-256 of each trace to
+// verification/commitments.sha256. This test runs the same cases against the real
+// contracts, rebuilds each trace from the actual on-chain results, recomputes the
+// SHA-256 and compares it to the Python commitment. The two must match byte for byte.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -66,8 +67,8 @@ for (const line of readFileSync(resolve(VERIFICATION_DIR, "commitments.sha256"),
   commitments.set(name, digest);
 }
 
-// 必須與 reference_model.py 的 canonical() 產出完全相同的位元組：
-// key 依序排列、無空白、非 ASCII 不轉義。
+// Must produce exactly the same bytes as canonical() in reference_model.py:
+// keys sorted, no whitespace, non-ASCII left unescaped.
 function canonical(v: unknown): string {
   if (v === null || v === undefined) return "null";
   if (typeof v === "boolean" || typeof v === "number" || typeof v === "string") {
@@ -87,15 +88,15 @@ function revertText(err: unknown): string {
 
 describe("WeatherMarket — Independent Reference Model", async function () {
   const conn = await network.create();
-  const { networkHelpers } = conn; // 只用 time helper，不用 loadFixture
+  const { networkHelpers } = conn; // time helpers only, no loadFixture
   const provider = new ethers.BrowserProvider(conn.provider as any);
   const rawProvider = conn.provider as { request: (a: unknown) => Promise<any> };
 
-  const MINT = 10_000_000_000n; // 10,000 USDC，足夠覆蓋所有案例
+  const MINT = 10_000_000_000n; // 10,000 USDC, enough for every case
 
-  // ethers 的 BrowserProvider 會對 getBlock("latest") 做短期快取，在這種
-  // 「每個案例都把鏈往前推 72 小時」的測試裡會讀到過期的 timestamp。
-  // 時間一律走 raw RPC 拿，不經過快取。
+  // ethers' BrowserProvider briefly caches getBlock("latest"), which returns a stale
+  // timestamp in a suite like this where every case pushes the chain 72 hours forward.
+  // Timestamps are always read through raw RPC so the cache is bypassed.
   async function chainHeadTimestamp(): Promise<number> {
     const b = await rawProvider.request({
       method: "eth_getBlockByNumber",
@@ -104,10 +105,11 @@ describe("WeatherMarket — Independent Reference Model", async function () {
     return Number(BigInt(b.timestamp));
   }
 
-  // 刻意不用 networkHelpers.loadFixture：fixture 靠 snapshot revert 還原狀態，
-  // 而這批案例每個都會呼叫 setNextBlockTimestamp 把鏈往前推 72 小時，
-  // snapshot 還原與時間覆寫混用時會出現「eth_call 讀得到下注、但交易執行時
-  // 讀不到」的錯配。每個案例直接部署一組全新合約，換來完全確定的行為。
+  // networkHelpers.loadFixture is deliberately not used. Fixtures restore state by
+  // reverting to a snapshot, and every case here calls setNextBlockTimestamp to push the
+  // chain 72 hours forward. Mixing snapshot restores with timestamp overrides produced a
+  // mismatch where eth_call could see a bet but the transaction executing against it
+  // could not. Deploying a fresh set of contracts per case buys fully deterministic behaviour.
   async function deployFresh() {
     const accounts = (await provider.listAccounts()) as JsonRpcSigner[];
     const [owner, alice, bob, carol, oracleSigner] = accounts;
@@ -135,28 +137,28 @@ describe("WeatherMarket — Independent Reference Model", async function () {
     return { owner, users, oracleSigner, mockUSDC, weatherMarket, wmAddr };
   }
 
-  // 合約常數必須與模型假設一致，否則整批比對沒有意義
+  // The contract constants must match the model's assumptions, or the whole comparison is meaningless
   it("model constants match the deployed contract", async () => {
     const { weatherMarket } = await deployFresh();
     assert.equal(
       await (weatherMarket as any).FEE_BPS(),
       BigInt(fixture.feeBps),
-      "FEE_BPS 與 reference model 不一致",
+      "FEE_BPS does not match the reference model",
     );
     assert.equal(
       await (weatherMarket as any).defaultLockedTimeout(),
       BigInt(fixture.defaultLockedTimeout),
-      "defaultLockedTimeout 與 reference model 不一致",
+      "defaultLockedTimeout does not match the reference model",
     );
     assert.equal(
       await (weatherMarket as any).MIN_LOCKED_TIMEOUT(),
       BigInt(fixture.minLockedTimeout),
-      "MIN_LOCKED_TIMEOUT 與 reference model 不一致",
+      "MIN_LOCKED_TIMEOUT does not match the reference model",
     );
     assert.equal(
       await (weatherMarket as any).MAX_LOCKED_TIMEOUT(),
       BigInt(fixture.maxLockedTimeout),
-      "MAX_LOCKED_TIMEOUT 與 reference model 不一致",
+      "MAX_LOCKED_TIMEOUT does not match the reference model",
     );
   });
 
@@ -164,7 +166,7 @@ describe("WeatherMarket — Independent Reference Model", async function () {
     assert.equal(fixture.cases.length, fixture.caseCount);
     assert.equal(commitments.size, fixture.caseCount);
     for (const c of fixture.cases) {
-      assert.equal(commitments.get(c.name), c.sha256, `${c.name} 的承諾不一致`);
+      assert.equal(commitments.get(c.name), c.sha256, `commitment mismatch for ${c.name}`);
     }
   });
 
@@ -181,7 +183,7 @@ describe("WeatherMarket — Independent Reference Model", async function () {
       const CREATE_4 = "createMarket(string,uint256,int256[],uint256)";
       const CREATE_5 = "createMarket(string,uint256,int256[],uint256,uint256)";
 
-      // ── createMarket 的 lockedTimeout 超出 MIN/MAX ──────────────────────
+      // ── createMarket with lockedTimeout outside MIN/MAX ────────────────────
       if (spec.mode === "create_revert") {
         let reverted = false;
         let text = "";
@@ -193,12 +195,12 @@ describe("WeatherMarket — Independent Reference Model", async function () {
           reverted = true;
           text = revertText(err);
         }
-        assert.ok(reverted, "超出範圍的 lockedTimeout 應該 revert 但建立成功了");
+        assert.ok(reverted, "an out-of-range lockedTimeout should revert, but creation succeeded");
         assert.ok(
           text.includes(spec.revertReason!),
-          `revert 訊息不含 "${spec.revertReason}"：${text}`,
+          `revert message does not contain "${spec.revertReason}": ${text}`,
         );
-        assert.equal(await (weatherMarket as any).nextMarketId(), 0n, "不該留下市場");
+        assert.equal(await (weatherMarket as any).nextMarketId(), 0n, "no market should have been created");
 
         const actual: Trace = {
           case: spec.name, outcome: "revert",
@@ -208,7 +210,7 @@ describe("WeatherMarket — Independent Reference Model", async function () {
           totalPool: "0", fee: "0", dust: "0", payouts: [],
           revertReason: spec.revertReason,
         };
-        assert.equal(sha256(canonical(actual)), spec.sha256, "trace SHA-256 不符");
+        assert.equal(sha256(canonical(actual)), spec.sha256, "trace SHA-256 mismatch");
         return;
       }
 
@@ -221,12 +223,12 @@ describe("WeatherMarket — Independent Reference Model", async function () {
       }
       const marketId = 0n;
 
-      // 該市場實際寫入的 lockedTimeout（不是全域常數）
+      // The lockedTimeout actually stored on this market (not a global constant)
       const marketTimeout = (await (weatherMarket as any).marketLockedTimeout(marketId)) as bigint;
       assert.equal(
         marketTimeout.toString(),
         spec.expected.lockedTimeout,
-        "市場寫入的 lockedTimeout 與 reference model 不一致",
+        "the market's stored lockedTimeout does not match the reference model",
       );
 
       for (const [u, bucket, amount] of spec.bets) {
@@ -246,9 +248,9 @@ describe("WeatherMarket — Independent Reference Model", async function () {
         timeout_plus_1: deadline + 1,
       };
       const targetTs = AT[spec.at];
-      assert.ok(targetTs !== undefined, `未知的 at="${spec.at}"`);
+      assert.ok(targetTs !== undefined, `unknown at="${spec.at}"`);
 
-      // ── lockMarket 對不存在 marketId ─────────────────────────────────
+      // ── lockMarket on a nonexistent marketId ──────────────────────────
       if (spec.mode === "lock_revert") {
         await networkHelpers.time.setNextBlockTimestamp(lockTime + 1);
         let reverted = false;
@@ -259,10 +261,10 @@ describe("WeatherMarket — Independent Reference Model", async function () {
           reverted = true;
           text = revertText(err);
         }
-        assert.ok(reverted, "lockMarket(999) 應該 revert 但成功了");
+        assert.ok(reverted, "lockMarket(999) should revert, but it succeeded");
         assert.ok(
           text.includes(spec.revertReason!),
-          `revert 訊息不含 "${spec.revertReason}"：${text}`,
+          `revert message does not contain "${spec.revertReason}": ${text}`,
         );
 
         const actual: Trace = {
@@ -273,17 +275,17 @@ describe("WeatherMarket — Independent Reference Model", async function () {
           totalPool: "0", fee: "0", dust: "0", payouts: [],
           revertReason: spec.revertReason,
         };
-        assert.equal(sha256(canonical(actual)), spec.sha256, "trace SHA-256 不符");
+        assert.equal(sha256(canonical(actual)), spec.sha256, "trace SHA-256 mismatch");
         return;
       }
 
-      // ── 鎖盤 ─────────────────────────────────────────────────────────
+      // ── Lock the market ───────────────────────────────────────────────
       await networkHelpers.time.setNextBlockTimestamp(lockTime + 1);
       await (weatherMarket as any).lockMarket(marketId);
 
       const totalPoolOnChain = (await (weatherMarket as any).getMarket(marketId))[4] as bigint;
 
-      // ── 結算窗口已關閉 → submitResult 應 revert ───────────────────────
+      // ── Settlement window closed -> submitResult must revert ──────────
       if (spec.mode === "settle_revert") {
         await networkHelpers.time.setNextBlockTimestamp(targetTs);
         let reverted = false;
@@ -295,8 +297,8 @@ describe("WeatherMarket — Independent Reference Model", async function () {
           reverted = true;
           text = revertText(err);
         }
-        assert.ok(reverted, "submitResult 應該 revert 但成功了");
-        assert.ok(text.includes(spec.revertReason!), `revert 訊息：${text}`);
+        assert.ok(reverted, "submitResult should revert, but it succeeded");
+        assert.ok(text.includes(spec.revertReason!), `revert message: ${text}`);
 
         const actual: Trace = {
           case: spec.name, outcome: "revert",
@@ -306,13 +308,13 @@ describe("WeatherMarket — Independent Reference Model", async function () {
           totalPool: totalPoolOnChain.toString(), fee: "0", dust: "0",
           payouts: [], revertReason: spec.revertReason,
         };
-        assert.equal(sha256(canonical(actual)), spec.sha256, "trace SHA-256 不符");
-        // 錢還在合約裡，一分沒少
+        assert.equal(sha256(canonical(actual)), spec.sha256, "trace SHA-256 mismatch");
+        // The money is still in the contract, untouched
         assert.equal(await (mockUSDC as any).balanceOf(wmAddr), totalPoolOnChain);
         return;
       }
 
-      // ── 退款窗口未開 → claimRefund 應 revert ─────────────────────────
+      // ── Refund window not open -> claimRefund must revert ─────────────
       if (spec.mode === "refund_revert") {
         await networkHelpers.time.setNextBlockTimestamp(targetTs);
         const firstBettor = users[spec.bets[0][0]];
@@ -324,8 +326,8 @@ describe("WeatherMarket — Independent Reference Model", async function () {
           reverted = true;
           text = revertText(err);
         }
-        assert.ok(reverted, "claimRefund 應該 revert 但成功了");
-        assert.ok(text.includes(spec.revertReason!), `revert 訊息：${text}`);
+        assert.ok(reverted, "claimRefund should revert, but it succeeded");
+        assert.ok(text.includes(spec.revertReason!), `revert message: ${text}`);
 
         const actual: Trace = {
           case: spec.name, outcome: "revert",
@@ -335,7 +337,7 @@ describe("WeatherMarket — Independent Reference Model", async function () {
           totalPool: totalPoolOnChain.toString(), fee: "0", dust: "0",
           payouts: [], revertReason: spec.revertReason,
         };
-        assert.equal(sha256(canonical(actual)), spec.sha256, "trace SHA-256 不符");
+        assert.equal(sha256(canonical(actual)), spec.sha256, "trace SHA-256 mismatch");
         assert.equal(await (mockUSDC as any).balanceOf(wmAddr), totalPoolOnChain);
         return;
       }
@@ -360,8 +362,9 @@ describe("WeatherMarket — Independent Reference Model", async function () {
 
       const fee = (await (weatherMarket as any).collectedFees()) as bigint;
 
-      // 每個下過注的人都試著領一次，成功就記實際入帳金額，失敗就記 revert。
-      // 不看模型的期望值決定要不要領，否則就是拿答案對答案。
+      // Every bettor attempts exactly one claim: on success record the amount actually
+      // received, on failure record a revert. The model's expected values never decide
+      // whether to attempt a claim — that would be checking the answer against itself.
       const bettors = [...new Set(spec.bets.map(([u]) => u))].sort((a, b) => a - b);
       const payouts: [number, string, string][] = [];
       let distributed = 0n;
@@ -403,24 +406,25 @@ describe("WeatherMarket — Independent Reference Model", async function () {
         revertReason: null,
       };
 
-      // 先做逐欄位比對，失敗時訊息比雜湊好讀
-      assert.deepEqual(actual, spec.expected, `${spec.name}: 與 reference model 不一致`);
-      // 再做承諾比對
-      assert.equal(sha256(canonical(actual)), spec.sha256, `${spec.name}: trace SHA-256 不符`);
+      // Field-by-field comparison first: the failure message is far more readable than a hash
+      assert.deepEqual(actual, spec.expected, `${spec.name}: does not match the reference model`);
+      // Then the commitment comparison
+      assert.equal(sha256(canonical(actual)), spec.sha256, `${spec.name}: trace SHA-256 mismatch`);
 
-      // ── INV-3：collectedFees + 未領取負債 <= 合約 USDC 餘額 ──────────
-      // 這裡所有人都已領完，未領取負債 = 0，餘額應恰好等於 fee + dust。
+      // ── INV-3: collectedFees + unclaimed liability <= contract USDC balance ──
+      // Everyone has claimed here, so the unclaimed liability is 0 and the balance
+      // should be exactly fee + dust.
       const contractBalance = (await (mockUSDC as any).balanceOf(wmAddr)) as bigint;
-      assert.equal(contractBalance, fee + dust, "INV-3: 餘額不等於 fee + dust");
-      assert.ok(fee <= contractBalance, "INV-3: collectedFees 超過合約餘額");
+      assert.equal(contractBalance, fee + dust, "INV-3: balance is not equal to fee + dust");
+      assert.ok(fee <= contractBalance, "INV-3: collectedFees exceeds the contract balance");
 
-      // 二次領取必須全部被擋
+      // Every second claim attempt must be rejected
       for (const u of bettors) {
         await assert.rejects(
           outcome === "settle"
             ? (weatherMarket.connect(users[u]) as any).claimWinnings(marketId)
             : (weatherMarket.connect(users[u]) as any).claimRefund(marketId),
-          `user ${u} 的二次領取沒有被擋下`,
+          `user ${u}'s second claim was not rejected`,
         );
       }
     });

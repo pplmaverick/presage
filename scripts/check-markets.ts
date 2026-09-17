@@ -49,7 +49,7 @@ async function main() {
         `Market #${id} (${city}): ${STATUS_LABEL[status] ?? status}, totalPool=${formatUnits(totalPool, 6)} USDC, finalTemp=${finalTemp}`,
       );
       console.log(
-        `  lockTime  : ${lockTime} (${new Date(Number(lockTime) * 1000).toISOString()}) — ${nowSec >= Number(lockTime) ? "已到達，可鎖盤" : "尚未到達"}`,
+        `  lockTime  : ${lockTime} (${new Date(Number(lockTime) * 1000).toISOString()}) — ${nowSec >= Number(lockTime) ? "reached, lockable" : "not reached"}`,
       );
       console.log(
         `  targetDate: ${targetDate} (${new Date(Number(targetDate) * 1000).toISOString()})`,

@@ -1,6 +1,6 @@
 /**
- * 補齊 Pharos Atlantic 設置：部署 AdminOracle + setOracle + mint USDC
- * MockUSDC 和 WeatherMarket 已存在，只需修復 oracle 和餘額
+ * Completes the Pharos Atlantic setup: deploy AdminOracle + setOracle + mint USDC
+ * MockUSDC and WeatherMarket already exist; only the oracle wiring and balances need fixing
  */
 import {
   createWalletClient,
@@ -28,7 +28,7 @@ const pharosAtlantic = defineChain({
   },
 });
 
-// gas=1M × gasPrice=10gwei = 0.01 ETH 保證金（帳戶有 0.042 ETH，安全）
+// gas=1M × gasPrice=10gwei = 0.01 ETH  deposit (the account holds 0.042 ETH, comfortably enough)
 const GAS_OPTS = {
   gas: 1_000_000n,
   gasPrice: parseGwei("10"),
@@ -51,7 +51,7 @@ async function main() {
   if (!privateKey) throw new Error("PRIVATE_KEY not set in .env");
 
   const account = privateKeyToAccount(`0x${privateKey}` as Hex);
-  console.log("帳戶:", account.address);
+  console.log("Account:", account.address);
 
   const publicClient = createPublicClient({
     chain: pharosAtlantic,
@@ -63,7 +63,7 @@ async function main() {
     transport: http(),
   });
 
-  // 讀取現有部署
+  // Load the existing deployment
   const __dirname = dirname(fileURLToPath(import.meta.url));
   const deploymentPath = resolve(__dirname, "../deployments/pharos-testnet-mock.json");
   const deployment = JSON.parse(readFileSync(deploymentPath, "utf-8"));
@@ -78,7 +78,7 @@ async function main() {
   const usdcArtifact = await hre.artifacts.readArtifact("MockUSDC");
   const oracleArtifact = await hre.artifacts.readArtifact("AdminOracle");
 
-  // 1. 部署 AdminOracle（指向現有 WeatherMarket）
+  // 1. Deploy AdminOracle pointing at the existing WeatherMarket
   console.log("\n[1/3] Deploying AdminOracle...");
   const deployHash = await (walletClient as any).deployContract({
     abi: oracleArtifact.abi,
@@ -94,12 +94,12 @@ async function main() {
   const adminOracleAddress = deployReceipt.contractAddress!;
   console.log("  AdminOracle deployed:", adminOracleAddress);
 
-  // 確認有代碼
+  // Confirm code is present
   const code = await publicClient.getCode({ address: adminOracleAddress });
-  if (!code || code === "0x") throw new Error("AdminOracle 部署後無代碼！");
-  console.log(`  代碼確認: ${(code.length - 2) / 2} bytes`);
+  if (!code || code === "0x") throw new Error("AdminOracle has no code after deployment");
+  console.log(`  code present: ${(code.length - 2) / 2} bytes`);
 
-  // 2. setOracle：把 WeatherMarket 的 oracle 換成 AdminOracle
+  // 2. setOracle: repoint WeatherMarket's oracle at AdminOracle
   console.log("\n[2/3] setOracle on WeatherMarket → AdminOracle...");
   await sendTx(
     publicClient,
@@ -113,18 +113,18 @@ async function main() {
     }),
   );
 
-  // 確認 oracle 更新
+  // Confirm the oracle was updated
   const oracle = await publicClient.readContract({
     address: weatherMarketAddress,
     abi: wmArtifact.abi,
     functionName: "oracle",
   }) as Hex;
   if (oracle.toLowerCase() !== adminOracleAddress.toLowerCase()) {
-    throw new Error(`oracle 未更新！現在是 ${oracle}`);
+    throw new Error(`oracle was not updated; it is still ${oracle}`);
   }
-  console.log("  oracle 確認:", oracle);
+  console.log("  oracle confirmed:", oracle);
 
-  // 3. Mint 1000 USDC 給部署錢包
+  // 3. Mint 1000 USDC to the deployer wallet
   console.log("\n[3/3] Minting 1000 USDC...");
   await sendTx(
     publicClient,
@@ -144,13 +144,13 @@ async function main() {
     functionName: "balanceOf",
     args: [account.address],
   }) as bigint;
-  console.log(`  餘額確認: ${Number(balance) / 1e6} USDC`);
+  console.log(`  balance check: ${Number(balance) / 1e6} USDC`);
 
-  // 4. 更新 pharos-testnet-mock.json
+  // 4. Update pharos-testnet-mock.json
   deployment.contracts.AdminOracle = adminOracleAddress;
   deployment.setupFixedAt = new Date().toISOString();
   writeFileSync(deploymentPath, JSON.stringify(deployment, null, 2));
-  console.log("\n✓ 設置完成，已更新 pharos-testnet-mock.json");
+  console.log("\n✓ setup complete, pharos-testnet-mock.json updated");
   console.log(JSON.stringify(deployment.contracts, null, 2));
 }
 

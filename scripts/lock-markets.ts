@@ -33,18 +33,18 @@ async function main() {
   const { account, walletClient, publicClient } = makeClients(chain);
   await assertChainId(publicClient, chain);
 
-  console.log(`網路      : ${chain.name} (chainId ${chain.id})  [NETWORK=${key}]`);
-  console.log(`合約      : ${weatherMarketAddr}`);
-  console.log(`簽章帳戶  : ${account.address}`);
+  console.log(`Network  : ${chain.name} (chainId ${chain.id})  [NETWORK=${key}]`);
+  console.log(`Contract : ${weatherMarketAddr}`);
+  console.log(`Signer   : ${account.address}`);
 
   const fees = await computeFees(publicClient);
   console.log(`Gas       : ${fees.source} — ${fees.detail}`);
   if (fees.source === "fallback") {
-    console.log("  ⚠ 用的是保守靜態值，不是現查的市場價，請留意成本。");
+    console.log("  ⚠ Using conservative static values, not a live market quote — watch the cost.");
   }
   console.log();
 
-  // 自動掃描所有 OPEN 市場，取代原本寫死的 MARKET_IDS 常數
+  // Scan every OPEN market automatically, replacing the old hard-coded MARKET_IDS
   const open = await scanMarkets(
     publicClient,
     weatherMarketAddr,
@@ -56,15 +56,15 @@ async function main() {
   const due = open.filter((m) => nowSec >= m.lockTime);
   const notDue = open.filter((m) => nowSec < m.lockTime);
 
-  console.log(`\nOPEN 市場 ${open.length} 個：可鎖 ${due.length}、未到 lockTime ${notDue.length}`);
+  console.log(`\n${open.length} OPEN markets: ${due.length} lockable, ${notDue.length} not yet at lockTime`);
   for (const m of notDue) {
     console.log(
-      `  #${m.id} (${m.city}) lockTime ${new Date(Number(m.lockTime) * 1000).toISOString()} — 尚未到達`,
+      `  #${m.id} (${m.city}) lockTime ${new Date(Number(m.lockTime) * 1000).toISOString()} — not reached yet`,
     );
   }
 
   if (due.length === 0) {
-    console.log("\n沒有需要鎖盤的市場。");
+    console.log("\nNo markets need locking.");
     return;
   }
 
@@ -88,7 +88,7 @@ async function main() {
         label: `lockMarket(#${m.id})`,
       });
 
-      // 回讀鏈上狀態確認真的轉成 LOCKED，不是只拿到一個 tx hash
+      // Read the state back to confirm it really became LOCKED, not just that a tx hash came back
       const after = await readMarket(
         publicClient,
         weatherMarketAddr,
@@ -97,22 +97,22 @@ async function main() {
       );
       if (after.status !== STATUS.LOCKED) {
         throw new Error(
-          `回讀狀態仍為 ${STATUS_LABEL[after.status]}，預期 LOCKED`,
+          `state read back as ${STATUS_LABEL[after.status]}, expected LOCKED`,
         );
       }
-      console.log(`  ✓ 已確認鏈上狀態 = LOCKED`);
+      console.log(`  ✓ confirmed on-chain status = LOCKED`);
       locked.push(m.id);
     } catch (err) {
       const reason = err instanceof Error ? (err as any).shortMessage ?? err.message : String(err);
-      console.error(`  ✗ 失敗：${reason}`);
+      console.error(`  ✗ failed: ${reason}`);
       failed.push({ id: m.id, reason });
     }
   }
 
-  console.log("\n=== 彙總 ===");
-  console.log(`成功鎖盤 : ${locked.length ? locked.map((i) => `#${i}`).join(", ") : "（無）"}`);
+  console.log("\n=== Summary ===");
+  console.log(`Locked : ${locked.length ? locked.map((i) => `#${i}`).join(", ") : "(none)"}`);
   if (failed.length > 0) {
-    console.log(`失敗     : ${failed.map((f) => `#${f.id} (${f.reason})`).join("; ")}`);
+    console.log(`Failed : ${failed.map((f) => `#${f.id} (${f.reason})`).join("; ")}`);
     process.exitCode = 1;
   }
 }

@@ -1,8 +1,8 @@
 /**
- * ERC-8004 AI Agent 註冊腳本
- * 文件：https://docs.arc.network/arc/tutorials/register-your-first-ai-agent
+ * ERC-8004 AI Agent registration script
+ * Docs: https://docs.arc.network/arc/tutorials/register-your-first-ai-agent
  *
- * 使用方式：
+ * Usage:
  *   npx hardhat run scripts/registerAgent.ts --network arc
  */
 import {
@@ -75,7 +75,7 @@ async function checkBalance(
   const formatted = formatUnits(balance, 18);
   const ok = balance >= MIN_BALANCE;
   console.log(
-    `  ${ok ? "✓" : "✗"} ${label}: ${parseFloat(formatted).toFixed(6)} USDC ${ok ? "" : "← 餘額不足，請到 faucet 領取"}`,
+    `  ${ok ? "✓" : "✗"} ${label}: ${parseFloat(formatted).toFixed(6)} USDC ${ok ? "" : "← insufficient balance, top up from the faucet"}`,
   );
   return balance;
 }
@@ -83,24 +83,24 @@ async function checkBalance(
 async function main() {
   const __dirname = dirname(fileURLToPath(import.meta.url));
 
-  // ── 1. Owner wallet（現有開發錢包）────────────────────────────────────────────
+  // ── 1. Owner wallet (the existing dev wallet)────────────────────────────────────────────
   const privateKey = process.env.PRIVATE_KEY;
-  if (!privateKey) throw new Error("PRIVATE_KEY 未設定於 .env");
+  if (!privateKey) throw new Error("PRIVATE_KEY is not set in .env");
   const ownerAccount = privateKeyToAccount(`0x${privateKey}` as Hex);
 
-  // ── 2. 生成 Validator wallet ──────────────────────────────────────────────────
+  // ── 2. Generate a validator wallet ──────────────────────────────────────────────────
   const validatorPrivKey = generatePrivateKey();
   const validatorAccount = privateKeyToAccount(validatorPrivKey);
 
   console.log("═══════════════════════════════════════════");
-  console.log("  ERC-8004 AI Agent 註冊");
+  console.log("  ERC-8004 AI Agent registration");
   console.log("═══════════════════════════════════════════");
-  console.log("\n【錢包資訊】");
+  console.log("\n[Wallet]");
   console.log(`  Owner wallet    : ${ownerAccount.address}`);
   console.log(`  Validator wallet: ${validatorAccount.address}`);
-  console.log(`  Validator privkey: ${validatorPrivKey}  ← 請立即備份！`);
+  console.log(`  Validator privkey: ${validatorPrivKey}  <- back this up now`);
 
-  // ── 3. 設定 clients ────────────────────────────────────────────────────────────
+  // ── 3. Set up clients ────────────────────────────────────────────────────────────
   const publicClient = createPublicClient({ chain: arc, transport: http() });
   const ownerClient = createWalletClient({
     account: ownerAccount,
@@ -108,36 +108,36 @@ async function main() {
     transport: http(),
   });
 
-  // ── 4. 確認餘額 ─────────────────────────────────────────────────────────────────
-  console.log("\n【餘額確認】（需 > 0.001 USDC for gas）");
+  // ── 4. Check balances ─────────────────────────────────────────────────────────────────
+  console.log("\n[Balance check] (needs > 0.001 USDC for gas)");
   const ownerBal     = await checkBalance(publicClient, ownerAccount.address, "Owner    ");
   const validatorBal = await checkBalance(publicClient, validatorAccount.address, "Validator");
 
   if (ownerBal < MIN_BALANCE) {
-    console.error("\n✗ Owner 餘額不足，請到 https://faucet.arc.network 領取測試幣後再執行");
+    console.error("\n✗ Owner balance too low — get test funds from https://faucet.arc.network and retry");
     process.exit(1);
   }
 
   if (validatorBal < MIN_BALANCE) {
-    console.warn("\n⚠ Validator 餘額不足。");
-    console.warn(`  請到 faucet 領取後傳入此地址：${validatorAccount.address}`);
-    console.warn("  現在繼續執行 register()（Validator 不影響初始註冊）\n");
+    console.warn("\n⚠ Validator balance too low.");
+    console.warn(`  Fund this address from the faucet: ${validatorAccount.address}`);
+    console.warn("  continuing with register() (the validator does not affect initial registration)\n");
   }
 
-  // ── 5. 建立 metadataURI（data URI，不需要 IPFS）──────────────────────────────
+  // ── 5. Build the metadataURI (a data URI — no IPFS needed)──────────────────────────────
   const metadataPath = resolve(__dirname, "../metadata/weather-oracle-agent.json");
   const metadataJson = readFileSync(metadataPath, "utf-8");
   const metadataB64  = Buffer.from(metadataJson).toString("base64");
   const metadataURI  = `data:application/json;base64,${metadataB64}`;
 
   console.log("\n【Metadata】");
-  console.log("  格式 : data URI (base64)");
-  console.log("  內容 :", JSON.parse(metadataJson).name, "—", JSON.parse(metadataJson).description);
+  console.log("  format : data URI (base64)");
+  console.log("  content :", JSON.parse(metadataJson).name, "—", JSON.parse(metadataJson).description);
 
-  // ── 6. 呼叫 IdentityRegistry.register() ────────────────────────────────────────
-  console.log("\n【註冊 Agent】");
+  // ── 6. Call IdentityRegistry.register() ────────────────────────────────────────
+  console.log("\n[Register agent]");
   console.log(`  IdentityRegistry: ${IDENTITY_REGISTRY}`);
-  console.log("  送出交易...");
+  console.log("  sending transaction...");
 
   const hash = await ownerClient.writeContract({
     address: IDENTITY_REGISTRY,
@@ -148,11 +148,11 @@ async function main() {
   });
 
   console.log(`  tx hash: ${hash}`);
-  console.log("  等待確認...");
+  console.log("  waiting for confirmation...");
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
-  // ── 7. 解析 agentId（Transfer event 的 tokenId）───────────────────────────────
+  // ── 7. Parse the agentId (the Transfer event's tokenId)───────────────────────────────
   let agentId: bigint | null = null;
   for (const log of receipt.logs) {
     try {
@@ -168,20 +168,20 @@ async function main() {
   }
 
   if (agentId === null) {
-    // fallback：用 tx index 推算（部分合約不 emit Transfer）
-    console.warn("  警告：無法從 Transfer 事件解析 agentId，請到 explorer 手動確認");
+    // fallback: derive it from the tx index (some contracts do not emit Transfer)
+    console.warn("  Warning: could not parse agentId from the Transfer event; check the explorer manually");
   }
 
   console.log("\n═══════════════════════════════════════════");
-  console.log("  ✓ 註冊成功！");
+  console.log("  ✓ registered successfully");
   console.log("═══════════════════════════════════════════");
-  console.log(`  agentId         : ${agentId ?? "請手動確認"}`);
+  console.log(`  agentId         : ${agentId ?? "check manually"}`);
   console.log(`  tx hash         : ${hash}`);
   console.log(`  block           : ${receipt.blockNumber}`);
   console.log(`  owner           : ${ownerAccount.address}`);
   console.log(`  validator addr  : ${validatorAccount.address}`);
 
-  // ── 8. 寫入 deployments/arc-testnet.json ──────────────────────────────────────
+  // ── 8. Write deployments/arc-testnet.json ──────────────────────────────────────
   const deploymentsPath = resolve(__dirname, "../deployments/arc-testnet.json");
   const deployments = JSON.parse(readFileSync(deploymentsPath, "utf-8"));
   deployments.agent = {
@@ -193,13 +193,13 @@ async function main() {
     registeredAt: new Date().toISOString(),
   };
   writeFileSync(deploymentsPath, JSON.stringify(deployments, null, 2));
-  console.log("\n  → deployments/arc-testnet.json 已更新");
-  console.log("\n⚠  請立即備份 Validator private key：");
+  console.log("\n  -> deployments/arc-testnet.json updated");
+  console.log("\n⚠  Back up the validator private key now:");
   console.log(`   ${validatorPrivKey}`);
 }
 
 main().catch((err) => {
-  console.error("\n✗ 錯誤：", err.shortMessage ?? err.message);
+  console.error("\n✗ Error:", err.shortMessage ?? err.message);
   if (err.details) console.error("  Details:", err.details);
   process.exit(1);
 });

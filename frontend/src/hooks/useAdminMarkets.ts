@@ -20,8 +20,9 @@ export interface AdminMarket {
 export const STATUS_LABEL = ['OPEN', 'LOCKED', 'SETTLED'] as const
 
 /**
- * 掃描 0..nextMarketId-1 的所有市場。
- * 刻意不做分頁/快取：admin 面板是低頻使用，正確性優先於請求數。
+ * Scans every market from 0..nextMarketId-1.
+ * Deliberately no pagination or caching: the admin panel is used infrequently,
+ * so correctness matters more than request count.
  */
 export function useAdminMarkets() {
   const { data: nextMarketId, refetch: refetchCount } = useReadContract({

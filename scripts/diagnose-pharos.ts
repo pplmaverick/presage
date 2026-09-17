@@ -1,5 +1,5 @@
 /**
- * 診斷腳本：確認 Pharos Atlantic 帳戶狀態和合約狀態
+ * Diagnostic script: check Pharos Atlantic account and contract state
  */
 import {
   createWalletClient,
@@ -44,9 +44,9 @@ async function main() {
     transport: http(),
   });
 
-  console.log("=== Pharos Atlantic 診斷 ===\n");
+  console.log("=== Pharos Atlantic diagnostics ===\n");
 
-  // 1. 基本鏈資訊
+  // 1. Basic chain info
   const chainId = await publicClient.getChainId();
   const blockNumber = await publicClient.getBlockNumber();
   const gasPrice = await publicClient.getGasPrice();
@@ -54,14 +54,14 @@ async function main() {
   console.log(`Block Number: ${blockNumber}`);
   console.log(`Gas Price:    ${gasPrice / BigInt(1e9)} Gwei`);
 
-  // 2. 帳戶資訊
+  // 2. Account info
   const ethBalance = await publicClient.getBalance({ address: account.address });
   const nonce = await publicClient.getTransactionCount({ address: account.address });
-  console.log(`\n帳戶地址:   ${account.address}`);
-  console.log(`ETH 餘額:   ${formatEther(ethBalance)} ETH`);
+  console.log(`\naccount:   ${account.address}`);
+  console.log(`ETH balance: ${formatEther(ethBalance)} ETH`);
   console.log(`Nonce:      ${nonce}`);
 
-  // 3. 確認合約是否真的在鏈上
+  // 3. Confirm the contracts really are on-chain
   const __dirname = dirname(fileURLToPath(import.meta.url));
   const mockPath = resolve(__dirname, "../deployments/pharos-testnet-mock.json");
 
@@ -71,19 +71,19 @@ async function main() {
     const wmAddr = deployment.contracts.WeatherMarket as Hex;
     const oracleAddr = deployment.contracts.AdminOracle as Hex;
 
-    console.log("\n--- 合約代碼存在確認 ---");
+    console.log("\n--- contract code presence ---");
     const usdcCode = await publicClient.getCode({ address: mockUsdcAddr });
     const wmCode = await publicClient.getCode({ address: wmAddr });
     const oracleCode = await publicClient.getCode({ address: oracleAddr });
 
     const hasCode = (code: Hex | undefined) =>
-      code && code !== "0x" ? `✓ 有代碼（${(code.length - 2) / 2} bytes）` : "✗ 無代碼（EOA 或未部署）";
+      code && code !== "0x" ? `✓ code present (${(code.length - 2) / 2} bytes)` : "✗ no code (EOA or not deployed)";
 
     console.log(`MockUSDC    ${mockUsdcAddr}: ${hasCode(usdcCode)}`);
     console.log(`WeatherMarket ${wmAddr}: ${hasCode(wmCode)}`);
     console.log(`AdminOracle   ${oracleAddr}: ${hasCode(oracleCode)}`);
 
-    // 4. 如果有代碼，讀取合約狀態
+    // 4. If there is code, read the contract state
     if (usdcCode && usdcCode !== "0x") {
       const usdcArtifact = await hre.artifacts.readArtifact("MockUSDC");
       const balance = await publicClient.readContract({
@@ -97,7 +97,7 @@ async function main() {
         abi: usdcArtifact.abi,
         functionName: "totalSupply",
       }) as bigint;
-      console.log(`\nMockUSDC 狀態:`);
+      console.log(`\nMockUSDC state:`);
       console.log(`  totalSupply: ${Number(totalSupply) / 1e6} USDC`);
       console.log(`  deployer balance: ${Number(balance) / 1e6} USDC`);
     }
@@ -119,18 +119,18 @@ async function main() {
         abi: wmArtifact.abi,
         functionName: "nextMarketId",
       }) as bigint;
-      console.log(`\nWeatherMarket 狀態:`);
+      console.log(`\nWeatherMarket state:`);
       console.log(`  owner:         ${owner}`);
       console.log(`  oracle:        ${oracle}`);
-      console.log(`  oracle 正確?   ${oracle.toLowerCase() === oracleAddr.toLowerCase() ? "✓ AdminOracle" : "✗ 不是 AdminOracle（可能是 deployer）"}`);
+      console.log(`  oracle correct? ${oracle.toLowerCase() === oracleAddr.toLowerCase() ? "✓ AdminOracle" : "✗ not AdminOracle (probably the deployer)"}`);
       console.log(`  nextMarketId:  ${nextMarketId}`);
     }
   } else {
-    console.log("\n⚠ pharos-testnet-mock.json 不存在");
+    console.log("\n⚠ pharos-testnet-mock.json does not exist");
   }
 
-  // 5. 試一次 gasEstimate（估算 mint 的 gas）
-  console.log("\n--- 嘗試 gas 估算 ---");
+  // 5. Try a gasEstimate (for the mint call)
+  console.log("\n--- attempting gas estimation ---");
   try {
     const usdcArtifact = await hre.artifacts.readArtifact("MockUSDC");
     const mockPath2 = resolve(__dirname, "../deployments/pharos-testnet-mock.json");
@@ -146,20 +146,20 @@ async function main() {
           args: [account.address, 1_000_000_000n],
           account: account.address,
         });
-        console.log(`  mint() 估算 gas: ${estimated}`);
+        console.log(`  mint() estimated gas: ${estimated}`);
       } else {
-        console.log("  MockUSDC 無代碼，跳過估算");
+        console.log("  MockUSDC has no code, skipping estimation");
       }
     }
   } catch (e: unknown) {
     const err = e as Error & { shortMessage?: string; details?: string };
-    console.log(`  gas 估算失敗: ${err.shortMessage ?? err.message}`);
+    console.log(`  gas estimation failed: ${err.shortMessage ?? err.message}`);
     if (err.details) console.log(`  Details: ${err.details}`);
   }
 }
 
 main().catch((err) => {
-  console.error("診斷失敗:", err.shortMessage ?? err.message);
+  console.error("Diagnostics failed:", err.shortMessage ?? err.message);
   if (err.details) console.error("Details:", err.details);
   process.exit(1);
 });

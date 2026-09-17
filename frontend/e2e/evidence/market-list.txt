@@ -1,4 +1,6 @@
-  Tokyo | #3  ||  LOCKED  ||  2026-09-16 11:18Z  ||  2026-09-17 11:18Z | 剩 23h53m  ||  0.50  ||  取得溫度
-  Taipei | #2  ||  SETTLED  ||  2026-09-16 11:16Z  ||  2026-09-17 11:16Z | 1 天  ||  0.50  ||  finalTemp 26°C · bucket 1
-  Tokyo | #1  ||  LOCKED  ||  2026-09-16 11:13Z  ||  2026-09-17 11:13Z | 剩 23h48m  ||  0.50  ||  取得溫度
-  Taipei | #0  ||  SETTLED  ||  2026-09-16 11:11Z  ||  2026-09-17 11:11Z | 1 天  ||  0.50  ||  finalTemp 26°C · noWinner
+  Seoul | #5  ||  OPEN  ||  2026-09-17 12:01Z  ||  2026-09-20 12:01Z | 3d  ||  2.00  ||  Lock market
+  Bangkok | #4  ||  LOCKED  ||  2026-09-16 11:53Z  ||  2026-09-17 11:53Z | Settlement window closed · refund mode  ||  0.00  ||  Past deadline — bettors can call claimRefund
+  Tokyo | #3  ||  SETTLED  ||  2026-09-16 11:18Z  ||  2026-09-17 11:18Z | 1d  ||  0.50  ||  finalTemp 20°C · noWinner
+  Taipei | #2  ||  SETTLED  ||  2026-09-16 11:16Z  ||  2026-09-17 11:16Z | 1d  ||  0.50  ||  finalTemp 26°C · bucket 1
+  Tokyo | #1  ||  LOCKED  ||  2026-09-16 11:13Z  ||  2026-09-17 11:13Z | Settlement window closed · refund mode  ||  0.50  ||  Past deadline — bettors can call claimRefund
+  Taipei | #0  ||  SETTLED  ||  2026-09-16 11:11Z  ||  2026-09-17 11:11Z | 1d  ||  0.50  ||  finalTemp 26°C · noWinner

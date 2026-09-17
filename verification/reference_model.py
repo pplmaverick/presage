@@ -2,43 +2,48 @@
 """
 Independent Reference Model — Presage / WeatherMarket
 
-這份模型只依照規格書寫，不參考 contracts/WeatherMarket.sol 的實作細節。
-規格來源（README.md「Temperature Encoding & Bucket System」/「Fees & Security」
-＋ 本輪 Deep-Audit 任務書 INV-1~4）：
+This model is written from the specification alone. It deliberately does not consult
+the implementation in contracts/WeatherMarket.sol.
 
-  1. buckets 是嚴格遞增的「上界陣列」，長度 n，共 n+1 個區間。
-     bucket i（0 <= i < n）代表 buckets[i-1] < temp <= buckets[i]；
-     bucket n 代表 temp > buckets[n-1]。
-     判定方式：由小到大找第一個滿足 temp <= buckets[i] 的 i；都不滿足則為 n。
+Specification sources: README.md ("Temperature Encoding & Bucket System" and
+"Fees & Security") plus the INV-1..INV-4 statements from the deep-audit brief.
 
-  2. 下注把金額累加到三個計數：該 (market, bucket, user)、該 (market, bucket)
-     的總額、以及該 (market, user) 的總額；同時累加市場總池 totalPool。
+  1. `buckets` is a strictly increasing array of upper bounds of length n, defining
+     n+1 ranges. Bucket i (0 <= i < n) means buckets[i-1] < temp <= buckets[i];
+     bucket n means temp > buckets[n-1].
+     Resolution: scan upwards for the first i where temp <= buckets[i]; if none
+     matches the answer is n.
 
-  3. 結算時決定 winningBucket。若該 bucket 的總額為 0，則 noWinner = True。
+  2. A bet accumulates into three counters — (market, bucket, user), the
+     (market, bucket) total, and the (market, user) total — and into the market's
+     totalPool.
 
-  4. 手續費 FEE_BPS = 200（2%），只有在有得獎者時收取，
-     fee = floor(totalPool * 200 / 10000)。noWinner 時 fee = 0。
+  3. Settlement determines winningBucket. If that bucket's total is 0, noWinner = True.
 
-  5. 領取：
-       noWinner  → 退還該使用者在此市場的全部下注（不扣手續費）。
-       有得獎者  → netPool = totalPool - fee；
-                   payout = floor(該使用者在 winningBucket 的下注 * netPool
-                                  / winningBucket 的總額)。
-                   在 winningBucket 沒有下注的人不能領（視為 revert）。
-       每個 (market, user) 只能領一次。
+  4. The fee is FEE_BPS = 200 (2%), charged only when there is a winner:
+     fee = floor(totalPool * 200 / 10000). With noWinner the fee is 0.
 
-  6. 每個市場在建立當下寫入一個 lockedTimeout（未指定時採用合約的
-     defaultLockedTimeout，預設 3 天；允許範圍 1 天 ~ 30 天）。市場鎖盤後：
-       now <  lockTime + lockedTimeout  → 可以結算，不可退款。
-       now >= lockTime + lockedTimeout  → 不可結算，可以退款；
-                                          退款金額 = 該使用者全部下注（不扣手續費）。
-     建立後改 defaultLockedTimeout 不影響已建立的市場。
+  5. Claiming:
+       noWinner    -> refund everything the user staked in that market (no fee).
+       has winner  -> netPool = totalPool - fee;
+                      payout = floor(user's stake in winningBucket * netPool
+                                     / the winningBucket total).
+                      A user with no stake in winningBucket cannot claim (treated
+                      as a revert).
+       Each (market, user) can claim only once.
 
-  7. lockMarket 只能對已存在的市場（marketId < nextMarketId）生效。
+  6. Every market stores a lockedTimeout at creation (falling back to the contract's
+     defaultLockedTimeout, 3 days by default; allowed range 1 to 30 days). Once locked:
+       now <  lockTime + lockedTimeout  -> settlement allowed, refunds not.
+       now >= lockTime + lockedTimeout  -> settlement closed, refunds allowed;
+                                           the refund is the user's full stake (no fee).
+     Changing defaultLockedTimeout afterwards does not affect existing markets.
 
-輸出：
-  verification/cases.json        — 測試案例 + 本模型算出的期望值
-  verification/commitments.sha256 — 每筆 trace 的 SHA-256 承諾
+  7. lockMarket only applies to markets that exist (marketId < nextMarketId).
+
+Outputs:
+  verification/cases.json         - test cases plus the expected values this model derives
+  verification/commitments.sha256 - the SHA-256 commitment for each trace
 """
 
 import hashlib
@@ -47,17 +52,17 @@ import os
 
 FEE_BPS = 200
 BPS_DENOM = 10_000
-DEFAULT_LOCKED_TIMEOUT = 3 * 24 * 60 * 60   # 3 天
-MIN_LOCKED_TIMEOUT = 1 * 24 * 60 * 60       # 1 天
-MAX_LOCKED_TIMEOUT = 30 * 24 * 60 * 60      # 30 天
+DEFAULT_LOCKED_TIMEOUT = 3 * 24 * 60 * 60   # 3 days
+MIN_LOCKED_TIMEOUT = 1 * 24 * 60 * 60       # 1 day
+MAX_LOCKED_TIMEOUT = 30 * 24 * 60 * 60      # 30 days
 
 USDC = 10 ** 6  # 6 decimals
 
 
-# ── 規格實作 ────────────────────────────────────────────────────────────────
+# ── Specification, implemented ──────────────────────────────────────────────
 
 def determine_winning_bucket(buckets, temp):
-    """規格 1：由小到大找第一個 temp <= buckets[i]；都不滿足則是 len(buckets)。"""
+    """Spec 1: scan upwards for the first temp <= buckets[i]; if none matches, len(buckets)."""
     for i, upper in enumerate(buckets):
         if temp <= upper:
             return i
@@ -65,7 +70,7 @@ def determine_winning_bucket(buckets, temp):
 
 
 def tally(bets):
-    """規格 2：把下注攤成各層計數。bets = [(user, bucket, amount), ...]"""
+    """Spec 2: fan bets out into the per-level counters. bets = [(user, bucket, amount), ...]"""
     bucket_totals = {}
     user_bucket = {}
     user_total = {}
@@ -79,7 +84,7 @@ def tally(bets):
 
 
 def settle(buckets, bets, final_temp):
-    """規格 3~5：結算並算出每個人可領多少。"""
+    """Spec 3-5: settle and work out what each user can claim."""
     bucket_totals, user_bucket, user_total, total_pool = tally(bets)
     winning = determine_winning_bucket(buckets, final_temp)
     no_winner = bucket_totals.get(winning, 0) == 0
@@ -101,7 +106,7 @@ def settle(buckets, bets, final_temp):
                 )
 
     distributed = sum(a for _, kind, a in payouts if kind == "claimable")
-    # 整數除法往下取整留下的餘數，永遠留在合約裡
+    # The remainder left by flooring integer division stays in the contract forever
     dust = total_pool - fee - distributed
     return {
         "winning": winning,
@@ -114,7 +119,7 @@ def settle(buckets, bets, final_temp):
 
 
 def refund(bets):
-    """規格 6：逾時退款，每人拿回自己全部下注，不扣手續費。"""
+    """Spec 6: timed-out refund — everyone takes back their full stake, no fee."""
     _, _, user_total, total_pool = tally(bets)
     payouts = [(u, "claimable", user_total[u]) for u in sorted(user_total)]
     distributed = sum(a for _, _, a in payouts)
@@ -128,14 +133,14 @@ def refund(bets):
     }
 
 
-# ── 測試案例 ────────────────────────────────────────────────────────────────
-# user 以索引表示：0=alice, 1=bob, 2=carol
-# amount 以 USDC 最小單位（6 decimals）表示
+# ── Test cases ──────────────────────────────────────────────────────────────
+# Users are indices: 0=alice, 1=bob, 2=carol
+# Amounts are in the smallest USDC unit (6 decimals)
 
 BUCKETS_STD = [25, 28, 31, 34]
 
 CASES = [
-    # ── 正常結算 ──────────────────────────────────────────────────────────
+    # ── Ordinary settlement ───────────────────────────────────────────────
     dict(name="settle_single_winner", buckets=BUCKETS_STD,
          bets=[(0, 2, 100 * USDC), (1, 3, 50 * USDC)],
          mode="settle", final_temp=30, at="timeout_minus_3600"),
@@ -149,7 +154,7 @@ CASES = [
                (0, 4, 17 * USDC)],
          mode="settle", final_temp=27, at="timeout_minus_3600"),
 
-    # ── 邊界：溫度正好等於 bucket 上界 ────────────────────────────────────
+    # ── Boundary: temperature exactly on a bucket's upper bound ───────────
     dict(name="settle_temp_exactly_on_upper_bound", buckets=BUCKETS_STD,
          bets=[(0, 1, 40 * USDC), (1, 2, 60 * USDC)],
          mode="settle", final_temp=28, at="timeout_minus_3600"),
@@ -167,7 +172,7 @@ CASES = [
          bets=[(0, 4, 7 * USDC)],
          mode="settle", final_temp=20, at="timeout_minus_3600"),
 
-    # ── 極端 finalTemp（含負值）────────────────────────────────────────────
+    # ── Extreme finalTemp, including negatives ────────────────────────────
     dict(name="extreme_temp_negative_hits_bucket0", buckets=BUCKETS_STD,
          bets=[(0, 0, 80 * USDC), (1, 3, 20 * USDC)],
          mode="settle", final_temp=-40, at="timeout_minus_3600"),
@@ -184,7 +189,7 @@ CASES = [
          bets=[(0, 4, 5 * USDC)],
          mode="settle", final_temp=-100, at="timeout_minus_3600"),
 
-    # ── 單一使用者跨多 bucket ─────────────────────────────────────────────
+    # ── A single user spanning several buckets ────────────────────────────
     dict(name="single_user_spans_all_buckets", buckets=BUCKETS_STD,
          bets=[(0, 0, 10 * USDC), (0, 1, 20 * USDC), (0, 2, 30 * USDC),
                (0, 3, 40 * USDC), (0, 4, 50 * USDC)],
@@ -207,7 +212,7 @@ CASES = [
          bets=[(0, 2, 49), (1, 3, 1)],
          mode="settle", final_temp=30, at="timeout_minus_3600"),
 
-    # ── 單一 bucket 市場（buckets 長度 1 → 2 個區間）───────────────────────
+    # ── Single-boundary market (buckets length 1 -> 2 ranges) ─────────────
     dict(name="single_boundary_market_low", buckets=[25],
          bets=[(0, 0, 60 * USDC), (1, 1, 40 * USDC)],
          mode="settle", final_temp=24, at="timeout_minus_3600"),
@@ -216,7 +221,7 @@ CASES = [
          bets=[(0, 0, 60 * USDC), (1, 1, 40 * USDC)],
          mode="settle", final_temp=26, at="timeout_minus_3600"),
 
-    # ── 結算窗口邊界（lockTime + LOCKED_TIMEOUT 前後 1 秒）──────────────────
+    # ── Settlement window boundary (1s either side of lockTime + timeout) ─
     dict(name="settle_at_deadline_minus_1s", buckets=BUCKETS_STD,
          bets=[(0, 2, 100 * USDC), (1, 3, 100 * USDC)],
          mode="settle", final_temp=30, at="timeout_minus_1"),
@@ -231,7 +236,7 @@ CASES = [
          mode="settle_revert", final_temp=30, at="timeout_plus_1",
          revert_reason="settlement window closed"),
 
-    # ── claimRefund 的 timeout 邊界 ───────────────────────────────────────
+    # ── claimRefund timeout boundary ──────────────────────────────────────
     dict(name="refund_at_deadline_minus_1s_reverts", buckets=BUCKETS_STD,
          bets=[(0, 2, 100 * USDC), (1, 3, 50 * USDC)],
          mode="refund_revert", final_temp=None, at="timeout_minus_1",
@@ -249,12 +254,12 @@ CASES = [
          bets=[(0, 0, 11 * USDC), (0, 2, 22 * USDC), (1, 4, 33 * USDC)],
          mode="refund", final_temp=None, at="timeout_plus_1"),
 
-    # ── lockMarket 對不存在的 marketId ────────────────────────────────────
+    # ── lockMarket on a nonexistent marketId ──────────────────────────────
     dict(name="lock_nonexistent_market_reverts", buckets=BUCKETS_STD,
          bets=[], mode="lock_revert", final_temp=None, at="lock_time_plus_1",
          revert_reason="market not exist"),
 
-    # ── 自訂 lockedTimeout（admin 面板的結算期下拉會走這條）─────────────────
+    # ── Custom lockedTimeout (what the admin panel's dropdown produces) ───
     dict(name="custom_timeout_7d_settle_before_deadline", buckets=BUCKETS_STD,
          bets=[(0, 2, 100 * USDC), (1, 3, 40 * USDC)],
          mode="settle", final_temp=30, at="timeout_minus_1",
@@ -275,7 +280,7 @@ CASES = [
          mode="settle", final_temp=29, at="timeout_minus_1",
          locked_timeout=30 * 24 * 3600),
 
-    # 超出 MIN/MAX 的 lockedTimeout 不可建市場
+    # A lockedTimeout outside MIN/MAX must prevent market creation
     dict(name="create_timeout_below_min_reverts", buckets=BUCKETS_STD,
          bets=[], mode="create_revert", final_temp=None, at="lock_time_plus_1",
          locked_timeout=1 * 24 * 3600 - 1, revert_reason="timeout out of range"),
@@ -286,7 +291,7 @@ CASES = [
 ]
 
 
-# ── trace 產生 ──────────────────────────────────────────────────────────────
+# ── Trace generation ────────────────────────────────────────────────────────
 
 def effective_timeout(case):
     return case.get("locked_timeout") or DEFAULT_LOCKED_TIMEOUT
@@ -309,7 +314,7 @@ def build_trace(case):
         result = refund(case["bets"])
         outcome = "refund"
     else:
-        raise ValueError(f"未知 mode: {mode}")
+        raise ValueError(f"unknown mode: {mode}")
 
     return {
         "case": case["name"],
@@ -328,7 +333,7 @@ def build_trace(case):
 
 
 def canonical(trace):
-    """與 TypeScript 端的 canonical() 必須產出完全相同的位元組。"""
+    """Must produce exactly the same bytes as canonical() on the TypeScript side."""
     return json.dumps(trace, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
 
@@ -381,10 +386,10 @@ def main():
         for digest, name in commitments:
             f.write(f"{digest}  {name}\n")
 
-    print(f"{len(cases_out)} 個案例已寫入 verification/cases.json")
-    print(f"{len(commitments)} 筆 SHA-256 承諾已寫入 verification/commitments.sha256")
+    print(f"{len(cases_out)} cases written to verification/cases.json")
+    print(f"{len(commitments)} SHA-256 commitments written to verification/commitments.sha256")
 
-    # 順手把模型自己算出來的關鍵數字印出來，方便肉眼複核
+    # Print the key numbers the model derived, for eyeballing
     for c in cases_out:
         e = c["expected"]
         if e["outcome"] == "settle":

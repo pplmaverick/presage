@@ -8,13 +8,13 @@ import Admin from './pages/Admin'
 import { useIsOwner } from './hooks/useIsOwner'
 
 /**
- * /admin 的守門。
+ * Route guard for /admin.
  *
- * - owner 判定還沒有結論（錢包重連中、owner() RPC 未回）→ 什麼都不做：
- *   不渲染任何 admin 內容，也不導轉。直接導轉會讓 owner 重新整理頁面時
- *   先被踢回首頁。
- * - 有結論且不是 owner（含完全沒連錢包）→ 導回首頁，且自始至終不渲染
- *   Admin 的任何內容，避免讓人看出這條路由存在。
+ * - Owner check unresolved (wallet reconnecting, owner() RPC in flight) -> do nothing:
+ *   render no admin content and do not redirect. Redirecting immediately would bounce
+ *   the owner to the home page every time they reload.
+ * - Resolved and not the owner (including no wallet connected) -> redirect home, and
+ *   never render any part of Admin, so the route's existence is not revealed.
  */
 function AdminRoute() {
   const { isOwner, isResolved } = useIsOwner()

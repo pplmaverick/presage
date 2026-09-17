@@ -75,9 +75,10 @@ export default defineConfig({
         Origin: "http://localhost",
       },
     },
-    // Arc Mainnet — chainId 5042 (0x13b2), 原生 gas 代幣是 USDC（18 decimals 記帳），
-    // 官方 RPC https://rpc.mainnet.arc.io。gas 參數不寫死在這裡：結算腳本一律
-    // 走 scripts/lib/fees.ts 的動態計算（見該檔說明）。
+    // Arc Mainnet — chainId 5042 (0x13b2). The native gas token is USDC (accounted in
+    // 18 decimals); the official RPC is https://rpc.mainnet.arc.io. Gas parameters are
+    // deliberately not hard-coded here: every script derives them dynamically through
+    // scripts/lib/ops.ts (see the notes in that file).
     arcMainnet: {
       type: "http",
       url: process.env.ARC_MAINNET_RPC_URL ?? "https://rpc.mainnet.arc.io",

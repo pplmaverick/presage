@@ -78,8 +78,9 @@ function BetRow({ bet }: { bet: BetRecord }) {
   const isRefund = status === 2 && market.noWinner
   const canClaim = (isWinner || isRefund) && !isClaimed
 
-  // Oracle 逾時未結算的逃生口：市場停在 LOCKED 且已過 settlementDeadline 之後，
-  // 下注者可以自行取回本金全額（不扣手續費）。條件不成立時整顆按鈕不出現。
+  // Escape hatch for an oracle that never settled: once a market is still LOCKED past
+  // its settlementDeadline, bettors can withdraw their full principal themselves (no
+  // fee deducted). The button is not rendered at all unless the conditions hold.
   const nowSec = BigInt(Math.floor(Date.now() / 1000))
   const canRefund =
     status === 1 &&
@@ -153,11 +154,14 @@ function BetRow({ bet }: { bet: BetRecord }) {
               {isPending || isConfirming ? (
                 <><span className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" /> Refunding...</>
               ) : (
-                '申請退款'
+                // Deliberately distinct from the noWinner path's "Claim Refund" label:
+                // that one is claimWinnings on a settled market, this one is claimRefund
+                // on a market the oracle never settled. Same money back, different call.
+                'Reclaim Principal'
               )}
             </button>
             <span className="text-[10px] font-mono text-amber-400">
-              Oracle 逾時未結算
+              Oracle missed the deadline
             </span>
           </div>
         ) : isClaimed ? (

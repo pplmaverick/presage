@@ -268,6 +268,14 @@ The winning bucket is the first `i` where `temp <= buckets[i]`, otherwise `bucke
 
 **Owner trust model.** A single EOA owns all three contracts and is also the owner of the AdminOracle. That key can create markets, repoint the oracle, submit results, and withdraw fees. It cannot withdraw user principal, and it cannot settle a market after its deadline. There is no multisig or timelock today.
 
+**A note on the source comments.** Everything in this repository is commented in English
+except `contracts/`, which still carries some Chinese comments. That is deliberate, not an
+oversight. Solidity appends a hash of the source metadata to the deployed bytecode, so
+editing even a comment changes the trailing bytes and would break the `exact_match`
+verification the deployed contracts currently hold on Sourcify and the block explorer.
+The contract comments will be translated as part of the next deployment (see M3), when a
+new bytecode hash is expected anyway.
+
 **Verification.** The contracts went through an internal security audit followed by Independent Reference Model testing: a Python model written from the specification alone produces the expected outcome for 32 scenarios and commits each trace to a SHA-256 digest, which a Hardhat test replays against the real contracts and compares byte-for-byte. Those artifacts live in `verification/`. The full suite is 59 tests, and the refund path was additionally exercised end-to-end on Arc Testnet with real transactions.
 
 ## Roadmap

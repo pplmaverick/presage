@@ -49,8 +49,8 @@ async function main() {
   const publicClient = createPublicClient({ chain: arc, transport: http() });
 
   const now = Math.floor(Date.now() / 1000);
-  const targetDate = now + 7 * 24 * 3_600;   // +7 天
-  const lockTime   = targetDate - 3_600;      // targetDate 前 1 小時
+  const targetDate = now + 7 * 24 * 3_600;   // +7 days
+  const lockTime   = targetDate - 3_600;      // 1 hour before targetDate
 
   console.log("WeatherMarket:", weatherMarketAddr);
   console.log("targetDate   :", new Date(targetDate * 1000).toISOString());
@@ -61,7 +61,7 @@ async function main() {
 
   for (const { city, buckets } of MARKETS) {
     console.log(`── Creating market: ${city} ──`);
-    console.log(`   buckets: [${buckets.join(",")}] → ${buckets.length + 1} 區間`);
+    console.log(`   buckets: [${buckets.join(",")}] -> ${buckets.length + 1} ranges`);
 
     const hash = await walletClient.writeContract({
       address: weatherMarketAddr,
@@ -72,7 +72,7 @@ async function main() {
     });
 
     console.log(`   tx hash : ${hash}`);
-    console.log(`   等待確認...`);
+    console.log(`   waiting for confirmation...`);
 
     const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
@@ -88,7 +88,7 @@ async function main() {
         marketId = (decoded.args as { marketId: bigint }).marketId;
         break;
       } catch {
-        // 跳過不相關的 log
+        // Skip unrelated logs
       }
     }
 
@@ -96,13 +96,13 @@ async function main() {
       console.log(`   ✓ marketId: ${marketId}\n`);
       results.push({ city, marketId: marketId.toString(), hash });
     } else {
-      console.warn(`   ⚠ 無法解析 marketId，請查詢 tx receipt\n`);
+      console.warn(`   ⚠ could not parse marketId; check the tx receipt\n`);
       results.push({ city, marketId: "unknown", hash });
     }
   }
 
   console.log("════════════════════════════════");
-  console.log("四個市場建立結果：");
+  console.log("Four markets created:");
   for (const r of results) {
     console.log(`  ${r.city.padEnd(8)} marketId=${r.marketId}  tx=${r.hash}`);
   }

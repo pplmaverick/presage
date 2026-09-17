@@ -31,7 +31,7 @@ const GAS_OPTS = {
 
 // 2026-08-24 08:00:00 UTC
 const TARGET_DATE = 1787558400n;
-// 2026-08-24 07:00:00 UTC（targetDate 前 1 小時）
+// 2026-08-24 07:00:00 UTC (1 hour before targetDate)
 const LOCK_TIME = 1787554800n;
 
 const MARKETS = [
@@ -59,8 +59,8 @@ async function main() {
   const results: { city: string; marketId: string; txHash: string }[] = [];
 
   for (const { city, buckets } of MARKETS) {
-    console.log(`\n>>> 建立 ${city} 市場`);
-    console.log(`    buckets: [${buckets.join(",")}] → ${buckets.length + 1} 個區間`);
+    console.log(`\n>>> creating the ${city} market`);
+    console.log(`    buckets: [${buckets.join(",")}] -> ${buckets.length + 1} ranges`);
 
     const hash = await walletClient.writeContract({
       address: weatherMarketAddr,
@@ -71,7 +71,7 @@ async function main() {
     });
 
     console.log(`    tx hash : ${hash}`);
-    console.log(`    等待確認...`);
+    console.log(`    waiting for confirmation...`);
 
     const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
@@ -87,12 +87,12 @@ async function main() {
         marketId = (decoded.args as { marketId: bigint }).marketId;
         break;
       } catch {
-        // 跳過不相關的 log
+        // Skip unrelated logs
       }
     }
 
     if (marketId === null) {
-      console.error(`    ❌ 無法從 logs 解析 marketId`);
+      console.error(`    ❌ could not parse marketId from the logs`);
       continue;
     }
 
@@ -101,7 +101,7 @@ async function main() {
   }
 
   console.log("\n" + "═".repeat(60));
-  console.log("市場建立結果：");
+  console.log("Markets created:");
   console.log("─".repeat(60));
   for (const r of results) {
     console.log(`  ${r.city.padEnd(8)} marketId=${r.marketId}  tx=${r.txHash}`);
