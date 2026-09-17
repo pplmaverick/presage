@@ -8,7 +8,7 @@ dotenv.config();
 const DUMMY_KEY =
   "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 
-const REAL_NETWORKS = ["arc", "pharos", "pharosMainnet"];
+const REAL_NETWORKS = ["arc", "arcMainnet", "pharos", "pharosMainnet"];
 
 const networkArgIndex = process.argv.findIndex(
   (arg) => arg === "--network" || arg.startsWith("--network=")
@@ -49,6 +49,16 @@ export default defineConfig({
         },
       },
     },
+    5042: {
+      name: "Arc Mainnet",
+      blockExplorers: {
+        etherscan: {
+          name: "Arc Explorer",
+          url: "https://explorer.arc.io",
+          apiUrl: "https://explorer.arc.io/api",
+        },
+      },
+    },
   },
   verify: {
     etherscan: {
@@ -64,6 +74,15 @@ export default defineConfig({
       httpHeaders: {
         Origin: "http://localhost",
       },
+    },
+    // Arc Mainnet — chainId 5042 (0x13b2), 原生 gas 代幣是 USDC（18 decimals 記帳），
+    // 官方 RPC https://rpc.mainnet.arc.io。gas 參數不寫死在這裡：結算腳本一律
+    // 走 scripts/lib/fees.ts 的動態計算（見該檔說明）。
+    arcMainnet: {
+      type: "http",
+      url: process.env.ARC_MAINNET_RPC_URL ?? "https://rpc.mainnet.arc.io",
+      accounts: [deployerKeyFor("arcMainnet")],
+      chainId: 5042,
     },
     pharos: {
       type: "http",
