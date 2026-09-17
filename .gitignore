@@ -32,3 +32,11 @@ frontend/dist
 /snapshots
 .vercel
 .env*.local
+
+# Playwright
+frontend/test-results
+frontend/playwright-report
+
+# macOS
+.DS_Store
+**/.DS_Store
