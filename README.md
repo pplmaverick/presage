@@ -54,22 +54,18 @@ Three contracts:
 
 ## Architecture
 
+```mermaid
+graph TD
+    A[Bettor] -->|placeBet, USDC| B[WeatherMarket]
+    C[Owner] -->|manually submits result| D[AdminOracle]
+    D -->|submitResult, onlyOracle| B
+    B -->|Settled| E[claimWinnings]
+    B -->|Timed out| F[claimRefund]
 ```
-  Bettor (any wallet)                    Owner (single EOA)
-        │                                       │
-        │ 1. approve + placeBet                 │ a. createMarket        ┐
-        ▼                                       │ b. lockMarket          │ signed in the
-  ┌──────────────────┐                          │ c. submitResult ──┐    │ browser from
-  │  WeatherMarket   │◄─────────────────────────┘                   │    │ /admin, or via
-  │  OPEN → LOCKED   │                                              │    │ the CLI scripts
-  │      → SETTLED   │◄──── AdminOracle.submitResult(city,temp,id) ─┘    ┘
-  └────────┬─────────┘        (onlyOwner → onlyOracle)
-           │
-           │ 2a. claimWinnings   (SETTLED)
-           │ 2b. claimRefund     (still LOCKED past settlementDeadline)
-           ▼
-       Bettor gets USDC
-```
+
+Funds sit in `WeatherMarket` from the moment a bet is placed. Settlement is manual — the owner reads the temperature and submits it through `AdminOracle` from a connected wallet; there is no automated oracle. If the owner misses the settlement deadline, every bettor can pull their own principal back through `claimRefund` with no one's permission needed.
+
+See the [full interactive architecture diagram](https://presage-arc.vercel.app/architecture.html) for guided views, source-linked nodes, and route tracing.
 
 Temperature data comes from the OpenWeather API, fetched at settlement time through a server-side route (`/api/weather/[city]`) so the API key never reaches the browser. A human reads the value, confirms it on screen, and signs the transaction.
 
