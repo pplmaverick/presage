@@ -56,11 +56,10 @@ Three contracts:
 
 ```mermaid
 graph TD
-    A[Bettor] -->|placeBet, USDC| B[WeatherMarket]
-    C[Owner] -->|manually submits result| D[AdminOracle]
-    D -->|submitResult, onlyOracle| B
-    B -->|Settled| E[claimWinnings]
-    B -->|Timed out| F[claimRefund]
+    A[Bettor places bet] -->|USDC| B[WeatherMarket holds funds]
+    B --> C[Owner manually submits result via AdminOracle]
+    C -->|Settled| D[claimWinnings]
+    C -->|Timed out| E[claimRefund]
 ```
 
 Funds sit in `WeatherMarket` from the moment a bet is placed. Settlement is manual — the owner reads the temperature and submits it through `AdminOracle` from a connected wallet; there is no automated oracle. If the owner misses the settlement deadline, every bettor can pull their own principal back through `claimRefund` with no one's permission needed.
