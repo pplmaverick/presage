@@ -24,5 +24,59 @@
     "defaultLockedTimeout": 259200,
     "minLockedTimeout": 86400,
     "maxLockedTimeout": 2592000
-  }
+  },
+  "operations": [
+    {
+      "date": "2026-10-02",
+      "action": "lockMarket",
+      "marketId": 0,
+      "txHash": "0xb37b60fcf1f9d8aa56f79388a76840225d77ad4c7dad4152582690c795695df3",
+      "block": 23800569,
+      "note": "Market #0 (Taipei) was never locked and passed its settlement deadline; locked so the bettor can refund"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "claimRefund",
+      "marketId": 0,
+      "txHash": "0x9efb71f243d53fa5cd757dfdf1a7a4e248fbfbf031221bef06d5ad0dd4ef9dc1",
+      "block": 23800929,
+      "note": "1.0 USDC principal refunded to the dev wallet, no fee"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "createMarket",
+      "marketId": 1,
+      "city": "Taipei",
+      "txHash": "0x57fc6d36e843b0d26e3e3c11afd8e8e558ccb472dd97463aec14092d3eedb9c4",
+      "block": 23801615,
+      "buckets": [
+        24,
+        26,
+        28,
+        30
+      ],
+      "lockTime": 1791511200,
+      "targetDate": 1791514800,
+      "lockedTimeout": 604800,
+      "note": "lockTime 2026-10-09 02:00 UTC, settlementDeadline 2026-10-16 02:00 UTC"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "createMarket",
+      "marketId": 2,
+      "city": "Tokyo",
+      "txHash": "0x243934863d79b53307694969131285f94bd643e38d042168ce58529ea4b29c9d",
+      "block": 23801638,
+      "buckets": [
+        18,
+        20,
+        22,
+        24
+      ],
+      "lockTime": 1791511200,
+      "targetDate": 1791514800,
+      "lockedTimeout": 604800,
+      "note": "lockTime 2026-10-09 02:00 UTC, settlementDeadline 2026-10-16 02:00 UTC"
+    }
+  ]
 }
