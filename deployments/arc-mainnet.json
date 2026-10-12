@@ -109,6 +109,42 @@
       "txHash": "0xa881a2a8cc1dd3532cd52f423d02f236b765b47249c224889ac8f7ed7c38a842",
       "block": 25525847,
       "note": "Via AdminOracle. finalTemp 24 (Open-Meteo archive 24.0C at 2026-10-09 03:00 UTC), winningBucket 3, noWinner=true, no claim needed"
+    },
+    {
+      "date": "2026-10-12",
+      "action": "createMarket",
+      "marketId": 3,
+      "city": "Taipei",
+      "txHash": "0xa2ce8b01216c89b3e0987c208b30f533a69efd81938e704d30a912059742ddc2",
+      "block": 25526249,
+      "buckets": [
+        24,
+        26,
+        28,
+        30
+      ],
+      "lockTime": 1792990800,
+      "targetDate": 1792994400,
+      "lockedTimeout": 1209600,
+      "note": "lockTime 2026-10-26 05:00 UTC, targetDate 2026-10-26 06:00 UTC, settlementDeadline 2026-11-09 05:00 UTC"
+    },
+    {
+      "date": "2026-10-12",
+      "action": "createMarket",
+      "marketId": 4,
+      "city": "Tokyo",
+      "txHash": "0x8e127b5432e6e3ad82ff1c2d4e0cbaf42502f55e25d84e8107f8b7118632c4c9",
+      "block": 25526278,
+      "buckets": [
+        18,
+        20,
+        22,
+        24
+      ],
+      "lockTime": 1792990800,
+      "targetDate": 1792994400,
+      "lockedTimeout": 1209600,
+      "note": "lockTime 2026-10-26 05:00 UTC, targetDate 2026-10-26 06:00 UTC, settlementDeadline 2026-11-09 05:00 UTC"
     }
   ]
 }
