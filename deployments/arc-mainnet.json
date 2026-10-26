@@ -145,6 +145,74 @@
       "targetDate": 1792994400,
       "lockedTimeout": 1209600,
       "note": "lockTime 2026-10-26 05:00 UTC, targetDate 2026-10-26 06:00 UTC, settlementDeadline 2026-11-09 05:00 UTC"
+    },
+    {
+      "date": "2026-10-26",
+      "action": "lockMarket",
+      "marketId": 3,
+      "txHash": "0xc526761ade9a5a135f29350447ede968a39eb4eb0f78b0349ff491def3b8ae28",
+      "block": 27966409,
+      "note": "Market #3 (Taipei) locked; no bets (totalPool 0)"
+    },
+    {
+      "date": "2026-10-26",
+      "action": "lockMarket",
+      "marketId": 4,
+      "txHash": "0x6e1818716498031864b5c8031bc85f7c7f318e886b7f7939422f9ce75fc6c2e9",
+      "block": 27966600,
+      "note": "Market #4 (Tokyo) locked; no bets (totalPool 0)"
+    },
+    {
+      "date": "2026-10-26",
+      "action": "submitResult",
+      "marketId": 3,
+      "txHash": "0xaee5d5eec4e351cd1cad1bf848059f08a609097ec82dbadccd34795168b0ff15",
+      "block": 27966947,
+      "note": "Via AdminOracle. finalTemp 26 (Open-Meteo archive 25.9C at 2026-10-26 06:00 UTC), winningBucket 1, noWinner=true, no claim needed"
+    },
+    {
+      "date": "2026-10-26",
+      "action": "submitResult",
+      "marketId": 4,
+      "txHash": "0x17142d6b4e45dfb3add2236ee210cf921bd74588bdf833f7d8f46799e587c710",
+      "block": 27967197,
+      "note": "Via AdminOracle. finalTemp 17 (Open-Meteo archive 17.4C at 2026-10-26 06:00 UTC), winningBucket 0, noWinner=true, no claim needed"
+    },
+    {
+      "date": "2026-10-26",
+      "action": "createMarket",
+      "marketId": 5,
+      "city": "Taipei",
+      "txHash": "0x85c030c9c3c1d66addf54bd034c3ccda515b23736c72a61a966c465e72ff0664",
+      "block": 27967362,
+      "buckets": [
+        22,
+        24,
+        26,
+        28
+      ],
+      "lockTime": 1794200400,
+      "targetDate": 1794204000,
+      "lockedTimeout": 1814400,
+      "note": "lockTime 2026-11-09 05:00 UTC, targetDate 2026-11-09 06:00 UTC, settlementDeadline 2026-11-30 05:00 UTC (21d timeout)"
+    },
+    {
+      "date": "2026-10-26",
+      "action": "createMarket",
+      "marketId": 6,
+      "city": "Tokyo",
+      "txHash": "0x242cff0214bf5f1ba1c573f2a5b527dae86c79a29c2e46dc878d40a3ae79caed",
+      "block": 27967389,
+      "buckets": [
+        14,
+        16,
+        18,
+        20
+      ],
+      "lockTime": 1794200400,
+      "targetDate": 1794204000,
+      "lockedTimeout": 1814400,
+      "note": "lockTime 2026-11-09 05:00 UTC, targetDate 2026-11-09 06:00 UTC, settlementDeadline 2026-11-30 05:00 UTC (21d timeout)"
     }
   ]
 }
