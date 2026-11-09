@@ -213,6 +213,38 @@
       "targetDate": 1794204000,
       "lockedTimeout": 1814400,
       "note": "lockTime 2026-11-09 05:00 UTC, targetDate 2026-11-09 06:00 UTC, settlementDeadline 2026-11-30 05:00 UTC (21d timeout)"
+    },
+    {
+      "date": "2026-11-09",
+      "action": "lockMarket",
+      "marketId": 5,
+      "txHash": "0x9f19a50fe85d5fce14eaebdf671e9d4be7579c9a49d73f4812016cf8b554aaba",
+      "block": 30315899,
+      "note": "Market #5 (Taipei) locked; no bets (totalPool 0)"
+    },
+    {
+      "date": "2026-11-09",
+      "action": "lockMarket",
+      "marketId": 6,
+      "txHash": "0x717d991f1f6b5bd550e7c0283a4e5e1c00ed80c85abd0253a432dd19ae17cc07",
+      "block": 30315901,
+      "note": "Market #6 (Tokyo) locked; no bets (totalPool 0)"
+    },
+    {
+      "date": "2026-11-09",
+      "action": "submitResult",
+      "marketId": 5,
+      "txHash": "0xc9d224ed24a4c80890e65280a7fbd9889815fb67f7fcb32a608e15f2940b68be",
+      "block": 30316557,
+      "note": "Via AdminOracle. finalTemp 21 (raw 21.0C, Open-Meteo Archive 2026-11-09 06:00 UTC), winningBucket 0, noWinner=true, totalPool 0, no claim needed. No new market opened after this round's settlement"
+    },
+    {
+      "date": "2026-11-09",
+      "action": "submitResult",
+      "marketId": 6,
+      "txHash": "0x049e3e5868b7b11e25a10e5c8d001468af962d016e06d3931b623637ec423c32",
+      "block": 30316560,
+      "note": "Via AdminOracle. finalTemp 10 (raw 9.7C, Open-Meteo Archive 2026-11-09 06:00 UTC), winningBucket 0, noWinner=true, totalPool 0, no claim needed. No new market opened after this round's settlement"
     }
   ]
 }
